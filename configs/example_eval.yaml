@@ -1,0 +1,25 @@
+model:
+  name: qwen2-7b
+  backend: vllm
+  max_new_tokens: 256
+  temperature: 0.1
+
+tasks:
+  - boolq
+  - csqa
+  - piqa
+  - strategyqa
+  - gsm8k
+
+prompting:
+  mode: zero_shot
+  chain_of_thought: false
+
+evaluation:
+  metrics:
+    - accuracy
+    - exact_match
+
+output:
+  save_generations: true
+  save_metrics: true
