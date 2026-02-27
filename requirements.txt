@@ -1,0 +1,12 @@
+python>=3.10
+numpy
+pandas
+tqdm
+scikit-learn
+datasets
+transformers
+accelerate
+sentencepiece
+matplotlib
+pyyaml
+vllm
