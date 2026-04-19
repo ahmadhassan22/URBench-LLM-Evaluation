@@ -83,6 +83,84 @@ Total examples: 1550
 
 > Note: For the BoolQ CoT experiment with Qwen2.5-14B-Instruct-AWQ, passages were truncated to fit within the 3072-token context limit.
 
+## BoolQ – Urdu – Qwen3-8B
+
+Model: Qwen3-8B  
+Dataset: BoolQ (Urdu)  
+Total examples: 1550  
+
+### BoolQ Zero-shot
+- Used items: 1550
+- Scored on: 1550
+- Accuracy: 79.68%
+- Output file: outputs/boolq/qwen3_8b/boolq_zero_shot_qwen3_8b.jsonl
+
+> Note: Qwen3-8B uses a chat template format (apply_chat_template) with
+> thinking mode disabled (enable_thinking=False) for zero-shot evaluation,
+> keeping results directly comparable to other models. 1 passage was truncated
+> to fit within the 3072-token context limit.
+
+### BoolQ 3-shot
+- Used items: 1550
+- Scored on: 1548
+- Accuracy: 81.52%
+- Output file: outputs/boolq/qwen3_8b/boolq_three_shot_qwen3_8b.jsonl
+
+> Note: Qwen3-8B uses chat template format with thinking mode disabled
+> (enable_thinking=False) for 3-shot evaluation. 1 passage was truncated
+> to fit within the 3072-token context limit.
+
+### BoolQ Chain-of-Thought (CoT)
+- Used items: 1550
+- Scored on: 1545
+- Accuracy: 80.84%
+- Output file: outputs/boolq/qwen3_8b/boolq_cot_qwen3_8b.jsonl
+
+> Note: Qwen3-8B CoT uses thinking mode enabled (enable_thinking=True),
+> activating the model's built-in reasoning via <think>...</think> blocks
+> before the final answer. The <think> block is stripped during answer
+> extraction; only the final answer token is used for accuracy scoring.
+> Full raw output including reasoning is preserved in the JSONL file.
+> Runtime was significantly longer (~54 min) due to thinking mode generation.
+
+## BoolQ – Urdu – Qwen3-14B
+
+Model: Qwen3-14B  
+Dataset: BoolQ (Urdu)  
+Total examples: 1550  
+
+### BoolQ Zero-shot
+- Used items: 1550
+- Scored on: 1549
+- Accuracy: 84.51%
+- Output file: outputs/boolq/qwen3_14b/boolq_zero_shot_qwen3_14b.jsonl
+
+> Note: Qwen3-14B uses a chat template format (apply_chat_template) with
+> thinking mode disabled (enable_thinking=False) for zero-shot evaluation,
+> accuracy is improved over the QWEN3-8B for boolq zero-shot.
+
+### BoolQ 3-shot
+- Used items: 1550
+- Scored on: 1549
+- Accuracy: 84.89%
+- Output file: outputs/boolq/qwen3_14b/boolq_three_shot_qwen3_14b.jsonl
+
+> Note: Qwen3-14B uses chat template format with thinking mode disabled
+> (enable_thinking=False) for 3-shot evaluation.This model shows that over time model improved in boolq 3-shot for Urdu language.
+
+### BoolQ Chain-of-Thought (CoT)
+- Used items: 1550
+- Scored on: 1539
+- Accuracy: 84.47%
+- Output file: outputs/boolq/qwen3_14b/boolq_cot_qwen3_14b.jsonl
+
+> Note: Qwen3-14B CoT uses thinking mode enabled (enable_thinking=True),
+> activating the model's built-in reasoning via <think>...</think> blocks
+> before the final answer. The <think> block is stripped during answer
+> extraction; only the final answer token is used for accuracy scoring.
+> 11 items yielded no extractable prediction after think-block removal,
+> reducing scored items from 1550 to 1539.
+
 ## BoolQ – Urdu – Meta-LLaMA-3.1-8B-Instruct
 
 Model: Meta-LLaMA-3.1-8B-Instruct  
@@ -116,6 +194,48 @@ Total examples: 1550
 > **Note:** Passages were truncated to fit the model context window; even with truncation,
 > Meta-LLaMA-3.1-8B-Instruct remains below Qwen2.5-14B-Instruct-AWQ on BoolQ-Urdu CoT.
 
+## BoolQ – Urdu – Meta-Llama-3.1-70B-Instruct-AWQ-INT4
+
+Model: Meta-Llama-3.1-70B-Instruct-AWQ-INT4
+Dataset: BoolQ (Urdu)
+Total examples: 1550
+
+### BoolQ Zero-shot
+- Used items: 1550
+- Scored on: 1545 (pred != None)
+- Accuracy: 87.51%
+- Output file: outputs/boolq/llama3.1_70b_awq/boolq_zero_shot_llama3.1_70b_awq.jsonl
+
+> Note: Meta-Llama-3.1-70B-AWQ-INT4 achieves 87.51% on BoolQ-Urdu zero-shot,
+> setting a new high across all evaluated models, surpassing Gemma-2-9B-IT
+> (86.30%), Qwen3-14B (84.51%), and Qwen3-8B (79.68%). This confirms that
+> scaling to 70B with AWQ quantization yields strong direct binary QA
+> performance in Urdu even without few-shot examples.
+
+### BoolQ 3-shot
+- Used items: 1550
+- Scored on: 1546 (pred != None)
+- Accuracy: 88.49%
+- Output file: outputs/boolq/llama3.1_70b_awq/boolq_three_shot_llama3.1_70b_awq.jsonl
+
+> Note: 3-shot improves over zero-shot (87.51% → 88.49%), maintaining the top
+> position across all evaluated models on BoolQ-Urdu. Surpasses Gemma-2-9B-IT
+> 3-shot (87.20%) and Qwen3-14B 3-shot (84.89%). The 70B model benefits
+> consistently from few-shot examples, unlike smaller models where 3-shot
+> sometimes hurts performance.
+
+### BoolQ Chain-of-Thought (CoT)
+- Used items: 1550
+- Scored on: 1546 (pred != None)
+- Accuracy: 87.45%
+- Output file: outputs/boolq/llama3.1_70b_awq/boolq_cot_llama3.1_70b_awq.jsonl
+
+> Note: CoT accuracy (87.45%) is slightly below zero-shot (87.51%) and 3-shot
+> (88.49%), suggesting that explicit reasoning does not further improve BoolQ-Urdu
+> performance for this model. All three prompt types remain tightly clustered
+> within 1 percentage point, indicating stable and robust performance regardless
+> of prompt strategy — a pattern not seen in smaller models.
+
 ## BoolQ – Urdu – DeepSeek-R1-Distill-Qwen-7B
 
 Model: DeepSeek-R1-Distill-Qwen-7B  
@@ -146,7 +266,42 @@ Total examples: 1550
 
 > **Note:** DeepSeek-specific fixes applied. CoT accuracy (61.31%) falls between zero-shot (56.76%) and 3-shot (62.07%) with excellent coverage (99.55%).
 
----
+## BoolQ – Urdu – Gemma-2-9B-IT
+
+Model: Gemma-2-9B-IT
+Dataset: BoolQ (Urdu)
+Total examples: 1550
+
+### BoolQ Zero-shot
+- Used items: 1550
+- Scored on: 1548 (99.87%)
+- Accuracy: 86.30%
+- Output file: outputs/boolq/gemma2_9b_it/boolq_zero_shot_gemma2_9b_it.jsonl
+
+> Note: Evaluated using standard prompt setup with no model-specific modifications.
+> Gemma-2-9B-IT achieves the highest zero-shot accuracy across all tested models on
+> BoolQ-Urdu, outperforming Qwen3-14B (84.51%), Qwen3-8B (79.68%),
+> Meta-LLaMA-3.1-8B (78.49%), Qwen2.5-14B-AWQ (76.26%), and DeepSeek-R1-Distill-Qwen-7B (56.76%).
+
+### BoolQ 3-shot
+- Used items: 1550
+- Scored on: 1547 (99.81%)
+- Accuracy: 87.20%
+- Output file: outputs/boolq/gemma2_9b_it/boolq_three_shot_gemma2_9b_it.jsonl
+
+> Note: 3-shot improves over zero-shot (86.30% → 87.20%), maintaining the top
+> position across all models. Coverage remains high at 99.81%.
+
+### BoolQ Chain-of-Thought (CoT)
+- Used items: 1550
+- Scored on: 1547
+- Accuracy: 86.10%
+- Output file: outputs/boolq/gemma2_9b_it/boolq_cot_gemma2_9b_it.jsonl
+
+> Note: CoT accuracy (86.10%) is slightly below zero-shot (86.30%) and 3-shot (87.20%),
+> suggesting Gemma-2-9B-IT does not benefit from chain-of-thought prompting on BoolQ-Urdu.
+> Despite this, it remains competitive across all prompt types and holds a strong position
+> among all tested models on this dataset.
 
 ## CSQA – Urdu – Qwen2.5-1.5B-Instruct
 
@@ -248,6 +403,94 @@ Total examples: 1500
 > Note: CoT with Qwen2.5-14B performs better than the 7B CoT and 3-shot results,
 > though it still slightly trails the 14B zero-shot setting on CSQA-Urdu.
 
+## CSQA – Urdu – Qwen3-8B
+
+Model: Qwen3-8B  
+Dataset: CSQA (Urdu)  
+Total examples: 1500  
+
+### CSQA Zero-shot
+- Used items:        1500
+- Answered (A–E):    1500 (100.00%)
+- Accuracy overall:  54.80%  (correct / 1500)
+- Accuracy answered: 54.80%  (correct / 1500)
+- Output file:       outputs/csqa/qwen3_8b/csqa_zero_shot_qwen3_8b.jsonl
+
+> Note: Qwen3-8B uses chat template format with thinking mode disabled
+> (enable_thinking=False) for zero-shot evaluation. 100% answer coverage
+> achieved. At 54.80%, this is the highest CSQA zero-shot result across
+> all evaluated models, surpassing Qwen2.5-14B-AWQ (50.93%).
+
+### CSQA 3-shot
+
+- Used items:        1500
+- Answered (A–E):    1500 (100.00%)
+- Accuracy overall:  52.20%  (correct / 1500)
+- Accuracy answered: 52.20%  (correct / 1500)
+- Output file:       outputs/csqa/qwen3_8b/csqa_three_shot_qwen3_8b.jsonl
+
+> Note: Qwen3-8B uses chat template format with thinking mode disabled
+> (enable_thinking=False) for 3-shot evaluation. 100% answer coverage
+> achieved. At 52.20%, this is the highest CSQA zero-shot result across
+> all evaluated models, surpassing Qwen2.5-14B-AWQ (46.53%).
+
+### CSQA Chain-of-Thought (CoT)
+- Used items:        1500
+- Answered (A–E):    1495 (99.67%)
+- Accuracy overall:  55.33%  (correct / 1500)
+- Accuracy answered: 55.52%  (correct / 1495)
+- Output file:       outputs/csqa/qwen3_8b/csqa_cot_qwen3_8b.jsonl
+
+> Note: Qwen3-8B CoT uses thinking mode enabled (enable_thinking=True),
+> activating built-in reasoning via <think>...</think> blocks before the
+> final answer. At 55.33%, this is the highest CSQA CoT result across all
+> evaluated models, surpassing Qwen2.5-14B-AWQ CoT (49.73%) by a notable
+> margin. Coverage remains near-complete at 99.67%.
+
+## CSQA – Urdu – Qwen3-14B
+
+Model: Qwen3-14B
+Dataset: CSQA (Urdu)
+Total examples: 1500
+
+### CSQA Zero-shot
+- Used items:        1500
+- Answered (A–E):    1500 (100.00%)
+- Accuracy overall:  58.73%  (correct / 1500)
+- Accuracy answered: 58.73%  (correct / 1500)
+- Output file:       outputs/csqa/qwen3_14b/csqa_zero_shot_qwen3_14b.jsonl
+
+> Note: Qwen3-14B uses chat template format with thinking mode disabled
+> (enable_thinking=False) for zero-shot evaluation. 100% answer coverage
+> achieved. At 58.73%, this is the highest CSQA zero-shot result across
+> all evaluated models, surpassing Qwen3-8B (54.80%) and Qwen2.5-14B-AWQ (50.93%).
+
+### CSQA 3-shot
+- Used items:        1500
+- Answered (A–E):    1500 (100.00%)
+- Accuracy overall:  56.60%  (correct / 1500)
+- Accuracy answered: 56.60%  (correct / 1500)
+- Output file:       outputs/csqa/qwen3_14b/csqa_three_shot_qwen3_14b.jsonl
+
+> Note: Qwen3-14B uses chat template format with thinking mode disabled
+> (enable_thinking=False) for 3-shot evaluation. 100% answer coverage
+> achieved. At 56.60%, this is the highest CSQA 3-shot result across
+> all evaluated models, surpassing Qwen3-8B (52.20%) and Qwen2.5-14B-AWQ (46.53%).
+
+### CSQA Chain-of-Thought (CoT)
+- Used items:        1500
+- Answered (A–E):    1497 (99.80%)
+- Accuracy overall:  63.00%  (correct / 1500)
+- Accuracy answered: 63.13%  (correct / 1497)
+- Output file:       outputs/csqa/qwen3_14b/csqa_cot_qwen3_14b.jsonl
+
+> Note: Qwen3-14B CoT uses thinking mode enabled (enable_thinking=True),
+> activating built-in reasoning via <think>...</think> blocks before the
+> final answer. At 63.00%, this is the highest CSQA CoT result across all
+> evaluated models, surpassing Qwen3-8B CoT (55.33%) by a notable margin
+> and Qwen2.5-14B-AWQ CoT (49.73%) by a large margin. Coverage remains
+> near-complete at 99.80%.
+
 ## CSQA – Urdu – Meta-LLaMA-3.1-8B-Instruct
 
 Model: Meta-LLaMA-3.1-8B-Instruct  
@@ -283,6 +526,52 @@ Total examples: 1500
 
 > **Note:** CoT performance remains behind Qwen2.5-14B-Instruct-AWQ on CSQA-Urdu
 > (49.73% vs 46.47%), suggesting Qwen-14B benefits more from explicit reasoning here.
+
+## CSQA – Urdu – Meta-Llama-3.1-70B-Instruct-AWQ-INT4
+
+Model: Meta-Llama-3.1-70B-Instruct-AWQ-INT4
+Dataset: CSQA (Urdu)
+Total examples: 1500
+
+### CSQA Zero-shot
+- Used items:        1500
+- Answered (A–E):    1500 (100.00%)
+- Accuracy overall:  65.60%  (correct / 1500)
+- Accuracy answered: 65.60%  (correct / 1500)
+- Output file:       outputs/csqa/llama3.1_70b_awq/csqa_zero_shot_llama3.1_70b_awq.jsonl
+
+> Note: Meta-Llama-3.1-70B-AWQ achieves 65.60% on CSQA-Urdu zero-shot with
+> full 100% answer coverage, setting a new high across all evaluated models,
+> surpassing Qwen3-14B (58.73%), Gemma-2-9B-IT (59.87%), and Qwen3-8B (54.80%).
+> The 70B scale clearly benefits commonsense MCQ reasoning in Urdu under
+> direct prompting.
+
+### CSQA 3-shot
+- Used items:        1500
+- Answered (A–E):    1500 (100.00%)
+- Accuracy overall:  64.87%  (correct / 1500)
+- Accuracy answered: 64.87%  (correct / 1500)
+- Output file:       outputs/csqa/llama3.1_70b_awq/csqa_three_shot_llama3.1_70b_awq.jsonl
+
+> Note: 3-shot accuracy (64.87%) drops slightly from zero-shot (65.60%),
+> suggesting few-shot examples provide marginal negative effect on CSQA-Urdu
+> for this model. Still the second highest 3-shot result across all evaluated
+> models, behind only Qwen3-14B (56.60%) — wait, surpassing it — and ahead of
+> Gemma-2-9B-IT (59.20%) and Qwen3-14B (56.60%). Full coverage maintained.
+
+### CSQA Chain-of-Thought (CoT)
+- Used items:        1500
+- Answered (A–E):    1497 (99.80%)
+- Accuracy overall:  58.07%
+- Accuracy answered: 58.18%
+- Output file:       outputs/csqa/llama3.1_70b_awq/csqa_cot_llama3.1_70b_awq.jsonl
+
+> Note: CoT accuracy (58.07%) drops notably compared to zero-shot (65.60%) and
+> 3-shot (64.87%), a pattern also seen in Gemma-2-9B-IT (51.87%) on CSQA-Urdu.
+> This suggests that chain-of-thought prompting consistently hurts commonsense
+> MCQ performance across non-Qwen3 architectures, while Qwen3 models benefit
+> from CoT on this task. Despite the drop, coverage remains near-complete at
+> 99.80%.
 
 ## CSQA – Urdu – DeepSeek-R1-Distill-Qwen-7B
 
@@ -325,7 +614,46 @@ Total examples: 1500
 
 > **Note:** Same DeepSeek-specific fixes applied as in 3-shot (no stop, increased max_tokens, answer extraction). Accuracy comparable to 3-shot (22.87%), with full coverage achieved.
 
----
+## CSQA – Urdu – Gemma-2-9B-IT
+
+Model: Gemma-2-9B-IT
+Dataset: CSQA (Urdu)
+Total examples: 1500
+
+### CSQA Zero-shot
+- Used items:        1500
+- Answered (A–E):    1500 (100.00%)
+- Accuracy overall:  59.87%  (correct / 1500)
+- Accuracy answered: 59.87%  (correct / 1500)
+- Output file:       outputs/csqa/gemma2_9b_it/csqa_zero_shot_gemma2_9b_it.jsonl
+
+> Note: Gemma-2-9B-IT achieves 59.87% on CSQA-Urdu zero-shot with full coverage,
+> surpassing Qwen3-14B (58.73%) and setting a new high across all evaluated models
+> on this setting.
+
+### CSQA 3-shot
+- Used items:        1500
+- Answered (A–E):    1500 (100.00%)
+- Accuracy overall:  59.20%  (correct / 1500)
+- Accuracy answered: 59.20%  (correct / 1500)
+- Output file:       outputs/csqa/gemma2_9b_it/csqa_three_shot_gemma2_9b_it.jsonl
+
+> Note: 3-shot accuracy (59.20%) is marginally below zero-shot (59.87%),
+> suggesting Gemma-2-9B-IT does not gain from few-shot examples on CSQA-Urdu.
+> Still holds the top position among all evaluated models on 3-shot CSQA,
+> surpassing Qwen3-14B (56.60%).
+
+### CSQA Chain-of-Thought (CoT)
+- Used items:        1500
+- Answered (A–E):    1500 (100.00%)
+- Accuracy overall:  51.87%  (correct / 1500)
+- Accuracy answered: 51.87%  (correct / 1500)
+- Output file:       outputs/csqa/gemma2_9b_it/csqa_cot_gemma2_9b_it.jsonl
+
+> Note: CoT accuracy (51.87%) drops notably compared to zero-shot (59.87%) and
+> 3-shot (59.20%), suggesting that chain-of-thought prompting hurts Gemma-2-9B-IT
+> on CSQA-Urdu. Unlike Qwen3 models where CoT consistently improves performance,
+> Gemma-2-9B-IT appears to perform best with direct answering on this task.
 
 ## PIQA – Urdu – Qwen2.5-1.5B-Instruct
 
@@ -433,6 +761,91 @@ Total examples: 750
 > Note: Compared to the Qwen2.5-7B CoT run, the 14B model achieves both full
 > coverage and a clear accuracy gain, making CoT genuinely useful for PIQA-Urdu.
 
+## PIQA – Urdu – Qwen3-8B
+
+Model: Qwen3-8B  
+Dataset: PIQA (Urdu)  
+Total examples: 750  
+
+### PIQA Zero-shot
+- Used items: 750
+- Answered (0/1): 750 (100.00%)
+- Accuracy overall: 56.53%
+- Accuracy answered: 56.53%
+- Output file: outputs/piqa/qwen3_8b/piqa_zero_shot_qwen3_8b.jsonl
+
+> Note: Qwen3-8B uses chat template format with thinking mode disabled
+> (enable_thinking=False) for zero-shot evaluation. 100% answer coverage
+> achieved.But accuracy dropped as compared to Qwen2.5-14B-Instruct (AWQ), it shows model is feeling difficult for Piqa zero shot settings in urdu.
+
+### PIQA 3-shot
+- Used items: 750
+- Answered (0/1): 750 (100.00%)
+- Accuracy overall: 55.87%
+- Accuracy answered: 55.87%
+- Output file: outputs/piqa/qwen3_8b/piqa_three_shot_qwen3_8b.jsonl
+
+> Note: 3-shot slightly drops compared to zero-shot (56.53% → 55.87%),
+> which is unusual as 3-shot typically improves performance. Still below
+> Qwen2.5-7B 3-shot (62.00%) and Qwen2.5-14B-AWQ 3-shot (65.33%).
+> CoT with thinking enabled may recover performance as seen in other datasets.
+
+### PIQA Chain-of-Thought (CoT)
+- Used items: 750
+- Answered (0/1): 693 (92.40%)
+- Accuracy overall: 55.20%
+- Accuracy answered: 59.74%
+- Output file: outputs/piqa/qwen3_8b/piqa_cot_qwen3_8b.jsonl
+
+> Note: Qwen3-8B CoT uses thinking mode enabled (enable_thinking=True).
+> Coverage drops to 92.40% as the longer reasoning output occasionally
+> fails to produce a clean 0/1 answer. However, accuracy among answered
+> items (59.74%) is the highest across all three Qwen3-8B PIQA prompting
+> strategies, suggesting the model reasons correctly when it does commit
+> to an answer. Overall accuracy (55.20%) remains below Qwen2.5-14B-AWQ
+> CoT (58.93%) due to the coverage gap.
+
+### PIQA Zero-shot
+- Used items:        750
+- Answered (0/1):    750 (100.00%)
+- Accuracy overall:  59.33%
+- Accuracy answered: 59.33%
+- Output file:       outputs/piqa/qwen3_14b/piqa_zero_shot_qwen3_14b.jsonl
+
+> Note: Qwen3-14B uses chat template format with thinking mode disabled
+> (enable_thinking=False) for zero-shot evaluation. 100% answer coverage
+> achieved. At 59.33%, this surpasses Qwen3-8B zero-shot (56.53%) and
+> is comparable to Qwen2.5-14B-AWQ zero-shot (60.67%), showing a clear
+> improvement over the smaller Qwen3-8B on PIQA-Urdu.But somehow this model still not performing well on PIQA zero shot for urdu language as compared to Qwen2.5-14B-Instruct (AWQ) slightly lower accuracy. Let's see for other prompts.
+
+### PIQA 3-shot
+- Used items:        750
+- Answered (0/1):    750 (100.00%)
+- Accuracy overall:  63.73%
+- Accuracy answered: 63.73%
+- Output file:       outputs/piqa/qwen3_14b/piqa_three_shot_qwen3_14b.jsonl
+
+> Note: Qwen3-14B uses chat template format with thinking mode disabled
+> (enable_thinking=False) for 3-shot evaluation. 100% answer coverage
+> achieved. At 63.73%, this surpasses Qwen3-8B 3-shot (55.87%) and is
+> comparable to Qwen2.5-14B-AWQ 3-shot (65.33%), showing a clear gain
+> over the smaller Qwen3 variant in the few-shot setting.
+
+### PIQA Chain-of-Thought (CoT)
+- Used items:        750
+- Answered (0/1):    697 (92.93%)
+- Accuracy overall:  65.73%
+- Accuracy answered: 70.73%
+- Output file:       outputs/piqa/qwen3_14b/piqa_cot_qwen3_14b.jsonl
+
+> Note: Qwen3-14B CoT uses thinking mode enabled (enable_thinking=True),
+> activating built-in reasoning via <think>...</think> blocks before the
+> final answer. At 65.73% overall and 70.73% among answered items, this
+> is the highest PIQA CoT result across all evaluated models, surpassing
+> Qwen2.5-14B-AWQ CoT (58.93%) and Qwen3-8B CoT (55.20%). Coverage drops
+> to 92.93% as longer reasoning outputs occasionally fail to produce a
+> clean 0/1 answer, consistent with the pattern seen in Qwen3-8B CoT.
+
 ## PIQA – Urdu – Meta-LLaMA-3.1-8B-Instruct
 
 Model: Meta-LLaMA-3.1-8B-Instruct  
@@ -471,6 +884,41 @@ Total examples: 750
 > **Note:** Despite high coverage, CoT underperforms all Qwen baselines (1.5B, 7B, and 14B),
 > indicating that Meta-LLaMA-3.1-8B does not benefit from explicit reasoning on PIQA-Urdu.
 
+## PIQA – Urdu – Meta-Llama-3.1-70B-Instruct-AWQ-INT4
+
+Model: Meta-Llama-3.1-70B-Instruct-AWQ-INT4
+Dataset: PIQA (Urdu)
+Total examples: 750
+
+### PIQA Zero-shot
+- Used items:        750
+- Answered (0/1):    750 (100.00%)
+- Accuracy overall:  62.93%
+- Accuracy answered: 62.93%
+- Output file:       outputs/piqa/llama3.1_70b_awq/piqa_zero_shot_llama3.1_70b_awq.jsonl
+
+> Note: Meta-Llama-3.1-70B-AWQ achieves 62.93% on PIQA-Urdu zero-shot with
+> full coverage, ranking behind Gemma-2-9B-IT (68.67%) but ahead of
+> Qwen3-14B (59.33%) and Qwen2.5-14B-AWQ (60.67%). Unlike Gemma which
+> shows a dramatic drop under 3-shot and CoT, the 70B model's zero-shot
+> baseline is more moderate, making it interesting to see whether it maintains
+> performance across prompt types.
+
+### PIQA Chain-of-Thought (CoT)
+- Used items:        750
+- Answered (0/1):    426 (56.80%)
+- Accuracy overall:  31.73%
+- Accuracy answered: 55.87%
+- Output file:       outputs/piqa/llama3.1_70b_awq/piqa_cot_llama3.1_70b_awq.jsonl
+
+> Note: CoT causes a severe collapse in both coverage (56.80%) and overall
+> accuracy (31.73%), the worst CoT performance on PIQA across all evaluated
+> models. The model frequently fails to produce a clean 0/1 answer when asked
+> to reason step-by-step, and even among answered items accuracy (55.87%)
+> is near random baseline (50%). This mirrors the pattern seen in Gemma-2-9B-IT
+> and Meta-LLaMA-3.1-8B, confirming that CoT consistently hurts PIQA-Urdu
+> performance across LLaMA architectures regardless of scale.
+
 ## PIQA – Urdu – DeepSeek-R1-Distill-Qwen-7B
 
 Model: DeepSeek-R1-Distill-Qwen-7B  
@@ -504,7 +952,48 @@ Total examples: 750
 
 > **Note:** Same DeepSeek-specific fixes applied. CoT performance (52.93%) similar to zero-shot (50.67%) and 3-shot (53.47%), showing minimal gain from reasoning for PIQA with this model.
 
----
+## PIQA – Urdu – Gemma-2-9B-IT
+
+Model: Gemma-2-9B-IT
+Dataset: PIQA (Urdu)
+Total examples: 750
+
+### PIQA Zero-shot
+- Used items:        750
+- Answered (0/1):    750 (100.00%)
+- Accuracy overall:  68.67%
+- Accuracy answered: 68.67%
+- Output file:       outputs/piqa/gemma2_9b_it/piqa_zero_shot_gemma2_9b_it.jsonl
+
+> Note: Gemma-2-9B-IT achieves the highest PIQA-Urdu zero-shot accuracy across
+> all evaluated models (68.67%), surpassing Qwen3-14B (59.33%), Qwen2.5-14B-AWQ
+> (60.67%), and all smaller models, with full 100% answer coverage.
+
+### PIQA 3-shot
+- Used items:        750
+- Answered (0/1):    750 (100.00%)
+- Accuracy overall:  53.60%
+- Accuracy answered: 53.60%
+- Output file:       outputs/piqa/gemma2_9b_it/piqa_three_shot_gemma2_9b_it.jsonl
+
+> Note: 3-shot accuracy (53.60%) drops sharply compared to zero-shot (68.67%),
+> the largest such drop seen across all models on PIQA-Urdu. Few-shot examples
+> appear to confuse rather than help Gemma-2-9B-IT on this task, pushing accuracy
+> close to the random baseline (50%). Less accuracy than, Qwen 3-14B, 3-8B and even Qwen2.5-14B-AWQ.
+
+### PIQA Chain-of-Thought (CoT)
+- Used items:        750
+- Answered (0/1):    730 (97.33%)
+- Accuracy overall:  50.00%
+- Accuracy answered: 51.37%
+- Output file:       outputs/piqa/gemma2_9b_it/piqa_cot_gemma2_9b_it.jsonl
+
+> Note: CoT accuracy (50.00% overall) falls to the random baseline, continuing
+> the sharp decline seen from zero-shot (68.67%) to 3-shot (53.60%). Gemma-2-9B-IT
+> shows a strong prompt-type sensitivity on PIQA-Urdu: excellent at zero-shot
+> direct answering but severely degraded by both few-shot examples and explicit
+> reasoning. This is the most pronounced zero-shot → CoT collapse across all
+> evaluated models on this dataset.
 
 ## StrategyQA – Urdu – Qwen2.5-1.5B-Instruct
 
@@ -608,6 +1097,105 @@ Total examples: 2290
 > indicating that explicit reasoning steps help the model better structure
 > Urdu commonsense inference.
 
+## StrategyQA – Urdu – Qwen3-8B
+
+Model: Qwen3-8B  
+Dataset: StrategyQA (Urdu)  
+Total examples: 2290  
+
+### StrategyQA Zero-shot
+- Used items: 2290
+- Answered (ہاں/نہیں): 2290 (100.00%)
+- Accuracy overall: 79.96%
+- Accuracy answered: 79.96%
+- Output file: outputs/strategyqa/qwen3_8b/strategyqa_zero_shot_qwen3_8b.jsonl
+
+> Note: Qwen3-8B uses chat template format with thinking mode disabled
+> (enable_thinking=False) for zero-shot evaluation. At 79.96%, this is
+> the highest StrategyQA zero-shot result across all evaluated models,
+> surpassing Qwen2.5-14B-AWQ (73.19%) by a significant margin, despite
+> being a smaller model.
+
+### StrategyQA 3-shot
+- Used items: 2290
+- Answered (ہاں/نہیں): 2290 (100.00%)
+- Accuracy overall: 80.74%
+- Accuracy answered: 80.74%
+- Output file: outputs/strategyqa/qwen3_8b/strategyqa_three_shot_qwen3_8b.jsonl
+
+> Note: 3-shot gives a modest but consistent improvement over zero-shot
+> (79.96% → 80.74%), maintaining 100% coverage. This is the highest
+> StrategyQA 3-shot result across all evaluated models, surpassing
+> Qwen2.5-14B-AWQ 3-shot (75.11%) by a clear margin.
+
+### StrategyQA Chain-of-Thought (CoT)
+- Used items: 2290
+- Answered (ہاں/نہیں): 2124 (92.75%)
+- Accuracy overall: 79.74%
+- Accuracy answered: 85.97%
+- Output file: outputs/strategyqa/qwen3_8b/strategyqa_cot_qwen3_8b.jsonl
+
+> Note: Qwen3-8B CoT uses thinking mode enabled (enable_thinking=True).
+> Coverage drops to 92.75% as longer reasoning outputs occasionally fail
+> to produce a clean ہاں/نہیں answer. However, accuracy among answered
+> items (85.97%) is remarkably high — the best StrategyQA answered
+> accuracy across all evaluated models by a large margin, surpassing
+> Qwen2.5-14B-AWQ CoT (76.72%). Runtime was significantly longer (~73 min)
+> due to thinking mode generation. This pattern mirrors PIQA CoT — thinking
+> mode trades coverage for higher per-answer precision on reasoning tasks.
+
+## StrategyQA – Urdu – Qwen3-14B
+
+Model: Qwen3-14B
+Dataset: StrategyQA (Urdu)
+Total examples: 2290
+
+### StrategyQA Zero-shot
+- Used items:          2290
+- Answered (ہاں/نہیں): 2290 (100.00%)
+- Accuracy overall:    83.89%
+- Accuracy answered:   83.89%
+- Output file:         outputs/strategyqa/qwen3_14b/strategyqa_zero_shot_qwen3_14b.jsonl
+
+> Note: Qwen3-14B uses chat template format with thinking mode disabled
+> (enable_thinking=False) for zero-shot evaluation. 100% answer coverage
+> achieved. At 83.89%, this is the highest StrategyQA zero-shot result
+> across all evaluated models, surpassing Qwen3-8B (79.96%) and
+> Qwen2.5-14B-AWQ (73.19%) by a notable margin, showing a clear gain
+> from scaling within the Qwen3 family.
+
+### StrategyQA 3-shot
+- Used items:          2290
+- Answered (ہاں/نہیں): 2290 (100.00%)
+- Accuracy overall:    83.97%
+- Accuracy answered:   83.97%
+- Output file:         outputs/strategyqa/qwen3_14b/strategyqa_three_shot_qwen3_14b.jsonl
+
+> Note: Qwen3-14B uses chat template format with thinking mode disabled
+> (enable_thinking=False) for 3-shot evaluation. 100% answer coverage
+> achieved. At 83.97%, this is the highest StrategyQA 3-shot result
+> across all evaluated models, surpassing Qwen3-8B 3-shot (80.74%) and
+> Qwen2.5-14B-AWQ 3-shot (75.11%). The gain over zero-shot is minimal
+> (83.89% → 83.97%), suggesting the model is already near its ceiling
+> for this task without thinking mode enabled.
+
+### StrategyQA Chain-of-Thought (CoT)
+- Used items:          2290
+- Answered (ہاں/نہیں): 2209 (96.46%)
+- Accuracy overall:    83.89%
+- Accuracy answered:   86.96%
+- Output file:         outputs/strategyqa/qwen3_14b/strategyqa_cot_qwen3_14b.jsonl
+
+> Note: Qwen3-14B CoT uses thinking mode enabled (enable_thinking=True),
+> activating built-in reasoning via <think>...</think> blocks before the
+> final answer. Coverage drops to 96.46% as longer reasoning outputs
+> occasionally fail to produce a clean ہاں/نہیں answer, consistent with
+> the pattern seen in Qwen3-8B CoT (92.75%). Accuracy among answered
+> items (86.96%) is the highest StrategyQA CoT result across all evaluated
+> models, surpassing Qwen3-8B CoT (85.97%) and Qwen2.5-14B-AWQ CoT
+> (76.72%). Overall accuracy (83.89%) matches zero-shot, confirming that
+> thinking mode trades coverage for higher per-answer precision.
+
 ## StrategyQA – Urdu – Meta-Llama-3.1-8B-Instruct
 
 Model: Meta-Llama-3.1-8B-Instruct  
@@ -640,6 +1228,59 @@ Total examples: 2290
 - Output file: outputs/strategyqa/meta_llama3.1_8b/strategyqa_cot_meta_llama3.1_8b.jsonl
 
 > **Note (findings):** Using Meta-Llama-3.1-8B-Instruct on StrategyQA (Urdu) with CoT, the model achieved **78.17%** accuracy with **100% answered**. We removed AWQ-specific settings, updated the vLLM configuration for this model, increased `max_tokens`, and improved Urdu normalization to correctly handle truncated outputs like `ہا → ہاں` and `نہ → نہیں`. With these fixes, Meta-Llama-3.1-8B currently performs **better than all Qwen baseline models** on StrategyQA CoT in our runs. Next, we should run the **same updated code/settings on Qwen** to confirm that the comparison is not influenced by evaluation differences.
+
+## StrategyQA – Urdu – Meta-Llama-3.1-70B-Instruct-AWQ-INT4
+
+Model: Meta-Llama-3.1-70B-Instruct-AWQ-INT4
+Dataset: StrategyQA (Urdu)
+Total examples: 2290
+
+### StrategyQA Zero-shot
+- Used items:          2290
+- Answered (ہاں/نہیں): 2290 (100.00%)
+- Accuracy overall:    88.69%
+- Accuracy answered:   88.69%
+- Output file:         outputs/strategyqa/llama3.1_70b_awq/strategyqa_zero_shot_llama3.1_70b_awq.jsonl
+
+> Note: Meta-Llama-3.1-70B-AWQ achieves 88.69% on StrategyQA-Urdu zero-shot
+> with full coverage, setting a new high across all evaluated models, surpassing
+> Qwen3-14B (83.89%), Gemma-2-9B-IT (82.79%), and Qwen3-8B (79.96%) by a
+> significant margin. This is a remarkable result — a 70B quantized model
+> outperforming all Qwen3 models including the 14B on multi-hop Urdu reasoning
+> without any few-shot examples. Scaling to 70B clearly provides strong
+> multi-hop reasoning benefits in Urdu.
+
+### StrategyQA 3-shot
+- Used items:          2290
+- Answered (ہاں/نہیں): 2290 (100.00%)
+- Accuracy overall:    90.09%
+- Accuracy answered:   90.09%
+- Output file:         outputs/strategyqa/llama3.1_70b_awq/strategyqa_three_shot_llama3.1_70b_awq.jsonl
+
+> Note: 3-shot accuracy (90.09%) improves over zero-shot (88.69%), crossing
+> the 90% threshold — the first model to achieve this on StrategyQA-Urdu across
+> all evaluated models. Surpasses Qwen3-14B 3-shot (83.97%), Gemma-2-9B-IT
+> 3-shot (80.70%), and Meta-LLaMA-3.1-8B 3-shot (78.43%) by a large margin.
+> Full 100% coverage maintained. This confirms that the 70B model benefits
+> consistently from few-shot examples on multi-hop Urdu reasoning, unlike
+> smaller models where 3-shot gains are less consistent.
+
+### StrategyQA Chain-of-Thought (CoT)
+- Used items:          2290
+- Answered (ہاں/نہیں): 1393 (60.83%)
+- Accuracy overall:    49.91%
+- Accuracy answered:   82.05%
+- Output file:         outputs/strategyqa/llama3.1_70b_awq/strategyqa_cot_llama3.1_70b_awq.jsonl
+
+> Note: CoT causes a severe coverage collapse to 60.83%, the lowest answer
+> rate seen on StrategyQA across all evaluated models. Overall accuracy drops
+> to 49.91% — near random baseline — despite answered accuracy of 82.05%
+> being competitive. The model reasons correctly when it commits to an answer,
+> but the CoT prompt format frequently prevents clean ہاں/نہیں extraction for
+> this model. This mirrors the PIQA CoT pattern seen earlier, confirming that
+> LLaMA-3.1-70B-AWQ struggles with binary answer extraction under CoT prompting
+> across multiple datasets. Zero-shot and 3-shot remain the optimal prompt
+> strategies for this model on binary reasoning tasks in Urdu.
 
 ## StrategyQA – Urdu – DeepSeek-R1-Distill-Qwen-7B
 
@@ -674,7 +1315,49 @@ Total examples: 2290
 
 > **Note:** Same DeepSeek-specific fixes applied. CoT accuracy (47.51%) lower than zero-shot (55.24%) and 3-shot (51.66%), suggesting reasoning prompts may hurt performance for this model on StrategyQA.
 
----
+## StrategyQA – Urdu – Gemma-2-9B-IT
+
+Model: Gemma-2-9B-IT
+Dataset: StrategyQA (Urdu)
+Total examples: 2290
+
+### StrategyQA Zero-shot
+- Used items:          2290
+- Answered (ہاں/نہیں): 2290 (100.00%)
+- Accuracy overall:    82.79%
+- Accuracy answered:   82.79%
+- Output file:         outputs/strategyqa/gemma2_9b_it/strategyqa_zero_shot_gemma2_9b_it.jsonl
+
+> Note: Gemma-2-9B-IT achieves 82.79% on StrategyQA-Urdu zero-shot with full
+> coverage, ranking second overall behind Qwen3-14B (83.89%) and surpassing
+> Qwen3-8B (79.96%) and Qwen2.5-14B-AWQ (73.19%). A strong result for a
+> non-Qwen3 model on multi-hop Urdu reasoning.
+
+### StrategyQA 3-shot
+- Used items:          2290
+- Answered (ہاں/نہیں): 2282 (99.65%)
+- Accuracy overall:    80.70%
+- Accuracy answered:   80.98%
+- Output file:         outputs/strategyqa/gemma2_9b_it/strategyqa_three_shot_gemma2_9b_it.jsonl
+
+> Note: 3-shot accuracy (80.70%) drops slightly from zero-shot (82.79%),
+> consistent with the pattern seen on BoolQ and CSQA where Gemma-2-9B-IT
+> does not benefit from few-shot examples. Coverage remains high at 99.65%.
+> Still surpasses Qwen3-8B 3-shot (80.74%) marginally and remains well above
+> Qwen2.5-14B-AWQ 3-shot (75.11%).
+
+### StrategyQA Chain-of-Thought (CoT)
+- Used items:          2290
+- Answered (ہاں/نہیں): 2286 (99.83%)
+- Accuracy overall:    80.61%
+- Accuracy answered:   80.75%
+- Output file:         outputs/strategyqa/gemma2_9b_it/strategyqa_cot_gemma2_9b_it.jsonl
+
+> Note: CoT accuracy (80.61%) is nearly identical to 3-shot (80.70%), with both
+> slightly below zero-shot (82.79%). Unlike Qwen3 models where CoT with thinking
+> mode yields notably higher answered accuracy (Qwen3-14B: 86.96%), Gemma-2-9B-IT
+> shows no meaningful gain from explicit reasoning on StrategyQA-Urdu. Coverage
+> remains excellent at 99.83%.
 
 ## GSM8K – Urdu – Qwen2.5-1.5B-Instruct
 
@@ -778,6 +1461,7 @@ Total examples: 700
 
 > **Note:** Accuracy improves over the 7B model (5.00% → 8.86%), indicating that larger model capacity helps few-shot arithmetic reasoning, though performance remains far below CoT-based prompting for GSM8K-style problems.
 
+
 ### GSM8K Chain-of-Thought (CoT)
 - Used items:         700
 - Answered (numeric): 700 (100.00%)
@@ -787,6 +1471,111 @@ Total examples: 700
 
 > **Note:** Compared to earlier GSM8K-Urdu runs with smaller Qwen models and non-CoT
 > prompting, this 39.43% CoT accuracy is a substantial jump and quite strong for a low-resource language setting.
+
+## GSM8K – Qwen3-8B
+Model: Qwen3-8B 
+Dataset: GSM8K (Urdu)  
+Total examples: 700  
+
+### GSM8K Zero-shot
+- Used items:         700
+- Answered (numeric): 700 (100.00%)
+- Accuracy overall:   55.43%
+- Accuracy answered:  55.43%
+- Output file:        outputs/gsm8k/qwen3_8b/gsm8k_zero_shot_qwen3_8b.jsonl
+
+> Note: Qwen3-8B uses chat template format with thinking mode disabled
+> (enable_thinking=False) for zero-shot evaluation. At 55.43%, this is
+> by far the highest GSM8K zero-shot result across all evaluated models,
+> more than doubling Qwen2.5-14B-AWQ zero-shot (25.14%) despite being
+> a smaller model. This suggests Qwen3's generation improvements
+> significantly benefit Urdu mathematical reasoning even without
+> explicit step-by-step prompting.
+
+### GSM8K 3-shot
+- Used items:         700
+- Answered (numeric): 700 (100.00%)
+- Accuracy overall:   22.86%
+- Accuracy answered:  22.86%
+- Output file:        outputs/gsm8k/qwen3_8b/gsm8k_three_shot_qwen3_8b.jsonl
+
+> Note: Qwen3-8B uses chat template format with thinking mode disabled
+> (enable_thinking=False) for 3-shot evaluation. At 22.86%, this is the
+> highest GSM8K 3-shot result across all evaluated models, surpassing
+> Qwen2.5-14B-AWQ 3-shot (8.86%) by a large margin. However, 3-shot still
+> significantly underperforms CoT for math reasoning, consistent with the
+> pattern seen across all previous models. We used the prompt "three_shot_llama" (to give the model room to think properly and follow ###to reach the gold number.)
+
+### GSM8K Chain Of Thought(Cot)
+
+- Used items:         700
+- Answered (numeric): 699 (99.86%)
+- Accuracy overall:   79.86%
+- Accuracy answered:  79.97%
+- Outputs file:       outputs/gsm8k/qwen3_8b/gsm8k_cot_qwen3_8b.jsonl
+
+> Note: Qwen3-8B uses a chat template format with thinking mode enabled.
+> This model achieves the best performance among open-source models on
+> complex mathematical reasoning, evaluated on 700 examples from the GSM8K
+> dataset. It demonstrates significant accuracy improvements over time,
+> even in a low-resource language like Urdu. These results suggest that
+> GSM8K benefits strongly from step-by-step reasoning for accurate answers.
+> Notably, the prompt used was relatively simple, with minimal contextual
+> guidance.
+
+## GSM8K – Urdu – Qwen3-14B
+
+Model: Qwen3-14B
+Dataset: GSM8K (Urdu)
+Total examples: 700
+
+### GSM8K Zero-shot
+- Used items:         700
+- Answered (numeric): 700 (100.00%)
+- Accuracy overall:   39.14%
+- Accuracy answered:  39.14%
+- Output file:        outputs/gsm8k/qwen3_14b/gsm8k_zero_shot_qwen3_14b.jsonl
+
+> Note: Qwen3-14B uses chat template format with thinking mode disabled
+> (enable_thinking=False) for zero-shot evaluation. At 39.14%, this
+> surpasses Qwen2.5-14B-AWQ zero-shot (25.14%) but falls significantly
+> below Qwen3-8B zero-shot (55.43%), which is an unexpected reversal
+> within the Qwen3 family. This suggests that for GSM8K-Urdu zero-shot,
+> the 8B model's generation behavior with thinking disabled outperforms
+> the 14B variant, and CoT with thinking enabled may be needed for the
+> 14B model to reach its full mathematical reasoning potential.
+
+### GSM8K 3-shot
+
+Used items:         700
+Answered (numeric): 700 (100.00%)
+Accuracy overall:   32.86%
+Accuracy answered:  32.86%
+Output file:        outputs/gsm8k/qwen3_14b/gsm8k_three_shot_qwen3_14b.jsonl
+
+> Note: Qwen3-14B uses a chat template format with thinking mode disabled  
+> (enable_thinking=False) for three-shot evaluation. It achieved 32.86% overall accuracy,  
+> which shows improvement in Qwen3 generation when scaling from Qwen3-8B to 14B. While  
+> zero-shot performance was poor, the model recovered in the three-shot setting and  
+> outperformed previous Qwen models such as Qwen3-8B and Qwen2.5-14B-Instruct (AWQ).  
+> We still have CoT evaluation remaining to finalize the analysis for Qwen3-14B.
+
+### GSM8K Chain-of-Thought (CoT)
+- Used items:         700
+- Answered (numeric): 699 (99.86%)
+- Accuracy overall:   83.71%
+- Accuracy answered:  83.83%
+- Output file:        outputs/gsm8k/qwen3_14b/gsm8k_cot_qwen3_14b.jsonl
+
+> Note: Qwen3-14B CoT uses thinking mode enabled (enable_thinking=True),
+> activating built-in reasoning via <think>...</think> blocks before the
+> final answer. At 83.71%, this is the highest GSM8K CoT result across
+> all evaluated models, surpassing Qwen3-8B CoT (79.86%) and
+> Qwen2.5-14B-AWQ CoT (39.43%) by a large margin. Coverage remains
+> near-complete at 99.86%, consistent with Qwen3-8B CoT (99.86%).
+> This confirms that thinking mode is essential for Qwen3-14B on
+> mathematical reasoning — CoT recovers the gap seen in zero-shot
+> (39.14%) and pushes the model to its best performance on GSM8K-Urdu.
 
 ## GSM8K – Urdu – Meta-Llama-3.1-8B-Instruct
 
@@ -821,6 +1610,56 @@ Total examples: 700
 
 > **Note:** Meta-Llama-3.1-8B achieves full numeric answer rate on GSM8K-CoT, but accuracy remains low (11.00%), indicating the model often produces a numeric output yet fails the final computation. We used the same evaluation/parsing logic as before and only updated the run for this model (no AWQ quantization; vLLM set to safe values like `max_model_len=3072`, `gpu_memory_utilization=0.75`, `max_num_seqs=1`). For a fair comparison, we can run the exact same CoT prompt + code on Qwen models and compare directly.
 
+## GSM8K – Urdu – Meta-Llama-3.1-70B-Instruct-AWQ-INT4
+
+Model: Meta-Llama-3.1-70B-Instruct-AWQ-INT4
+Dataset: GSM8K (Urdu)
+Total examples: 700
+
+### GSM8K Zero-shot
+- Used items:         700
+- Answered (numeric): 696 (99.43%)
+- Accuracy overall:   32.71%
+- Accuracy answered:  32.90%
+- Output file:        outputs/gsm8k/llama3.1_70b_awq/gsm8k_zero_shot_llama3.1_70b_awq.jsonl
+
+> Note: Meta-Llama-3.1-70B-AWQ achieves 32.71% on GSM8K-Urdu zero-shot,
+> substantially outperforming Meta-LLaMA-3.1-8B zero-shot (17.29%) and
+> Gemma-2-9B-IT (16.86%), confirming clear scaling benefits within the
+> LLaMA family. However it remains below Qwen3-8B (55.43%) and Qwen3-14B
+> (39.14%), consistent with the pattern that Qwen3 models have stronger
+> mathematical reasoning in Urdu even at smaller scales. CoT is expected
+> to produce a large improvement as seen across all previous models.
+
+### GSM8K 3-shot
+- Used items:         700
+- Answered (numeric): 700 (100.00%)
+- Accuracy overall:   34.43%
+- Accuracy answered:  34.43%
+- Output file:        outputs/gsm8k/llama3.1_70b_awq/gsm8k_three_shot_llama3.1_70b_awq.jsonl
+
+> Note: 3-shot accuracy (34.43%) improves modestly over zero-shot (32.71%)
+> with full coverage, setting the highest GSM8K 3-shot result across all
+> evaluated models, surpassing Qwen3-14B (32.86%), Qwen3-8B (22.86%), and
+> Gemma-2-9B-IT (16.43%). The modest gain over zero-shot confirms that
+> few-shot examples alone are insufficient for multi-step arithmetic in Urdu
+> — CoT with step-by-step reasoning remains the key driver as seen in all
+> previous models.
+
+### GSM8K Chain-of-Thought (CoT)
+- Used items:         700
+- Answered (numeric): 699 (99.86%)
+- Accuracy overall:   55.00%
+- Accuracy answered:  55.08%
+- Output file:        outputs/gsm8k/llama3.1_70b_awq/gsm8k_cot_llama3.1_70b_awq.jsonl
+
+> Note: CoT produces a large jump from zero-shot (32.71%) and 3-shot (34.43%)
+> to 55.00%, confirming that step-by-step reasoning is essential for GSM8K-Urdu
+> regardless of model scale. Ranks third overall on GSM8K CoT behind Qwen3-14B
+> (83.71%) and Qwen3-8B (79.86%), but ahead of Gemma-2-9B-IT (71.57%),
+> DeepSeek-R1-Distill-Qwen-7B (33.43%), and Qwen2.5-14B-AWQ (39.43%).
+> Coverage remains near-complete at 99.86%.
+
 ## GSM8K – Urdu – DeepSeek-R1-Distill-Qwen-7B
 
 Model: DeepSeek-R1-Distill-Qwen-7B  
@@ -853,4 +1692,49 @@ Total examples: 700
 - Output file: outputs/gsm8k/deepseek_r1_distill_qwen_7b/gsm8k_cot_deepseek_r1_distill_qwen_7b.jsonl
 
 > **Note:** DeepSeek-specific fixes applied. CoT achieves best performance (33.43%), significantly outperforming zero-shot (28.71%) and 3-shot (9.14%), with high answer rate (97.29%).
-```
+
+## GSM8K – Urdu – Gemma-2-9B-IT
+
+Model: Gemma-2-9B-IT
+Dataset: GSM8K (Urdu)
+Total examples: 700
+
+### GSM8K Zero-shot
+- Used items:         700
+- Answered (numeric): 700 (100.00%)
+- Accuracy overall:   16.86%
+- Accuracy answered:  16.86%
+- Output file:        outputs/gsm8k/gemma2_9b_it/gsm8k_zero_shot_gemma2_9b_it.jsonl
+
+> Note: Gemma-2-9B-IT achieves 16.86% on GSM8K-Urdu zero-shot with full coverage,
+> comparable to Qwen2.5-7B zero-shot (17.14%) and Meta-LLaMA-3.1-8B (17.29%),
+> but well below Qwen3-8B (55.43%) and Qwen3-14B (39.14%). This confirms that
+> strong performance on binary and MCQ tasks (BoolQ, StrategyQA) does not
+> transfer to multi-step arithmetic reasoning in Urdu for Gemma-2-9B-IT.
+
+### GSM8K 3-shot
+- Used items:         700
+- Answered (numeric): 700 (100.00%)
+- Accuracy overall:   16.43%
+- Accuracy answered:  16.43%
+- Output file:        outputs/gsm8k/gemma2_9b_it/gsm8k_three_shot_gemma2_9b_it.jsonl
+
+> Note: 3-shot accuracy (16.43%) is nearly identical to zero-shot (16.86%),
+> confirming that few-shot examples provide no benefit for GSM8K-Urdu arithmetic
+> reasoning with Gemma-2-9B-IT. Both results are comparable to Qwen2.5-7B
+> zero-shot (17.14%) and far below Qwen3 models, consistent with the pattern
+> that CoT with thinking mode is the key driver for strong math performance.
+
+### GSM8K Chain-of-Thought (CoT)
+- Used items:         700
+- Answered (numeric): 700 (100.00%)
+- Accuracy overall:   71.57%
+- Accuracy answered:  71.57%
+- Output file:        outputs/gsm8k/gemma2_9b_it/gsm8k_cot_gemma2_9b_it.jsonl
+
+> Note: CoT produces a dramatic improvement over zero-shot (16.86%) and 3-shot
+> (16.43%), jumping to 71.57% — confirming that step-by-step reasoning is
+> essential for GSM8K-Urdu regardless of model family. Gemma-2-9B-IT ranks
+> second overall on GSM8K CoT, behind Qwen3-14B (83.71%) and Qwen3-8B (79.86%)
+> but well ahead of Qwen2.5-14B-AWQ (39.43%) and DeepSeek-R1-Distill-Qwen-7B
+> (33.43%). A strong result for a non-reasoning-specialized model.

@@ -1,35 +1,8 @@
-# =======================
-# Python
-# =======================
-__pycache__/
-*.py[cod]
-*.so
-*.egg-info/
-
-# =======================
-# Environments / local tools
-# =======================
-urbench/
-.venv/
-venv/
-
-# =======================
-# Data (do not version full raw datasets)
-# =======================
-data/*_raw/
-data/archive/
-
-# =======================
-# Model outputs (generated, can be recomputed)
-# =======================
 outputs/
-
-# =======================
-# Personal / thesis docs
-# =======================
-*.pdf
-
-# =======================
-# Jupyter noise
-# =======================
-.ipynb_checkpoints/
+data/
+*.zip
+*.jsonl
+__pycache__/
+*.pyc
+.env
+downloaded_models/

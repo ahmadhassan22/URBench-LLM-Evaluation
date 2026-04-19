@@ -1,6 +1,5 @@
 import json
 import os
-import re
 from collections import defaultdict
 
 from vllm import LLM, SamplingParams
@@ -12,17 +11,14 @@ from vllm import LLM, SamplingParams
 CSQA_PATH = "../data/csqa_raw/csqa_train_1500_ur.jsonl"
 PROMPT_PATH = "../prompts/csqa/zero_shot.txt"
 
-# Model name (DeepSeek)
-MODEL_NAME = "/mnt/home/user41/downloaded_models/deepseek-ai/DeepSeek-R1-Distill-Qwen-7B"
-
-# Output directory
-OUTPUT_DIR = "../outputs/csqa/deepseek_r1_distill_qwen_7b"
+MODEL_NAME = "/mnt/home/user41/downloaded_models/LLM-Research/Meta-Llama-3.1-70B-Instruct-AWQ-INT4"
+OUTPUT_DIR = "/mnt/home/user41/URBench/outputs/csqa/llama3.1_70b_awq"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-MAX_EXAMPLES = None
+OUTPUT_FILE = "csqa_zero_shot_llama3.1_70b_awq.jsonl"
 
-# ADDED: DeepSeek detection flag
-IS_DEEPSEEK = "deepseek" in MODEL_NAME.lower()
+MAX_EXAMPLES = None
+MAX_MODEL_LEN = 4096
 
 
 # ==========================
@@ -35,8 +31,7 @@ def load_csqa(path):
         for line in f:
             if not line.strip():
                 continue
-            obj = json.loads(line)
-            data.append(obj)
+            data.append(json.loads(line))
     return data
 
 
@@ -72,11 +67,9 @@ def extract_choice_mapping(choices_field):
 
 def build_prompts(template, examples):
     prompts = []
-
     for ex in examples:
         question = ex["question"]
         choices = ex["choices"]
-
         mapping = extract_choice_mapping(choices)
 
         options_lines = [f"{lab}) {txt}" for lab, txt in mapping.items()]
@@ -95,6 +88,19 @@ def build_prompts(template, examples):
     return prompts
 
 
+def format_llama_prompts(tokenizer, raw_prompts: list) -> list:
+    formatted = []
+    for raw_prompt in raw_prompts:
+        messages = [{"role": "user", "content": raw_prompt}]
+        f = tokenizer.apply_chat_template(
+            messages,
+            tokenize=False,
+            add_generation_prompt=True
+        )
+        formatted.append(f)
+    return formatted
+
+
 URDU_LETTER_MAP = {
     "الف": "A",
     "ب": "B",
@@ -109,37 +115,6 @@ DIGIT_TO_LABEL = {
     "۱": "A", "۲": "B", "۳": "C", "۴": "D", "۵": "E",
     "١": "A", "٢": "B", "٣": "C", "٤": "D", "٥": "E",
 }
-
-
-# ADDED: DeepSeek answer extraction function for CSQA
-def extract_deepseek_csqa_answer(text):
-    """Extract A-E answer from DeepSeek's output that might contain reasoning."""
-    if not text:
-        return text
-    
-    lines = text.split('\n')
-    for line in reversed(lines):
-        line = line.strip()
-        if not line:
-            continue
-        
-        # Check for single letter
-        if len(line) == 1 and line.upper() in "ABCDE":
-            return line.upper()
-        
-        # Check for patterns like "Answer: A" or "جواب: A"
-        words = line.split()
-        for word in words:
-            word_clean = word.strip('.:;,!?)')
-            if len(word_clean) == 1 and word_clean.upper() in "ABCDE":
-                return word_clean.upper()
-        
-        # Check for Urdu letters
-        for urdu_letter, lab in URDU_LETTER_MAP.items():
-            if urdu_letter in line:
-                return lab
-    
-    return text
 
 
 def normalize_csqa_output(text, choices):
@@ -192,7 +167,6 @@ def main():
     print("Loading CSQA dataset...")
     examples = load_csqa(CSQA_PATH)
     print(f"Total examples in file: {len(examples)}")
-    print(f"DeepSeek model detected: {IS_DEEPSEEK}")
 
     if MAX_EXAMPLES is not None:
         examples = examples[:MAX_EXAMPLES]
@@ -208,30 +182,24 @@ def main():
     llm = LLM(
         model=MODEL_NAME,
         tensor_parallel_size=1,
-        max_model_len=4096,
+        max_model_len=MAX_MODEL_LEN,
         trust_remote_code=True,
-        gpu_memory_utilization=0.85,
-        max_num_seqs=4,
+        gpu_memory_utilization=0.90,
+        max_num_seqs=1,
         enforce_eager=True,
         disable_log_stats=True,
+        quantization="awq",
     )
 
-    # CHANGED: Different sampling params for DeepSeek
-    if IS_DEEPSEEK:
-        print("Using DeepSeek-specific generation parameters")
-        sampling = SamplingParams(
-            temperature=0.0,
-            top_p=1.0,
-            max_tokens=256,  # Higher for reasoning
-            # No stop parameter
-        )
-    else:
-        sampling = SamplingParams(
-            temperature=0.0,
-            top_p=1.0,
-            max_tokens=16,
-            stop=["\n"],
-        )
+    tokenizer = llm.get_tokenizer()
+    prompts = format_llama_prompts(tokenizer, prompts)
+
+    sampling = SamplingParams(
+        temperature=0.0,
+        top_p=1.0,
+        max_tokens=16,
+        stop=["\n"]
+    )
 
     print("Generating answers...")
     outputs = llm.generate(prompts, sampling)
@@ -239,25 +207,14 @@ def main():
     correct = 0
     answered = 0
 
-    out_path = os.path.join(
-        OUTPUT_DIR,
-        "csqa_zero_shot_deepseek_r1_distill_qwen_7b.jsonl",
-    )
+    out_path = os.path.join(OUTPUT_DIR, OUTPUT_FILE)
 
     with open(out_path, "w", encoding="utf-8") as fout:
         for ex, prompt, out in zip(examples, prompts, outputs):
             raw = out.outputs[0].text.strip() if out.outputs else ""
-            
-            # ADDED: For DeepSeek, try to extract answer from full output
-            if IS_DEEPSEEK:
-                raw_for_pred = extract_deepseek_csqa_answer(raw)
-            else:
-                raw_for_pred = raw
-                
-            pred = normalize_csqa_output(raw_for_pred, ex["choices"])
+            pred = normalize_csqa_output(raw, ex["choices"])
             gold = ex["answerKey"].strip().upper()
 
-            is_correct = None
             if pred is not None:
                 answered += 1
                 is_correct = (pred == gold)
@@ -278,6 +235,8 @@ def main():
                 "raw_output": raw,
                 "model_name": MODEL_NAME,
                 "prompt_type": "zero_shot",
+                "thinking_mode": "N/A",
+                "context_max_len": MAX_MODEL_LEN,
             }
             fout.write(json.dumps(record, ensure_ascii=False) + "\n")
 
@@ -288,7 +247,6 @@ def main():
 
     print("\n=== CSQA Zero-shot with vLLM ===")
     print(f"Model:             {MODEL_NAME}")
-    print(f"DeepSeek mode:     {IS_DEEPSEEK}")
     print(f"Used items:        {used}")
     print(f"Answered (A–E):    {answered} ({answer_rate:.2f}%)")
     print(f"Accuracy overall:  {acc_overall:.2f}%  (correct / {used})")

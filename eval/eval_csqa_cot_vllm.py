@@ -12,17 +12,14 @@ from vllm import LLM, SamplingParams
 CSQA_PATH = "../data/csqa_raw/csqa_train_1500_ur.jsonl"
 PROMPT_PATH = "../prompts/csqa/cot.txt"
 
-# CHANGED: Model name to DeepSeek
-MODEL_NAME = "/mnt/home/user41/downloaded_models/deepseek-ai/DeepSeek-R1-Distill-Qwen-7B"
-
-# CHANGED: Output directory to DeepSeek
-OUTPUT_DIR = "../outputs/csqa/deepseek_r1_distill_qwen_7b"
+MODEL_NAME = "/mnt/home/user41/downloaded_models/LLM-Research/Meta-Llama-3.1-70B-Instruct-AWQ-INT4"
+OUTPUT_DIR = "/mnt/home/user41/URBench/outputs/csqa/llama3.1_70b_awq"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-MAX_EXAMPLES = None
+OUTPUT_FILE = "csqa_cot_llama3.1_70b_awq.jsonl"
 
-# ADDED: DeepSeek detection flag
-IS_DEEPSEEK = "deepseek" in MODEL_NAME.lower()
+MAX_EXAMPLES = None
+MAX_MODEL_LEN = 4096
 
 
 # ==========================
@@ -47,7 +44,6 @@ def load_prompt_template(path):
 
 def extract_choice_mapping(choices_field):
     mapping = {}
-
     if isinstance(choices_field, dict) and "label" in choices_field and "text" in choices_field:
         labels = choices_field["label"]
         texts = choices_field["text"]
@@ -64,17 +60,14 @@ def extract_choice_mapping(choices_field):
             else:
                 txt = str(ch).strip()
             mapping[lab] = txt
-
     return mapping
 
 
 def build_prompts(template, examples):
     prompts = []
-
     for ex in examples:
         question = ex["question"]
-        choices = ex["choices"]
-        mapping = extract_choice_mapping(choices)
+        mapping = extract_choice_mapping(ex["choices"])
 
         fmt = defaultdict(str)
         fmt["question"] = question
@@ -86,6 +79,19 @@ def build_prompts(template, examples):
         prompts.append(prompt)
 
     return prompts
+
+
+def format_llama_prompts(tokenizer, raw_prompts: list) -> list:
+    formatted = []
+    for raw_prompt in raw_prompts:
+        messages = [{"role": "user", "content": raw_prompt}]
+        f = tokenizer.apply_chat_template(
+            messages,
+            tokenize=False,
+            add_generation_prompt=True
+        )
+        formatted.append(f)
+    return formatted
 
 
 URDU_LETTER_MAP = {
@@ -107,11 +113,9 @@ DIGIT_TO_LABEL = {
 def _map_letter_or_digit_to_label(text):
     if not text:
         return None
-
     t = text.strip()
     if not t:
         return None
-
     t = " ".join(t.split())
 
     for ch in t:
@@ -130,34 +134,9 @@ def _map_letter_or_digit_to_label(text):
     return None
 
 
-# ADDED: DeepSeek answer extraction function
-def extract_deepseek_answer(text):
-    """Extract answer from DeepSeek's output that might contain reasoning."""
-    if not text:
-        return text
-    
-    lines = text.split('\n')
-    for line in reversed(lines):
-        line = line.strip()
-        if not line:
-            continue
-        
-        if len(line) == 1 and line.upper() in "ABCDE":
-            return line.upper()
-        
-        words = line.split()
-        for word in words:
-            word_clean = word.strip('.:;,!?')
-            if len(word_clean) == 1 and word_clean.upper() in "ABCDE":
-                return word_clean.upper()
-    
-    return text
-
-
 def normalize_csqa_cot_output(text, choices):
     if not text:
         return None
-
     t = text.strip()
     if not t:
         return None
@@ -182,14 +161,11 @@ def normalize_csqa_cot_output(text, choices):
         if isinstance(labels, list) and isinstance(texts, list):
             low_full = t.lower()
             for lab, txt in zip(labels, texts):
-                if not isinstance(txt, str):
-                    continue
-                tt = txt.strip()
-                if not tt:
-                    continue
-                if tt in t or tt.lower() in low_full:
-                    if isinstance(lab, str) and lab.upper() in "ABCDE":
-                        return lab.upper()
+                if isinstance(txt, str):
+                    tt = txt.strip()
+                    if tt and (tt in t or tt.lower() in low_full):
+                        if isinstance(lab, str) and lab.upper() in "ABCDE":
+                            return lab.upper()
 
     return None
 
@@ -202,11 +178,9 @@ def main():
     print("Loading CSQA dataset...")
     examples = load_csqa(CSQA_PATH)
     print(f"Total examples in file: {len(examples)}")
-    print(f"DeepSeek model detected: {IS_DEEPSEEK}")
 
     if MAX_EXAMPLES is not None:
         examples = examples[:MAX_EXAMPLES]
-        print(f"Using only first {len(examples)} examples for this run.")
 
     print("Loading CoT template...")
     template = load_prompt_template(PROMPT_PATH)
@@ -218,30 +192,24 @@ def main():
     llm = LLM(
         model=MODEL_NAME,
         tensor_parallel_size=1,
-        max_model_len=4096,
+        max_model_len=MAX_MODEL_LEN,
         trust_remote_code=True,
-        gpu_memory_utilization=0.85,
-        max_num_seqs=4,
+        gpu_memory_utilization=0.90,
+        max_num_seqs=1,
         enforce_eager=True,
         disable_log_stats=True,
+        quantization="awq",
     )
 
-    # CHANGED: Different sampling params for DeepSeek
-    if IS_DEEPSEEK:
-        print("Using DeepSeek-specific generation parameters")
-        sampling = SamplingParams(
-            temperature=0.0,
-            top_p=1.0,
-            max_tokens=512,  # Increased for DeepSeek
-            stop=None,
-        )
-    else:
-        sampling = SamplingParams(
-            temperature=0.0,
-            top_p=1.0,
-            max_tokens=128,
-            stop=None,
-        )
+    tokenizer = llm.get_tokenizer()
+    prompts = format_llama_prompts(tokenizer, prompts)
+
+    sampling = SamplingParams(
+        temperature=0.0,
+        top_p=1.0,
+        max_tokens=128,
+        stop=None
+    )
 
     print("Generating answers (CoT)...")
     outputs = llm.generate(prompts, sampling)
@@ -249,31 +217,21 @@ def main():
     correct = 0
     total_answered = 0
 
-    # CHANGED: Output filename
-    out_path = os.path.join(
-        OUTPUT_DIR,
-        "csqa_cot_deepseek_r1_distill_qwen_7b.jsonl",
-    )
+    out_path = os.path.join(OUTPUT_DIR, OUTPUT_FILE)
 
     with open(out_path, "w", encoding="utf-8") as fout:
         for ex, prompt, out in zip(examples, prompts, outputs):
             raw = out.outputs[0].text.strip() if out.outputs else ""
-            
-            # ADDED: For DeepSeek, try to extract answer from full output
-            if IS_DEEPSEEK:
-                raw_for_pred = extract_deepseek_answer(raw)
-            else:
-                raw_for_pred = raw
-                
-            pred = normalize_csqa_cot_output(raw_for_pred, ex["choices"])
+            pred = normalize_csqa_cot_output(raw, ex["choices"])
             gold = ex["answerKey"].strip().upper()
 
-            is_correct = None
             if pred is not None:
                 total_answered += 1
                 is_correct = (pred == gold)
                 if is_correct:
                     correct += 1
+            else:
+                is_correct = False
 
             record = {
                 "qid": ex["qid"],
@@ -287,6 +245,8 @@ def main():
                 "raw_output": raw,
                 "model_name": MODEL_NAME,
                 "prompt_type": "cot",
+                "thinking_mode": "N/A",
+                "context_max_len": MAX_MODEL_LEN,
             }
             fout.write(json.dumps(record, ensure_ascii=False) + "\n")
 
@@ -296,11 +256,10 @@ def main():
 
     print("\n=== CSQA CoT with vLLM ===")
     print(f"Model:             {MODEL_NAME}")
-    print(f"DeepSeek mode:     {IS_DEEPSEEK}")
     print(f"Used items:        {used_items}")
     print(f"Answered (A–E):    {total_answered} ({(total_answered/used_items*100):.2f}%)")
-    print(f"Accuracy overall:  {overall_acc:.2f}%  (correct / {used_items})")
-    print(f"Accuracy answered: {answered_acc:.2f}%  (correct / {total_answered})")
+    print(f"Accuracy overall:  {overall_acc:.2f}%")
+    print(f"Accuracy answered: {answered_acc:.2f}%")
     print(f"Outputs ->         {out_path}")
 
 
