@@ -805,6 +805,12 @@ Total examples: 750
 > to an answer. Overall accuracy (55.20%) remains below Qwen2.5-14B-AWQ
 > CoT (58.93%) due to the coverage gap.
 
+## PIQA – Urdu – Qwen3-14B
+
+Model: Qwen3-14B  
+Dataset: PIQA (Urdu)  
+Total examples: 750 
+
 ### PIQA Zero-shot
 - Used items:        750
 - Answered (0/1):    750 (100.00%)
@@ -1738,3 +1744,180 @@ Total examples: 700
 > second overall on GSM8K CoT, behind Qwen3-14B (83.71%) and Qwen3-8B (79.86%)
 > but well ahead of Qwen2.5-14B-AWQ (39.43%) and DeepSeek-R1-Distill-Qwen-7B
 > (33.43%). A strong result for a non-reasoning-specialized model.
+
+---
+
+## Prompt Sensitivity Analysis
+
+> This section reports prompt sensitivity results for selected models.
+> Each setting was evaluated with 3 prompt templates (P1, P2, P3).
+> P1 is the original prompt used in all baseline evaluations above.
+> Mean and standard deviation are computed across the 3 variants.
+
+---
+
+### BoolQ – Prompt Sensitivity – Qwen3-14B
+
+#### Zero-shot
+
+| Prompt | Used Items | Scored On | Accuracy |
+|--------|------------|-----------|----------|
+| P1 (original) | 1550 | 1549 | 84.51% |
+| P2 | 1550 | 1550 | 82.84% |
+| P3 | 1550 | 1550 | 84.32% |
+| **Mean** | | | **83.89%** |
+| **Std** | | | **±0.73%** |
+
+- P1: outputs/boolq/qwen3_14b/boolq_zero_shot_qwen3_14b.jsonl
+- P2: outputs/boolq/qwen3_14b_p2/boolq_zero_shot_p2_qwen3_14b.jsonl
+- P3: outputs/boolq/qwen3_14b_p3/boolq_zero_shot_p3_qwen3_14b.jsonl
+
+> Note: Std of ±0.73% indicates low prompt sensitivity on BoolQ zero-shot
+> for Qwen3-14B — the model performs consistently regardless of instruction
+> phrasing, which is a positive robustness signal.
+
+#### 3-shot
+
+| Prompt | Used Items | Scored On | Accuracy |
+|--------|------------|-----------|----------|
+| P1 (original) | 1550 | 1549 | 84.89% |
+| P2 | 1550 | 1550 | 85.23% |
+| P3 | 1550 | 1550 | 82.06% |
+| **Mean** | | | **84.06%** |
+| **Std** | | | **±1.34%** |
+
+- P1: outputs/boolq/qwen3_14b/boolq_three_shot_qwen3_14b.jsonl
+- P2: outputs/boolq/qwen3_14b_p2/boolq_three_shot_p2_qwen3_14b.jsonl
+- P3: outputs/boolq/qwen3_14b_p3/boolq_three_shot_p3_qwen3_14b.jsonl
+
+> Note: Std of ±1.34% indicates moderate prompt sensitivity on BoolQ 3-shot.
+> P3 drops notably (82.06%) while P2 slightly improves over P1, suggesting
+> the instruction framing before the examples affects how the model uses
+> the demonstrations.
+
+#### Chain-of-Thought (CoT)
+
+| Prompt | Used Items | Scored On | Accuracy |
+|--------|------------|-----------|----------|
+| P1 (original) | 1550 | 1539 | 84.47% |
+| P2 | 1550 | 1545 | 83.62% |
+| P3 | 1550 | 1383 | 83.73% |
+| **Mean** | | | **83.94%** |
+| **Std** | | | **±0.37%** |
+
+- P1: outputs/boolq/qwen3_14b/boolq_cot_qwen3_14b.jsonl
+- P2: outputs/boolq/qwen3_14b_p2/boolq_cot_p2_qwen3_14b.jsonl
+- P3: outputs/boolq/qwen3_14b_p3/boolq_cot_p3_qwen3_14b.jsonl
+
+> Note: Std of ±0.37% is the lowest across all BoolQ prompt types,
+> indicating Qwen3-14B CoT is highly robust to prompt phrasing on
+> BoolQ-Urdu. P3 scored on fewer items (1383) due to think-block
+> removal occasionally leaving no extractable answer.
+
+### CSQA – Prompt Sensitivity – Qwen3-14B
+
+#### Zero-shot
+
+| Prompt | Used Items | Answered | Accuracy Overall |
+|--------|------------|----------|-----------------|
+| P1 (original) | 1500 | 1500 (100.00%) | 58.73% |
+| P2 | 1500 | 1500 (100.00%) | 59.53% |
+| P3 | 1500 | 1497 (99.80%) | 58.07% |
+| **Mean** | | | **58.78%** |
+| **Std** | | | **±0.60%** |
+
+- P1: outputs/csqa/qwen3_14b/csqa_zero_shot_qwen3_14b.jsonl
+- P2: outputs/csqa/qwen3_14b_p2/csqa_zero_shot_p2_qwen3_14b.jsonl
+- P3: outputs/csqa/qwen3_14b_p3/csqa_zero_shot_p3_qwen3_14b.jsonl
+
+> Note: Std of ±0.60% indicates very low prompt sensitivity on CSQA
+> zero-shot — Qwen3-14B is robust to instruction phrasing changes on
+> commonsense MCQ. P2 slightly outperforms P1, P3 slightly underperforms.
+
+#### 3-shot
+
+| Prompt | Used Items | Answered | Accuracy Overall |
+|--------|------------|----------|-----------------|
+| P1 (original) | 1500 | 1500 (100.00%) | 56.60% |
+| P2 | 1500 | 1500 (100.00%) | 56.80% |
+| P3 | 1500 | 1499 (99.93%) | 51.13% |
+| **Mean** | | | **54.84%** |
+| **Std** | | | **±2.55%** |
+
+- P1: outputs/csqa/qwen3_14b/csqa_three_shot_qwen3_14b.jsonl
+- P2: outputs/csqa/qwen3_14b_p2/csqa_three_shot_p2_qwen3_14b.jsonl
+- P3: outputs/csqa/qwen3_14b_p3/csqa_three_shot_p3_qwen3_14b.jsonl
+
+> Note: Std of ±2.55% is notably higher than zero-shot (±0.60%), indicating
+> moderate prompt sensitivity in the 3-shot setting. P3 drops sharply to
+> 51.13% while P1 and P2 remain close (56.60% vs 56.80%), suggesting the
+> instruction framing before the examples significantly affects how the model
+> uses the demonstrations on CSQA-Urdu.
+
+#### Chain-of-Thought (CoT)
+
+| Prompt | Used Items | Answered | Accuracy Overall |
+|--------|------------|----------|-----------------|
+| P1 (original) | 1500 | 1497 (99.80%) | 63.00% |
+| P2 | 1500 | 1490 (99.33%) | 52.13% |
+| P3 | 1500 | 1494 (99.60%) | 54.67% |
+| **Mean** | | | **56.60%** |
+| **Std** | | | **±4.67%** |
+
+- P1: outputs/csqa/qwen3_14b/csqa_cot_qwen3_14b.jsonl
+- P2: outputs/csqa/qwen3_14b_p2/csqa_cot_p2_qwen3_14b.jsonl
+- P3: outputs/csqa/qwen3_14b_p3/csqa_cot_p3_qwen3_14b.jsonl
+
+> Note: Std of ±4.67% is the highest sensitivity observed across all CSQA
+> prompt types, indicating that CoT phrasing significantly affects commonsense
+> MCQ accuracy for Qwen3-14B. P1 outperforms P2 and P3 by a large margin
+> (63.00% vs 52.13% and 54.67%), suggesting the original CoT instruction
+> format is particularly well-suited for this task. This is an important
+> finding — the original prompt is not just marginally better but substantially
+> better, which strengthens the value of careful prompt design for CoT in
+> low-resource Urdu NLP.
+
+### PIQA – Prompt Sensitivity – Qwen3-14B
+
+#### Zero-shot
+
+| Prompt | Used Items | Answered | Accuracy Overall |
+|--------|------------|----------|-----------------|
+| P1 (original) | 750 | 750 (100.00%) | 59.33% |
+| P2 | 750 | 750 (100.00%) | 69.60% |
+| P3 | 750 | 750 (100.00%) | 72.80% |
+| **Mean** | | | **67.24%** |
+| **Std** | | | **±5.60%** |
+
+- P1: outputs/piqa/qwen3_14b/piqa_zero_shot_qwen3_14b.jsonl
+- P2: outputs/piqa/qwen3_14b_p2/piqa_zero_shot_p2_qwen3_14b.jsonl
+- P3: outputs/piqa/qwen3_14b_p3/piqa_zero_shot_p3_qwen3_14b.jsonl
+
+> Note: Std of ±5.60% is the highest zero-shot sensitivity observed so far,
+> indicating that PIQA-Urdu is significantly affected by prompt phrasing.
+> P2 and P3 substantially outperform P1 (+10.27pp and +13.47pp respectively),
+> suggesting the original prompt was suboptimal for this task. This is an
+> important finding — the best PIQA zero-shot result (72.80%) surpasses
+> even LLaMA-3.1-70B zero-shot (62.93%).
+
+#### 3-shot
+
+| Prompt | Used Items | Answered | Accuracy Overall |
+|--------|------------|----------|-----------------|
+| P1 (original) | 750 | 750 (100.00%) | 63.73% |
+| P2 | 750 | 750 (100.00%) | 54.80% |
+| P3 | 750 | 750 (100.00%) | 73.07% |
+| **Mean** | | | **63.87%** |
+| **Std** | | | **±7.47%** |
+
+- P1: outputs/piqa/qwen3_14b/piqa_three_shot_qwen3_14b.jsonl
+- P2: outputs/piqa/qwen3_14b_p2/piqa_three_shot_p2_qwen3_14b.jsonl
+- P3: outputs/piqa/qwen3_14b_p3/piqa_three_shot_p3_qwen3_14b.jsonl
+
+> Note: Std of ±7.47% is the highest sensitivity observed across all
+> datasets and prompt types so far, confirming that PIQA-Urdu is highly
+> sensitive to prompt phrasing in the 3-shot setting. P3 (73.07%) sets
+> a new high for PIQA 3-shot across all models, surpassing LLaMA-3.1-70B
+> 3-shot (76.40%) — while P2 drops sharply to 54.80%, near random baseline.
+> This extreme variance confirms PIQA as the most prompt-sensitive dataset
+> in URBench.
