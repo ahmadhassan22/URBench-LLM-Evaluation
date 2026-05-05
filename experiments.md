@@ -1921,3 +1921,145 @@ Total examples: 700
 > 3-shot (76.40%) — while P2 drops sharply to 54.80%, near random baseline.
 > This extreme variance confirms PIQA as the most prompt-sensitive dataset
 > in URBench.
+
+#### Chain-of-Thought (CoT)
+
+| Prompt | Used Items | Answered | Accuracy Overall | Accuracy Answered |
+|--------|------------|----------|-----------------|-------------------|
+| P1 (original) | 750 | 697 (92.93%) | 65.73% | 70.73% |
+| P2 | 750 | 643 (85.73%) | 52.53% | 61.28% |
+| P3 | 750 | 468 (62.40%) | 31.60% | 50.64% |
+
+- P1: outputs/piqa/qwen3_14b/piqa_cot_qwen3_14b.jsonl
+- P2: outputs/piqa/qwen3_14b_p2/piqa_cot_p2_qwen3_14b.jsonl
+- P3: outputs/piqa/qwen3_14b_p3/piqa_cot_p3_qwen3_14b.jsonl
+
+> Note: Mean and Std are not reported for PIQA CoT due to unreliable coverage
+> across P2 (85.73%) and P3 (62.40%). The significant coverage drop from P1
+> (92.93%) confirms that PIQA CoT is highly sensitive to prompt phrasing —
+> only P1's specific format reliably elicits clean 0/1 binary answers after
+> CoT reasoning in Urdu. This is itself a key finding: for binary physical
+> commonsense tasks in Urdu, CoT prompt design requires careful instruction
+> about the expected output format.
+
+### StrategyQA – Prompt Sensitivity – Qwen3-14B
+
+#### Zero-shot
+
+| Prompt | Used Items | Answered | Accuracy Overall |
+|--------|------------|----------|-----------------|
+| P1 (original) | 2290 | 2290 (100.00%) | 83.89% |
+| P2 | 2290 | 2290 (100.00%) | 84.72% |
+| P3 | 2290 | 2290 (100.00%) | 84.19% |
+| **Mean** | | | **84.27%** |
+| **Std** | | | **±0.34%** |
+
+- P1: outputs/strategyqa/qwen3_14b/strategyqa_zero_shot_qwen3_14b.jsonl
+- P2: outputs/strategyqa/qwen3_14b_p2/strategyqa_zero_shot_p2_qwen3_14b.jsonl
+- P3: outputs/strategyqa/qwen3_14b_p3/strategyqa_zero_shot_p3_qwen3_14b.jsonl
+
+> Note: Std of ±0.34% is the lowest zero-shot sensitivity observed across
+> all datasets, confirming that Qwen3-14B is extremely robust on StrategyQA
+> zero-shot regardless of prompt phrasing. All three variants perform within
+> 0.83 percentage points of each other — a strong robustness signal for
+> multi-hop binary reasoning in Urdu.
+
+#### 3-shot
+
+| Prompt | Used Items | Answered | Accuracy Overall |
+|--------|------------|----------|-----------------|
+| P1 (original) | 2290 | 2290 (100.00%) | 83.97% |
+| P2 | 2290 | 2290 (100.00%) | 83.19% |
+| P3 | 2290 | 2288 (99.91%) | 81.97% |
+| **Mean** | | | **83.04%** |
+| **Std** | | | **±0.83%** |
+
+- P1: outputs/strategyqa/qwen3_14b/strategyqa_three_shot_qwen3_14b.jsonl
+- P2: outputs/strategyqa/qwen3_14b_p2/strategyqa_three_shot_p2_qwen3_14b.jsonl
+- P3: outputs/strategyqa/qwen3_14b_p3/strategyqa_three_shot_p3_qwen3_14b.jsonl
+
+> Note: Std of ±0.83% remains very low, confirming StrategyQA 3-shot is
+> robust to prompt phrasing. All three variants stay within 2 percentage
+> points of each other. Slight downward trend from P1 to P3 but well within
+> noise margin.
+
+#### Chain-of-Thought (CoT)
+
+| Prompt | Used Items | Answered | Accuracy Overall | Accuracy Answered |
+|--------|------------|----------|-----------------|-------------------|
+| P1 (original) | 2290 | 2209 (96.46%) | 83.89% | 86.96% |
+| P2 | 2290 | 2216 (96.77%) | 42.66% | 44.09% |
+| P3 | 2290 | 2219 (96.90%) | 84.63% | 87.34% |
+
+- P1: outputs/strategyqa/qwen3_14b/strategyqa_cot_qwen3_14b.jsonl
+- P2: outputs/strategyqa/qwen3_14b_p2/strategyqa_cot_p2_qwen3_14b.jsonl
+- P3: outputs/strategyqa/qwen3_14b_p3/strategyqa_cot_p3_qwen3_14b.jsonl
+
+> Note: P2 accuracy (42.66%) is anomalously low despite high coverage (96.77%),
+> suggesting an answer extraction error where the wrong ہاں/نہیں token is being
+> selected from the reasoning text. P3 (84.63%) closely matches P1 (83.89%),
+> confirming StrategyQA CoT is robust when the prompt is correctly formatted.
+> Mean and Std are not reported for CoT due to the P2 extraction anomaly.
+> StrategyQA zero-shot and 3-shot sensitivity remain the reliable measurements
+> (Mean ~83-84%, Std < 1%).
+
+### GSM8K – Prompt Sensitivity – Qwen3-14B
+
+#### Zero-shot
+
+| Prompt | Used Items | Answered | Accuracy Overall |
+|--------|------------|----------|-----------------|
+| P1 (original) | 700 | 700 (100.00%) | 39.14% |
+| P2 | 700 | 699 (99.86%) | 52.57% |
+| P3 | 700 | 699 (99.86%) | 51.00% |
+| **Mean** | | | **47.57%** |
+| **Std** | | | **±5.98%** |
+
+- P1: outputs/gsm8k/qwen3_14b/gsm8k_zero_shot_qwen3_14b.jsonl
+- P2: outputs/gsm8k/qwen3_14b_p2/gsm8k_zero_shot_p2_qwen3_14b.jsonl
+- P3: outputs/gsm8k/qwen3_14b_p3/gsm8k_zero_shot_p3_qwen3_14b.jsonl
+
+> Note: P2 and P3 substantially outperform P1 (+13.43pp and +11.86pp),
+> suggesting the original zero-shot prompt was suboptimal for GSM8K-Urdu.
+> Std of ±5.98% indicates moderate-high sensitivity. The new prompts asking
+> explicitly for #### N format with thinking disabled produce significantly
+> better results than the original prompt.
+
+#### Three-shot
+
+| Prompt        | Used Items | Answered      | Accuracy Overall |
+| ------------- | ---------- | ------------- | ---------------- |
+| P1 (original) | 700        | 700 (100.00%) | 32.86%           |
+| P2            | 700        | 603 (86.14%)  | 41.29%           |
+| P3            | 700        | 652 (93.14%)  | 35.29%           |
+| **Mean**      |            |               | **36.48%**       |
+| **Std**       |            |               | **±3.54%**       |
+
+P1: outputs/gsm8k/qwen3_14b/gsm8k_three_shot_qwen3_14b.jsonl
+P2: outputs/gsm8k/qwen3_14b_p2/gsm8k_three_shot_p2_qwen3_14b.jsonl
+P3: outputs/gsm8k/qwen3_14b_p3/gsm8k_three_shot_p3_qwen3_14b.jsonl
+
+Note: The mean accuracy across all three prompts is 36.48%, with a standard deviation of ±3.54%. P2 shows the highest performance, suggesting that the explicit instruction format (#### N) has a positive impact on accuracy. P3 also performs reasonably well, but with slightly lower accuracy than P2.
+
+#### Chain-of-Thought (CoT)
+
+| Prompt | Used Items | Answered | Accuracy Overall |
+|--------|------------|----------|-----------------|
+| P1 (original) | 700 | 699 (99.86%) | 83.71% |
+| P2 | 700 | 699 (99.86%) | 70.57% |
+| P3 | 700 | 700 (100.00%) | 64.29% |
+| **Mean** | | | **72.86%** |
+| **Std** | | | **±8.09%** |
+
+- P1: outputs/gsm8k/qwen3_14b/gsm8k_cot_qwen3_14b.jsonl
+- P2: outputs/gsm8k/qwen3_14b_p2/gsm8k_cot_p2_qwen3_14b.jsonl
+- P3: outputs/gsm8k/qwen3_14b_p3/gsm8k_cot_p3_qwen3_14b.jsonl
+
+> Note: Qwen3-14B shows **high prompt sensitivity in CoT** (std ±8.09%).
+> While P1 achieves strong performance (83.71%), accuracy drops significantly
+> for P2 (-13.14pp) and further for P3 (-19.42pp). This indicates that even
+> with thinking mode enabled, reasoning quality and answer extraction remain
+> highly dependent on prompt wording and structure. Unlike zero-shot where
+> prompts improved performance, CoT appears **fragile to prompt reformulation**,
+> suggesting that Qwen3-14B relies heavily on the exact instruction format to
+> stabilize its reasoning and final answer generation.
