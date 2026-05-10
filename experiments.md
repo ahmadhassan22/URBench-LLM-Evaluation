@@ -2063,3 +2063,52 @@ Note: The mean accuracy across all three prompts is 36.48%, with a standard devi
 > prompts improved performance, CoT appears **fragile to prompt reformulation**,
 > suggesting that Qwen3-14B relies heavily on the exact instruction format to
 > stabilize its reasoning and final answer generation.
+
+---
+
+## RAG Experiment – StrategyQA – Qwen3-14B
+
+### Setup
+- Model: Qwen3-14B
+- Dataset: StrategyQA (Urdu) — 2,290 questions
+- Retrieval Corpus: English Wikipedia (November 2023 dump)
+- Embedding Model: paraphrase-multilingual-MiniLM-L12-v2
+- Index: FAISS IndexFlatIP (cosine similarity)
+- Chunks: 200 words, 50-word overlap
+- Top-K retrieved passages: 3
+- Prompt: Same zero-shot Urdu prompt structure as baseline, with retrieved passages replacing gold facts
+- Thinking mode: disabled (enable_thinking=False)
+
+### Corpus Construction
+- Total Wikipedia articles: 6,407,814
+- Total chunks generated: 23,963,971
+- Entities extracted from StrategyQA facts: 4,701
+- Chunks after entity-based filtering: 53,316
+- Unique article titles in filtered index: 2,152
+
+### Results
+
+| Setting | Answered | Accuracy |
+|---------|----------|----------|
+| Zero-shot baseline (no RAG) | 100.00% | 83.89% |
+| RAG (retrieved Wikipedia context) | 100.00% | 56.24% |
+
+### Error Analysis
+- Total wrong predictions: 1,002 / 2,290
+- Questions with likely irrelevant passages: 1,003 (43.80%)
+
+Three failure categories identified:
+
+1. **Entity Disambiguation Failure** — "The Police" (band) retrieved articles about law enforcement instead. Semantic retrieval conflates entity names with common words.
+
+2. **Partial Retrieval / Missing Comparison Entity** — Multi-hop questions require two entities. Retrieval returns multiple chunks from one entity only (e.g., three Genghis Khan chunks, zero Julius Caesar chunks), making comparison impossible.
+
+3. **Coverage Gap** — Entity not present in filtered index. "Grey seal" absent; retrieval falls back to unrelated articles matching partial keywords (e.g., "Alexander Graham Bell" matched for "bell").
+
+### Key Finding
+RAG reduced StrategyQA accuracy by 27.65 percentage points (83.89% → 56.24%). The performance drop is primarily attributed to retrieval failures rather than model reasoning capability. When retrieval succeeds, the model reasons correctly — but 43.80% of questions receive irrelevant context that actively misleads the model.
+
+This confirms that for Urdu multi-hop reasoning, corpus coverage and retrieval quality are the primary bottlenecks, not model capability. The finding highlights a critical gap in Urdu NLP infrastructure: sparse Wikipedia coverage and entity disambiguation challenges constrain RAG effectiveness in low-resource language settings.
+
+### Output File
+- rag/outputs/rag_strategyqa_qwen3_14b_final.jsonl
