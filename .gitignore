@@ -8,3 +8,4 @@ __pycache__/
 downloaded_models/rag/index/
 rag/chunks/
 rag/outputs/
+rag/index/
