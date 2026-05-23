@@ -9,3 +9,11 @@ downloaded_models/rag/index/
 rag/chunks/
 rag/outputs/
 rag/index/
+rag/index/
+data/
+outputs/
+*.jsonl
+*.log
+*.err
+__pycache__/
+*.pyc
