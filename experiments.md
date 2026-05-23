@@ -2112,3 +2112,196 @@ This confirms that for Urdu multi-hop reasoning, corpus coverage and retrieval q
 
 ### Output File
 - rag/outputs/rag_strategyqa_qwen3_14b_final.jsonl
+
+---
+
+## XLT Prompting Experiment – StrategyQA – Qwen3-14B
+
+**Model:** Qwen3-14B  
+**Dataset:** StrategyQA (Urdu) — 2,290 questions  
+**Method:** Cross-Lingual Thought (XLT) Prompting  
+**Dates:** May 20–23, 2026  
+**Reference paper:** "Not All Languages Are Created Equal in LLMs" (Shi et al., EMNLP 2023)
+
+---
+
+### Motivation
+
+After completing the baseline evaluation (zero-shot, 3-shot, CoT) and the RAG experiment,
+the supervisor requested a novel method to improve Urdu reasoning performance beyond the
+RAG baseline (56.24%). XLT prompting was selected as a candidate method based on the
+paper's reported 10+ point gains on arithmetic and QA tasks through cross-lingual structured
+reasoning. The core idea: instruct the model to reason in English (where it has stronger
+training signal) and produce the final answer in Urdu.
+
+---
+
+### XLT Prompt Structure (6-step design)
+
+The prompt followed the XLT paper's recommended structure, adapted for Urdu:
+
+1. **Role assignment** — Tell the model it is an expert reasoning in Urdu
+2. **Task input** — Provide the Urdu question
+3. **Cross-lingual restatement** — Ask the model to restate the question in English
+4. **Task analysis** — Identify the task type
+5. **Step-by-step reasoning** — Reason in English, step by step
+6. **Final answer** — Output only ہاں or نہیں with the marker جواب:
+
+---
+
+### Experimental Runs
+
+#### XLT v1 — Initial Run
+
+**Settings:**
+- `enable_thinking=False` (XLT provides explicit reasoning; thinking mode disabled)
+- `max_tokens=512`
+- Prompt file: `prompts/xlt_exploratory/strategyqa_xlt1.txt`
+- Output: `outputs/strategyqa/qwen3_14b/xlt_exploratory/strategyqa_xlt_qwen3_14b.jsonl`
+
+**Results:**
+| Metric | Value |
+|---|---|
+| Used items | 2,290 |
+| Answered (ہاں/نہیں) | 1,711 (74.72%) |
+| Accuracy overall | 42.31% |
+| Accuracy answered | 56.63% |
+
+**Failure analysis:**
+Two distinct failure categories were identified:
+
+**Failure 1 — Token truncation (579 pred=None cases):**
+XLT prompts are significantly longer than standard CoT prompts due to the 4-step
+explicit structure. At `max_tokens=512`, the model consistently ran out of generation
+budget before completing Step 4 (final answer). Outputs were cut mid-sentence, never
+reaching the جواب: marker. The answer extractor found no ہاں/نہیں token → pred=None.
+
+Example of truncated output:
+...اگر پولیس کے ارکان قانون کے مطابق گرفتاری کرتے ہیں تو یہ قانونی گرفت
+[TRUNCATED]
+
+**Failure 2 — Factual hallucination during restatement (742 wrong cases):**
+The cross-lingual restatement step (Step 3) triggered confabulation. When asked to
+restate the Urdu question in English, the model frequently hallucinated incorrect facts
+during restatement, and the entire reasoning chain built on that wrong foundation.
+
+Documented hallucination examples:
+- "جنکِس خان ایک معاصر شخصیت ہیں، جو 1980 کی دہائی میں پیدا ہوئے ہیں" — model claimed Genghis Khan was born in the 1980s
+- "ریڈ گلوبو چین کے ایک ٹیلی ویژن چینل کا نام ہے" — Red Globo is Brazilian, not Chinese
+- "Casio ایک معروف ہندوستانی برانڈ ہے" — Casio is Japanese, not Indian
+
+Root cause: StrategyQA requires implicit multi-hop factual knowledge. The restatement
+step forced the model to explicitly verbalize facts it did not reliably know, surfacing
+hallucinations that would otherwise remain hidden in implicit reasoning.
+
+---
+
+#### XLT v2 — Fixed Run
+
+**Changes from v1:**
+1. `max_tokens` increased from 512 → 1024 (fixes truncation)
+2. Prompt redesigned: removed restatement step, replaced with fact identification step
+
+**Revised prompt structure:**
+- Step 1: Task analysis
+- Step 2: Identify required facts (in English)
+- Step 3: Reason step by step (in English)
+- Step 4: Final answer in Urdu (جواب:)
+
+**Settings:**
+- `enable_thinking=False`
+- `max_tokens=1024`
+- Output: `outputs/strategyqa/qwen3_14b/xlt_exploratory/strategyqa_xlt_v2_qwen3_14b.jsonl`
+
+**Results:**
+| Metric | Value |
+|---|---|
+| Used items | 2,290 |
+| Answered (ہاں/نہیں) | 2,208 (96.42%) |
+| Accuracy overall | 58.43% |
+| Accuracy answered | 60.60% |
+
+**Improvement over v1:** Coverage +21.70pp, Accuracy +16.12pp  
+**Gap vs CoT baseline:** −25.46pp (CoT = 83.89%)
+
+Coverage improved significantly confirming token truncation was the primary source
+of pred=None cases. Accuracy improved but remained 25 points below the CoT baseline,
+confirming hallucination in reasoning was a secondary but significant issue.
+
+---
+
+#### XLT v3 — Thinking Mode Enabled
+
+**Hypothesis:** The 25-point gap between XLT and CoT is primarily caused by
+`enable_thinking=False` in XLT vs `enable_thinking=True` in CoT, not by prompt
+structure differences. Enabling thinking mode in XLT should recover the gap.
+
+**Changes from v2:**
+- `enable_thinking=True`
+- `max_tokens=4096`
+- Output: `outputs/strategyqa/qwen3_14b/xlt_exploratory/strategyqa_xlt_v3_qwen3_14b.jsonl`
+
+**Results:**
+| Metric | Value |
+|---|---|
+| Accuracy overall | ~60% |
+
+**Finding:** Enabling thinking mode did not recover the gap. XLT v3 with thinking
+enabled performed similarly to XLT v2 without thinking mode (~60%), confirming
+that the performance gap is not solely attributable to thinking mode configuration.
+The XLT prompt structure itself — by forcing explicit cross-lingual reasoning steps
+in the output — appears to interfere with Qwen3-14B's reasoning process, possibly
+because the model's strongest reasoning occurs in its latent internal space rather
+than in explicit token-by-token output.
+
+---
+
+### Summary Comparison
+
+| Method | Accuracy | Gap vs CoT |
+|---|---|---|
+| CoT baseline (Qwen3-14B) | 83.89% | — |
+| RAG baseline | 56.24% | −27.65pp |
+| XLT v1 (broken) | 42.31% | −41.58pp |
+| XLT v2 (fixed) | 58.43% | −25.46pp |
+| XLT v3 (thinking enabled) | ~60.00% | ~−24pp |
+
+---
+
+### Key Research Findings
+
+**Finding 1 — Token budget is critical for structured prompting:**
+Multi-step explicit prompts (XLT) require significantly more generation tokens than
+standard CoT prompts. Insufficient `max_tokens` causes systematic truncation and
+pred=None failures. Always test with `MAX_EXAMPLES=50` before full runs.
+
+**Finding 2 — Restatement triggers hallucination on factual tasks:**
+For implicit multi-hop reasoning tasks like StrategyQA, asking the model to explicitly
+restate questions surfaces factual errors that remain hidden during implicit reasoning.
+XLT's restatement step is beneficial for tasks with clear factual premises but harmful
+for tasks requiring background world knowledge.
+
+**Finding 3 — Explicit cross-lingual reasoning does not improve over implicit CoT:**
+Qwen3-14B's internal thinking mode (CoT, `enable_thinking=True`) consistently
+outperforms explicit XLT structured prompting across all tested configurations.
+This suggests that for large models with strong internal reasoning capability,
+pivot-language prompting strategies provide no additional benefit and may
+actively interfere with model reasoning.
+
+**Finding 4 — XLT is dataset-dependent:**
+XLT may work better on tasks with clear factual premises (BoolQ, GSM8K) where
+the restatement step does not trigger hallucination. StrategyQA's implicit multi-hop
+nature makes it particularly vulnerable to restatement-induced errors.
+
+---
+
+### Files
+
+| File | Description |
+|---|---|
+| `eval/xlt_exploratory/strategyqa_xlt_qwen3_14b.py` | XLT v1 evaluation script |
+| `prompts/xlt_exploratory/strategyqa_xlt1.txt` | XLT v1 prompt (6-step with restatement) |
+| `eval/logs_archive/xlt_strategyqa_slurm.log` | XLT v1 run log |
+| `eval/logs_archive/xlt_strategyqa_v2_slurm.log` | XLT v2 run log |
+| `outputs/strategyqa/qwen3_14b/xlt_exploratory/strategyqa_xlt_qwen3_14b.jsonl` | XLT v1 outputs |
+| `outputs/strategyqa/qwen3_14b/xlt_exploratory/strategyqa_xlt_v2_qwen3_14b.jsonl` | XLT v2 outputs |
