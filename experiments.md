@@ -2305,3 +2305,91 @@ nature makes it particularly vulnerable to restatement-induced errors.
 | `eval/logs_archive/xlt_strategyqa_v2_slurm.log` | XLT v2 run log |
 | `outputs/strategyqa/qwen3_14b/xlt_exploratory/strategyqa_xlt_qwen3_14b.jsonl` | XLT v1 outputs |
 | `outputs/strategyqa/qwen3_14b/xlt_exploratory/strategyqa_xlt_v2_qwen3_14b.jsonl` | XLT v2 outputs |
+
+
+---
+
+## Alif-1.0-8B-Instruct — CoT Evaluation on URBench
+
+**Model:** Alif-1.0-8B-Merged (LoRA adapter merged into LLaMA-3.1-8B-Instruct base)  
+**Prompt type:** CoT (cot_p1.txt for all datasets)  
+**Thinking mode:** Disabled (LLaMA-based, no thinking mode)  
+**Date:** May 24, 2026  
+
+### Setup Notes
+
+Alif is distributed as a LoRA adapter trained on top of Meta-LLaMA-3.1-8B-Instruct.
+vLLM does not support LoRA adapters with `modules_to_save` set (embedding and LM head
+layers saved separately). The adapter was merged into the base model using PEFT's
+`merge_and_unload()` before evaluation.
+
+Merged model saved at:
+`/mnt/home/user41/downloaded_models/Alif/Alif-1.0-8B-Merged`
+
+A known artifact of the imperfect merge: the model generates repetitive garbage tokens
+("overposting", "ImageSharp", etc.) after the first answer token. Stop tokens
+`["overposting", "\n\n\n"]` were added to SamplingParams to cut generation early.
+
+---
+
+### Results
+
+| Dataset | Total | Answered | Accuracy Overall |
+|---|---|---|---|
+| BoolQ | 1,550 | 1,544 (99.61%) | 71.57% |
+| CSQA | 1,500 | 1,500 (100.00%) | 46.60% |
+| PIQA | 750 | 651 (86.80%) | 44.93% |
+| StrategyQA | 2,290 | 2,184 (95.37%) | 66.94% |
+| GSM8K | 700 | 700 (100.00%) | 55.86% |
+
+### Output Files
+
+| Dataset | Output File |
+|---|---|
+| BoolQ | outputs/boolq/alif_1.0_8b/boolq_cot_alif_1.0_8b.jsonl |
+| CSQA | outputs/csqa/alif_1.0_8b/csqa_cot_alif_1.0_8b.jsonl |
+| PIQA | outputs/piqa/alif_1.0_8b/piqa_cot_alif_1.0_8b.jsonl |
+| StrategyQA | outputs/strategyqa/alif_1.0_8b/strategyqa_cot_alif_1.0_8b.jsonl |
+| GSM8K | outputs/gsm8k/alif_1.0_8b/gsm8k_cot_alif_1.0_8b.jsonl |
+
+---
+
+### Comparison vs Base Model (LLaMA-3.1-8B-Instruct CoT)
+
+| Dataset | LLaMA-3.1-8B CoT | Alif CoT | Change |
+|---|---|---|---|
+| BoolQ | 71.40% | 71.57% | +0.17pp |
+| CSQA | 46.47% | 46.60% | +0.13pp |
+| PIQA | 49.47% | 44.93% | −4.54pp |
+| StrategyQA | 78.17% | 66.94% | −11.23pp |
+| GSM8K | 11.00% | 55.86% | +44.86pp |
+
+---
+
+### Key Findings
+
+**Finding 1 — Task-specific benefit of Urdu fine-tuning:**
+Alif's Urdu instruction tuning produces a large accuracy gain only on GSM8K (+44.86pp),
+where Urdu mathematical reasoning examples in the training data directly transfer.
+On all other datasets the improvement is negligible or negative, indicating that
+general Urdu instruction tuning does not consistently improve reasoning capability
+across task types.
+
+**Finding 2 — Multi-hop reasoning degrades after Urdu fine-tuning:**
+StrategyQA accuracy drops by 11.23pp compared to the base LLaMA-3.1-8B model.
+This suggests Alif's instruction tuning, which emphasizes generation quality and
+cultural alignment, may interfere with the model's implicit factual reasoning chains
+required for multi-hop yes/no questions.
+
+**Finding 3 — General multilingual models outperform Urdu-specialized models:**
+Qwen3-14B CoT outperforms Alif on every single URBench dataset despite being a
+general multilingual model with no Urdu-specific training. This challenges the
+assumption that Urdu-specialized models are necessarily better for Urdu reasoning tasks.
+
+**Finding 4 — Overposting artifact from imperfect LoRA merge:**
+The merged model produces repetitive garbage tokens after the first answer on
+approximately 13% of PIQA examples, reducing coverage to 86.80%. This is a
+technical limitation of merging LoRA adapters with `modules_to_save` and affects
+result reliability for PIQA specifically.
+
+---

@@ -1,19 +1,27 @@
-outputs/
-data/
-*.zip
-*.jsonl
-__pycache__/
-*.pyc
-.env
-downloaded_models/rag/index/
-rag/chunks/
-rag/outputs/
-rag/index/
-rag/index/
-data/
+# Large output files
 outputs/
 *.jsonl
+
+# Large index and model files
+rag/index/
+*.index
+*.faiss
+
+# Logs and error files
 *.log
 *.err
+
+# Python cache
 __pycache__/
 *.pyc
+*.pyo
+
+# Data files (too large)
+data/
+
+# Downloaded models
+downloaded_models/
+
+# Temporary files
+*.tmp
+*.bak
