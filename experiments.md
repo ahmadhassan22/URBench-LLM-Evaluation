@@ -2393,3 +2393,96 @@ technical limitation of merging LoRA adapters with `modules_to_save` and affects
 result reliability for PIQA specifically.
 
 ---
+
+---
+
+## Qalb-1.0-8B-Instruct — CoT Evaluation on URBench
+
+**Model:** Qalb-1.0-8B-Instruct (full merged model, LLaMA-3.1-8B based)
+**Prompt type:** CoT (cot_p1.txt for all datasets)
+**Thinking mode:** Disabled (LLaMA-based)
+**Date:** May 25–26, 2026
+
+### Setup Notes
+
+Qalb is a full safetensors model — no LoRA adapter, no merging required.
+Unlike Alif, it loaded and ran cleanly with vLLM on the first attempt.
+
+Qalb uses a non-standard tokenizer with an incorrect regex pattern (Mistral-derived).
+vLLM warned about this but proceeded normally. No chat_template was set in the
+tokenizer, so prompts were formatted manually using the LLaMA-3.1 format:
+
+<|begin_of_text|><|start_header_id|>system<|end_header_id|>
+You are a helpful assistant.<|eot_id|><|start_header_id|>user<|end_header_id|>
+{prompt}<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+
+A repetition artifact was observed: the model repeats `Answer: X` or `#### N`
+hundreds of times after producing the correct answer. This was investigated across
+multiple stop token configurations. Final stop settings used:
+- StrategyQA: `stop=None` (Urdu output, no repetition issue)
+- BoolQ: `stop=["\n\n\n"]`
+- CSQA: `stop=["\nAnswer:"]`
+- PIQA: `stop=["Answer:"]`
+- GSM8K: `stop=["Answer:"]`
+
+---
+
+### Results
+
+| Dataset | Total | Answered | Accuracy Overall |
+|---|---|---|---|
+| BoolQ | 1,550 | 1,518 (97.94%) | 55.40% |
+| CSQA | 1,500 | 1,500 (100.00%) | 31.20% |
+| PIQA | 750 | 743 (99.07%) | 51.07% |
+| StrategyQA | 2,290 | 2,189 (95.59%) | 72.14% |
+| GSM8K | 700 | 700 (100.00%) | 38.29% |
+
+### Output Files
+
+| Dataset | Output File |
+|---|---|
+| BoolQ | outputs/boolq/qalb_1.0_8b/boolq_cot_qalb_1.0_8b.jsonl |
+| CSQA | outputs/csqa/qalb_1.0_8b/csqa_cot_qalb_1.0_8b.jsonl |
+| PIQA | outputs/piqa/qalb_1.0_8b/piqa_cot_qalb_1.0_8b.jsonl |
+| StrategyQA | outputs/strategyqa/qalb_1.0_8b/strategyqa_cot_qalb_1.0_8b.jsonl |
+| GSM8K | outputs/gsm8k/qalb_1.0_8b/gsm8k_cot_qalb_1.0_8b.jsonl |
+
+---
+
+### Comparison vs Alif and LLaMA-3.1-8B Base
+
+| Dataset | LLaMA-3.1-8B CoT | Alif CoT | Qalb CoT |
+|---|---|---|---|
+| BoolQ | 71.40% | 71.57% | 55.40% |
+| CSQA | 46.47% | 46.60% | 31.20% |
+| PIQA | 49.47% | 44.93% | 51.07% |
+| StrategyQA | 78.17% | 66.94% | 72.14% |
+| GSM8K | 11.00% | 55.86% | 38.29% |
+
+---
+
+### Key Findings
+
+**Finding 1 — Qalb underperforms its base model on most tasks:**
+On BoolQ, CSQA, and StrategyQA, Qalb scores lower than LLaMA-3.1-8B-Instruct
+despite continued Urdu pre-training. Only PIQA shows marginal improvement.
+This is unexpected given the 1.97B token Urdu pre-training corpus.
+
+**Finding 2 — Urdu pre-training does not consistently improve reasoning:**
+Both Alif and Qalb show that Urdu-specific training helps math (GSM8K) but
+hurts or has no effect on multi-hop and commonsense reasoning. This suggests
+the Urdu training data may lack the reasoning-dense content needed to improve
+structured inference tasks.
+
+**Finding 3 — Repetition artifact in Qalb:**
+Qalb produces severe answer repetition after the first correct token. This
+required multiple stop token configurations per dataset. The artifact indicates
+incomplete instruction tuning — the model knows the answer but cannot stop
+generating. This is a known limitation of models with imperfect RLHF alignment.
+
+**Finding 4 — General multilingual models remain superior:**
+Qwen3-14B CoT outperforms Qalb on all 5 datasets. This confirms the pattern
+seen with Alif: general multilingual models with strong instruction tuning
+outperform Urdu-specialized models on structured reasoning tasks in Urdu.
+
+---
