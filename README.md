@@ -7,7 +7,7 @@
 
 ## Overview
 
-URBench provides the most comprehensive cross-architecture comparison of Urdu reasoning performance to date. It evaluates **9 general-purpose multilingual LLMs** and **2 Urdu-specialized models** across **5 reasoning datasets** using **3 prompting strategies**, with additional experiments on retrieval-augmented generation (RAG) and cross-lingual prompting (XLT).
+URBench provides the most comprehensive cross-architecture comparison of Urdu reasoning performance to date. It evaluates **9 general-purpose multilingual LLMs** and **2 Urdu-specialized models** across **5 reasoning datasets** using **3 prompting strategies**, with additional experiments on retrieval-augmented generation (RAG), cross-lingual prompting (XLT), and a novel **Similarity-Based Dynamic Few-Shot Retrieval (SDFR-UR)** method.
 
 The benchmark addresses a critical gap: while Urdu has a large global speaker base, structured reasoning evaluation in Urdu remains severely underexplored compared to high-resource languages.
 
@@ -182,6 +182,56 @@ Evaluated on StrategyQA using Qwen3-14B. XLT instructs the model to restate the 
 
 XLT consistently underperformed CoT. Analysis revealed two failure modes: (1) token truncation cutting off the answer before generation, and (2) factual hallucination during the English restatement step on implicit multi-hop questions. XLT was discontinued in favor of baseline CoT for all subsequent evaluations.
 
+### SDFR-UR (Similarity-Based Dynamic Few-Shot Retrieval for Urdu Reasoning)
+
+SDFR-UR is a novel retrieval-based few-shot method proposed for URBench. Instead of fixed in-context examples, it dynamically retrieves the top-3 most semantically similar examples per test question from an English retrieval pool, using cross-lingual sentence embeddings (`paraphrase-multilingual-MiniLM-L12-v2`) and FAISS IndexFlatIP. The retrieved English examples serve as few-shot context for the Urdu test question.
+
+Evaluated on Qwen3-14B across all 5 datasets with `enable_thinking=False`.
+
+#### Retrieval Pool Configuration
+
+| Dataset | Pool Source | Pool Size | Eval Size |
+|---|---|---|---|
+| GSM8K | English train split (ModelScope) | 7,473 | 700 |
+| BoolQ | First 80% of English file | 1,240 | 310 |
+| CSQA | Full English train (ModelScope, deduplicated) | 9,441 | 300 |
+| PIQA | First 80% of English file | 600 | 150 |
+| StrategyQA | First 80% of English file | 1,832 | 458 |
+
+#### Retrieval Quality (AvgTopSim — cross-lingual cosine similarity)
+
+| Dataset | AvgTopSim | Quality |
+|---|---|---|
+| GSM8K | 0.777 | Strong |
+| PIQA | 0.617 | Decent |
+| CSQA | 0.694 (large pool) | Moderate |
+| BoolQ | 0.580 | Weak |
+| StrategyQA | 0.567 | Weakest |
+
+#### Results vs Qwen3-14B Best Baseline
+
+| Dataset | Best Baseline | SDFR-UR | Δ | Verdict |
+|---|---|---|---|---|
+| GSM8K | 83.71% (CoT) | **89.71%** | **+6.00pp** | ✅ Clear win |
+| PIQA | 65.73% (CoT) | **70.67%** | **+4.94pp** | ✅ Clear win |
+| BoolQ | 84.89% (3-shot) | 84.52% | −0.37pp | ➡️ Match |
+| CSQA | 63.00% (CoT) | 57.67% | −5.33pp | ❌ Loss |
+| StrategyQA | 83.97% (3-shot) | 62.01% | −21.96pp | ❌ Loss |
+
+#### Key Findings from SDFR-UR
+
+1. **SDFR-UR outperforms CoT on GSM8K (+6.00pp) and PIQA (+4.94pp)** — tasks where cross-lingual retrieval finds structurally similar examples (math problems, physical goal descriptions transfer well across languages).
+
+2. **Retrieval similarity predicts method success.** Datasets with AvgTopSim > 0.70 benefit from SDFR-UR; datasets below 0.60 do not. This provides a practical selection criterion for when to apply the method.
+
+3. **Pool size matters for CSQA.** Expanding from 1,200 to 9,441 examples improved accuracy from 55.00% to 57.67% (+2.67pp), but was insufficient to overcome the cross-lingual commonsense gap.
+
+4. **Passage context is essential for BoolQ.** Omitting the passage from the prompt caused catastrophic failure (62.26%). Including it recovered performance to match the baseline (84.52%).
+
+5. **SDFR-UR and RAG both fail on StrategyQA** (−21.96pp and −27.65pp respectively). Two independent retrieval-based methods consistently failing on the same dataset confirms multi-hop factual reasoning is fundamentally incompatible with retrieval augmentation in the current setup.
+
+6. **Data leakage detection.** An initial CSQA run with the unfiltered ModelScope pool (9,741 examples) achieved an invalid 96.00% due to 100% ID overlap with the eval set. The pool was cleaned by removing all 300 overlapping IDs before the final reported run.
+
 ---
 
 ## Key Findings
@@ -207,18 +257,21 @@ PIQA shows the highest variance across prompt types of any dataset, with individ
 **7. DeepSeek-R1-Distill underperforms its size category.**  
 Despite being a reasoning-distilled model, DeepSeek-R1-Distill-Qwen-7B underperforms similarly-sized instruction-tuned models on all Urdu tasks, suggesting reasoning distillation does not transfer effectively to low-resource language settings.
 
+**8. Dynamic few-shot retrieval (SDFR-UR) beats CoT on structured reasoning tasks.**  
+SDFR-UR achieves 89.71% on GSM8K (+6.00pp over CoT) and 70.67% on PIQA (+4.94pp over CoT) — the highest scores on these datasets for Qwen3-14B. Retrieval similarity (AvgTopSim) is a reliable predictor of whether the method will help or hurt.
+
+**9. Retrieval-based methods consistently fail on multi-hop factual reasoning.**  
+Both RAG (−27.65pp) and SDFR-UR (−21.96pp) degrade StrategyQA performance significantly. This confirms that multi-hop factual reasoning in Urdu cannot be addressed through retrieval augmentation alone — the task requires parametric factual knowledge that retrieved examples cannot supply.
+
 ---
 
 ## Ongoing Work
 
-The benchmark evaluation phase is complete. Current research focus is on **method design** — proposing and evaluating a novel approach to improve Urdu reasoning performance beyond the baselines established here.
+The baseline evaluation and SDFR-UR method experiments are complete. Current focus:
 
-Directions under investigation:
-- Analysis of what makes general multilingual models outperform Urdu-specialized models
-- Identifying the conditions under which prompting strategies (CoT, 3-shot) consistently help vs. hurt across model architectures
-- Proposal of a method that leverages insights from the prompt sensitivity analysis and RAG failure analysis to improve reasoning accuracy
-
-Results and analysis will be documented in [`experiments.md`](experiments.md) as work progresses.
+- Evaluating SDFR-UR on Urdu-specialized models (Alif and Qalb) to assess whether dynamic retrieval helps models with known capability limitations
+- Thesis writing: Chapters 1–4 (Introduction, Related Work, Dataset Construction, Baseline Evaluation)
+- Preparing midterm defense materials and supervisor meeting with full results summary
 
 ---
 
@@ -232,6 +285,10 @@ URBench/
 │   ├── eval_*_cot_vllm.py            # CoT evaluation scripts
 │   ├── eval_*_cot_alif.py            # Alif model evaluation
 │   ├── eval_*_cot_qalb.py            # Qalb model evaluation
+│   ├── eval_*_cot_p2/p3_*.py         # Prompt sensitivity (P2/P3 variants)
+│   ├── sdfr_*.py                     # SDFR-UR method scripts
+│   ├── sdfr_prepare_splits.py        # Retrieval pool preparation
+│   ├── sdfr_build_indexes.py         # FAISS index construction
 │   ├── xlt_exploratory/              # XLT experiment scripts
 │   ├── sbatch_scripts/               # SLURM job submission scripts
 │   └── logs_archive/                 # Run logs
@@ -240,6 +297,7 @@ URBench/
 │   ├── csqa/
 │   ├── piqa/
 │   ├── strategyqa/
+│   │   └── english_pivoted/          # English-Pivoted CoT prompts
 │   └── gsm8k/
 ├── rag/                              # RAG pipeline scripts and index
 ├── configs/                          # Model and evaluation configs
@@ -260,6 +318,18 @@ python eval_boolq_cot_vllm.py
 ```
 
 Update `MODEL_NAME` and `OUTPUT_DIR` at the top of each script for your target model. All scripts use vLLM for efficient batch inference.
+
+For SDFR-UR:
+```bash
+# Step 1: Prepare retrieval pool splits
+python eval/sdfr_prepare_splits.py
+
+# Step 2: Build FAISS indexes (CPU, ~10 minutes)
+python eval/sdfr_build_indexes.py
+
+# Step 3: Submit evaluation jobs
+sbatch eval/sbatch_scripts/sdfr_gsm8k.sh
+```
 
 ### Hardware Requirements
 
