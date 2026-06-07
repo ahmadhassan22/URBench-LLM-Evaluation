@@ -2486,3 +2486,289 @@ seen with Alif: general multilingual models with strong instruction tuning
 outperform Urdu-specialized models on structured reasoning tasks in Urdu.
 
 ---
+
+## Prompt Sensitivity Analysis — Urdu-Specialized Models
+
+### BoolQ – Urdu – Alif-1.0-8B-Merged (Prompt Variants)
+
+Model: Alif-1.0-8B-Merged
+Dataset: BoolQ (Urdu)
+Total examples: 1550
+
+#### BoolQ CoT P3
+- Used items: 1550
+- Scored on: 1550 (pred != None)
+- Accuracy: 75.35%
+- Output file: outputs/boolq/alif_1.0_8b/boolq_cot_p3_alif.jsonl
+
+> Note: P3 prompt uses minimal instruction format with `جواب:` marker.
+> Improves over P1 baseline (71.57%) by +3.78pp. Confirms that prompt
+> phrasing meaningfully affects Alif performance on binary reading
+> comprehension even without any model retraining.
+
+---
+
+### BoolQ – Urdu – Qalb-1.0-8B-Instruct (Prompt Variants)
+
+Model: Qalb-1.0-8B-Instruct
+Dataset: BoolQ (Urdu)
+Total examples: 1550
+
+#### BoolQ CoT P3
+- Used items: 1550
+- Scored on: 1464 (pred != None)
+- Accuracy: 70.77%
+- Output file: outputs/boolq/qalb_1.0_8b/boolq_cot_p3_qalb.jsonl
+
+> Note: P3 improves dramatically over P1 baseline (55.40%) by +15.37pp —
+> the largest single improvement across all prompt sensitivity experiments.
+> Coverage drops to 94.5% (1464/1550) indicating some outputs did not
+> produce a clean ہاں/نہیں answer, likely due to longer reasoning chains.
+> Despite coverage loss, overall accuracy improvement is substantial and
+> confirms high prompt sensitivity in Qalb on BoolQ.
+
+---
+
+### CSQA – Urdu – Qalb-1.0-8B-Instruct (Prompt Variants)
+
+Model: Qalb-1.0-8B-Instruct
+Dataset: CSQA (Urdu)
+Total examples: 1500
+
+#### CSQA CoT P3
+- Used items: 1500
+- Answered (A-E): 1500 (100.00%)
+- Accuracy overall: 45.13%
+- Accuracy answered: 45.13%
+- Output file: outputs/csqa/qalb_1.0_8b/csqa_cot_p3_qalb.jsonl
+
+> Note: P3 improves over P1 baseline (31.20%) by +13.93pp with full
+> coverage maintained. This is the second largest improvement in the
+> prompt sensitivity analysis. The extractor was updated to handle the
+> P3 answer marker (بہترین جواب:) which differs from P1 (حتمی جواب:).
+
+---
+
+### GSM8K – Urdu – Qalb-1.0-8B-Instruct (Prompt Variants)
+
+Model: Qalb-1.0-8B-Instruct
+Dataset: GSM8K (Urdu)
+Total examples: 700
+
+#### GSM8K CoT P2
+- Used items: 700
+- Answered (numeric): 700 (100.00%)
+- Accuracy overall: 42.86%
+- Accuracy answered: 42.86%
+- Output file: outputs/gsm8k/qalb_1.0_8b/gsm8k_cot_p2_qalb.jsonl
+
+> Note: P2 improves over P1 baseline (38.29%) by +4.57pp with full
+> coverage. max_tokens was increased to 2048 for P2 and P3 Qalb GSM8K
+> scripts to prevent repetition loops observed during 50-example testing.
+
+#### GSM8K CoT P3
+- Used items: 700
+- Answered (numeric): 700 (100.00%)
+- Accuracy overall: 44.86%
+- Accuracy answered: 44.86%
+- Output file: outputs/gsm8k/qalb_1.0_8b/gsm8k_cot_p3_qalb.jsonl
+
+> Note: P3 improves over P1 baseline (38.29%) by +6.57pp — the stronger
+> of the two alternative prompts for Qalb GSM8K. Full coverage maintained
+> with 2048 max_tokens. Best prompt variant for Qalb on mathematical
+> reasoning in Urdu.
+
+---
+
+## Prompt Sensitivity Analysis — Summary and Key Findings
+
+### Sensitivity comparison: Qwen3-14B vs Urdu-specialized models (std across P1/P2/P3)
+
+| Dataset | Prompt type | Qwen3-14B std | Qalb std | Alif std |
+|---|---|---|---|---|
+| BoolQ | CoT | ±0.37% | ±9.45% | ±1.98% |
+| CSQA | CoT | ±4.67% | ±6.33% | ±6.97% |
+| GSM8K | CoT | ±8.09% | ±2.79% | ±9.38% |
+| PIQA | CoT | unreliable | ±3.84% | ±11.10% |
+| StrategyQA | Zero-shot | ±0.34% | ±4.41% | ±1.36% |
+
+### Key findings
+
+> Finding 1: Binary classification tasks (BoolQ) reveal the largest
+> sensitivity gap between model types. Qalb shows 25x higher prompt
+> sensitivity than Qwen3-14B on BoolQ CoT (±9.45% vs ±0.37%),
+> indicating that Urdu instruction tuning creates brittle instruction-
+> following patterns for binary reading comprehension tasks.
+
+> Finding 2: Mathematical reasoning (GSM8K CoT) shows high sensitivity
+> in all model types — Qwen3-14B ±8.09%, Alif ±9.38%, Qalb ±2.79%.
+> This identifies GSM8K-Urdu as an unstable evaluation target across
+> all architectures, not specific to Urdu-specialized models.
+
+> Finding 3: Physical commonsense reasoning (PIQA) is the most prompt-
+> sensitive dataset in URBench. Qwen3-14B itself reaches ±7.47% on
+> PIQA 3-shot — the highest 3-shot sensitivity in the entire study —
+> suggesting PIQA-Urdu evaluation is inherently sensitive regardless
+> of model type.
+
+> Finding 4: Optimal prompt direction differs between model types.
+> For Qwen3-14B, P1 (structured CoT) is best on reasoning tasks.
+> For Qalb, P3 (simpler direct prompts) recovers performance on
+> classification tasks. This asymmetry suggests prompt design for
+> Urdu should be model-architecture-aware.
+
+> Finding 5: Prompt optimization recovers meaningful performance for
+> Urdu-specialized models — up to +15.37pp for Qalb on BoolQ and
+> +13.93pp on CSQA — without any model retraining. However, this
+> does not close the gap with general multilingual models, which
+> remain 13-38pp ahead depending on dataset.
+
+### Conclusion
+
+> Prompt sensitivity is a significant and underreported confound in
+> Urdu reasoning evaluation. Results from any single prompt should
+> be interpreted with caution, particularly for Urdu-specialized
+> models on binary classification tasks and for all models on
+> mathematical reasoning. A robust Urdu reasoning evaluation should
+> report mean and std across multiple prompt variants rather than
+> single-prompt accuracy.
+---
+
+## SDFR-UR – Similarity-Based Dynamic Few-Shot Retrieval for Urdu Reasoning
+Method: SDFR-UR (Similarity-Based Dynamic Few-Shot Retrieval for Urdu Reasoning)
+Model: Qwen3-14B
+Datasets: BoolQ, CSQA, GSM8K, PIQA, StrategyQA
+Description: Instead of fixed few-shot examples, retrieves top-3 semantically
+similar examples per test question from a retrieval pool using
+paraphrase-multilingual-MiniLM-L12-v2 embeddings and FAISS IndexFlatIP.
+Retrieval is cross-lingual (English pool → Urdu test questions).
+
+### Retrieval Pool Details
+| Dataset     | Pool Source                          | Pool Size | Eval Size |
+|-------------|--------------------------------------|-----------|-----------|
+| GSM8K       | English train split (ModelScope)     | 7,473     | 700       |
+| BoolQ       | First 80% of English file            | 1,240     | 310       |
+| CSQA        | Full English train (ModelScope)      | 9,441*    | 300       |
+| PIQA        | First 80% of English file            | 600       | 150       |
+| StrategyQA  | First 80% of English file            | 1,832     | 458       |
+
+*CSQA large pool: 9,741 downloaded from opencompass/commonsense_qa via ModelScope,
+300 overlapping IDs removed to ensure zero eval contamination → 9,441 clean examples.
+
+### Retrieval Similarity Analysis (AvgTopSim, cross-lingual)
+| Dataset     | Small Pool | Large Pool | Threshold >0.75 |
+|-------------|------------|------------|-----------------|
+| GSM8K       | 0.777      | —          | strong          |
+| PIQA        | 0.617      | —          | decent          |
+| BoolQ       | 0.580      | —          | weak            |
+| CSQA        | 0.599      | 0.694      | 21% above 0.75  |
+| StrategyQA  | 0.567      | —          | weakest         |
+
+### SDFR-UR Results vs Qwen3-14B Baselines
+
+#### GSM8K
+- Eval examples:    700
+- Correct:          628/700
+- Accuracy:         89.71%
+- Best baseline:    83.71% (CoT, enable_thinking=True)
+- Δ vs baseline:    +6.00pp
+- Output file:      outputs/sdfr/sdfr_gsm8k_qwen3_14b.jsonl
+
+> Note: SDFR-UR achieves the highest GSM8K accuracy across all evaluated
+> methods (89.71%), surpassing CoT with thinking mode enabled (83.71%) by
+> +6.00pp. High retrieval similarity (0.777) confirms cross-lingual embeddings
+> reliably match Urdu math questions to structurally similar English examples.
+> This is the strongest result of the SDFR-UR method.
+
+#### PIQA
+- Eval examples:    150
+- Correct:          106/150
+- Accuracy:         70.67%
+- Best baseline:    65.73% (CoT, enable_thinking=True)
+- Δ vs baseline:    +4.94pp
+- Output file:      outputs/sdfr/sdfr_piqa_qwen3_14b.jsonl
+
+> Note: SDFR-UR achieves 70.67% on PIQA, surpassing the best baseline CoT
+> (65.73%) by +4.94pp. Physical commonsense goal descriptions transfer well
+> across languages, enabling useful retrieval (AvgTopSim=0.617).
+
+#### BoolQ
+- Eval examples:    310
+- Correct:          262/310
+- Accuracy:         84.52%
+- Best baseline:    84.89% (3-shot, enable_thinking=False)
+- Δ vs baseline:    −0.37pp
+- Output file:      outputs/sdfr/sdfr_boolq_qwen3_14b.jsonl
+
+> Note: SDFR-UR matches the best BoolQ baseline within a negligible margin
+> (84.52% vs 84.89%, difference of 1 example on 310-item eval set). The
+> initial run without passage context scored 62.26% — confirming that passage
+> inclusion is essential for reading comprehension tasks. After fixing the
+> prompt to include the passage in both few-shot examples and the eval prompt,
+> performance recovered to match the baseline. Retrieval similarity is moderate
+> (0.580), limiting further gains.
+
+#### CSQA (Large Clean Pool)
+- Eval examples:    300
+- Correct:          173/300
+- Accuracy:         57.67%
+- Best baseline:    63.00% (CoT, enable_thinking=True)
+- Δ vs baseline:    −5.33pp
+- Pool:             9,441 examples (zero overlap verified)
+- Output file:      outputs/sdfr/sdfr_csqa_large_clean_qwen3_14b.jsonl
+
+> Note: SDFR-UR with small pool (1,200 examples) scored 55.00%. Upgrading
+> to the large clean pool (9,441 examples) improved to 57.67% (+2.67pp),
+> confirming pool size matters. However, SDFR-UR still falls below CoT
+> (63.00%) by 5.33pp. Root causes identified: (1) cross-lingual mismatch
+> between English pool answer choices and Urdu eval choices confuses the
+> model; (2) CSQA commonsense knowledge is culturally grounded — English
+> examples do not reliably transfer to Urdu cultural reasoning contexts;
+> (3) only 21% of eval questions achieve retrieval similarity above 0.75,
+> meaning most retrieved examples are mediocre matches. CoT with thinking
+> mode leverages the model's full parametric commonsense knowledge, which
+> outperforms retrieved examples for this task type.
+> Important: An earlier run with the leaky large pool (9,741 examples with
+> 100% ID overlap with eval set) produced an invalid 96% accuracy — this
+> result was discarded and the pool was cleaned before the final run.
+
+#### StrategyQA
+- Eval examples:    458
+- Correct:          284/458
+- Accuracy:         62.01%
+- Best baseline:    83.97% (3-shot, enable_thinking=False)
+- Δ vs baseline:    −21.96pp
+- Output file:      outputs/sdfr/sdfr_strategyqa_qwen3_14b.jsonl
+
+> Note: SDFR-UR performs significantly below baseline on StrategyQA
+> (−21.96pp). StrategyQA requires multi-hop factual reasoning — retrieved
+> examples provide structurally similar yes/no questions but cannot supply
+> the specific factual chains needed to answer each question. Retrieval
+> similarity is the lowest of all datasets (0.567), with MinTopSim=0.399
+> indicating some questions find essentially no useful match in the pool.
+> This finding is consistent with the earlier RAG experiment on StrategyQA
+> (−27.65pp vs baseline), where two independent retrieval-based methods
+> both fail on multi-hop factual reasoning. This confirms retrieval
+> augmentation is fundamentally mismatched with this task type.
+
+### Summary Table
+| Dataset     | Best Baseline      | SDFR-UR | Δ        | Verdict      |
+|-------------|--------------------|---------|----------|--------------|
+| GSM8K       | 83.71% (CoT)       | 89.71%  | +6.00pp  | ✅ Clear win  |
+| PIQA        | 65.73% (CoT)       | 70.67%  | +4.94pp  | ✅ Clear win  |
+| BoolQ       | 84.89% (3-shot)    | 84.52%  | −0.37pp  | ➡️ Match      |
+| CSQA        | 63.00% (CoT)       | 57.67%  | −5.33pp  | ❌ Loss       |
+| StrategyQA  | 83.97% (3-shot)    | 62.01%  | −21.96pp | ❌ Loss       |
+
+### Key Findings
+1. SDFR-UR works when retrieval similarity is high (>0.75) and the task
+   is structurally pattern-matchable across languages (math, physical reasoning).
+2. SDFR-UR fails when tasks require factual knowledge chains (StrategyQA)
+   or culturally grounded commonsense (CSQA) that English examples cannot supply.
+3. Pool size matters for CSQA: 1,200 → 9,441 examples improved accuracy
+   by +2.67pp, but was insufficient to overcome the cross-lingual mismatch.
+4. Reading comprehension tasks (BoolQ) require passage context in the prompt —
+   omitting it causes catastrophic failure (62.26% without passage vs 84.52% with).
+5. Retrieval-based methods (both RAG and SDFR-UR) consistently underperform
+   on StrategyQA, confirming multi-hop factual reasoning is incompatible with
+   retrieval augmentation in the current setup.
