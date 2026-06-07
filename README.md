@@ -193,7 +193,7 @@ Evaluated on Qwen3-14B across all 5 datasets with `enable_thinking=False`.
 | Dataset | Pool Source | Pool Size | Eval Size |
 |---|---|---|---|
 | GSM8K | English train split (ModelScope) | 7,473 | 700 |
-| BoolQ | First 80% of English file | 1,240 | 310 |
+| BoolQ | google/boolq via ModelScope (passage-based) | 7,877 | 310 |
 | CSQA | Full English train (ModelScope, deduplicated) | 9,441 | 300 |
 | PIQA | First 80% of English file | 600 | 150 |
 | StrategyQA | First 80% of English file | 1,832 | 458 |
@@ -205,7 +205,7 @@ Evaluated on Qwen3-14B across all 5 datasets with `enable_thinking=False`.
 | GSM8K | 0.777 | Strong |
 | PIQA | 0.617 | Decent |
 | CSQA | 0.694 (large pool) | Moderate |
-| BoolQ | 0.580 | Weak |
+| BoolQ | 0.611 (large pool, passage-based) | Moderate |
 | StrategyQA | 0.567 | Weakest |
 
 #### Results vs Qwen3-14B Best Baseline
@@ -214,7 +214,7 @@ Evaluated on Qwen3-14B across all 5 datasets with `enable_thinking=False`.
 |---|---|---|---|---|
 | GSM8K | 83.71% (CoT) | **89.71%** | **+6.00pp** | ✅ Clear win |
 | PIQA | 65.73% (CoT) | **70.67%** | **+4.94pp** | ✅ Clear win |
-| BoolQ | 84.89% (3-shot) | 84.52% | −0.37pp | ➡️ Match |
+| BoolQ | 84.89% (3-shot) | 85.48% | +0.59pp | ✅ Win |
 | CSQA | 63.00% (CoT) | 57.67% | −5.33pp | ❌ Loss |
 | StrategyQA | 83.97% (3-shot) | 62.01% | −21.96pp | ❌ Loss |
 
@@ -226,7 +226,7 @@ Evaluated on Qwen3-14B across all 5 datasets with `enable_thinking=False`.
 
 3. **Pool size matters for CSQA.** Expanding from 1,200 to 9,441 examples improved accuracy from 55.00% to 57.67% (+2.67pp), but was insufficient to overcome the cross-lingual commonsense gap.
 
-4. **Passage context is essential for BoolQ.** Omitting the passage from the prompt caused catastrophic failure (62.26%). Including it recovered performance to match the baseline (84.52%).
+4. **Passage context and retrieval strategy are both critical for BoolQ.** Omitting the passage caused catastrophic failure (62.26%). Switching from question-based to passage-based retrieval with a larger pool (7,877 examples) pushed accuracy to 85.48% (+0.59pp over baseline).
 
 5. **SDFR-UR and RAG both fail on StrategyQA** (−21.96pp and −27.65pp respectively). Two independent retrieval-based methods consistently failing on the same dataset confirms multi-hop factual reasoning is fundamentally incompatible with retrieval augmentation in the current setup.
 
@@ -258,7 +258,7 @@ PIQA shows the highest variance across prompt types of any dataset, with individ
 Despite being a reasoning-distilled model, DeepSeek-R1-Distill-Qwen-7B underperforms similarly-sized instruction-tuned models on all Urdu tasks, suggesting reasoning distillation does not transfer effectively to low-resource language settings.
 
 **8. Dynamic few-shot retrieval (SDFR-UR) beats CoT on structured reasoning tasks.**  
-SDFR-UR achieves 89.71% on GSM8K (+6.00pp over CoT) and 70.67% on PIQA (+4.94pp over CoT) — the highest scores on these datasets for Qwen3-14B. Retrieval similarity (AvgTopSim) is a reliable predictor of whether the method will help or hurt.
+SDFR-UR achieves 89.71% on GSM8K (+6.00pp over CoT), 70.67% on PIQA (+4.94pp over CoT), and 85.48% on BoolQ (+0.59pp over baseline). Retrieval similarity (AvgTopSim) is a reliable predictor of method success. For reading comprehension tasks, passage-based retrieval outperforms question-based retrieval.
 
 **9. Retrieval-based methods consistently fail on multi-hop factual reasoning.**  
 Both RAG (−27.65pp) and SDFR-UR (−21.96pp) degrade StrategyQA performance significantly. This confirms that multi-hop factual reasoning in Urdu cannot be addressed through retrieval augmentation alone — the task requires parametric factual knowledge that retrieved examples cannot supply.
