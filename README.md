@@ -218,6 +218,27 @@ Evaluated on Qwen3-14B across all 5 datasets with `enable_thinking=False`.
 | CSQA | 63.00% (CoT) | 57.67% | −5.33pp | ❌ Loss |
 | StrategyQA | 83.97% (3-shot) | 62.01% | −21.96pp | ❌ Loss |
 
+#### SDFR-UR Results — Urdu-Specialized Models (GSM8K, PIQA, BoolQ only)
+
+Evaluated on the 3 datasets where SDFR-UR showed wins on Qwen3-14B.
+Context-hints format used instead of full few-shot demonstrations to reduce model confusion.
+
+**Alif-1.0-8B-Instruct**
+
+| Dataset | Alif CoT Baseline | SDFR-UR | Δ | Verdict |
+|---|---|---|---|---|
+| GSM8K | 55.86% | **64.29%** | **+8.43pp** | ✅ Win |
+| PIQA | 44.93% | 45.33% | +0.40pp | ➡️ Match |
+| BoolQ | 71.57% | 67.74% | −3.83pp | ❌ Loss |
+
+**Qalb-1.0-8B-Instruct**
+
+| Dataset | Qalb CoT Baseline | SDFR-UR | Δ | Verdict |
+|---|---|---|---|---|
+| GSM8K | 38.29% | **43.86%** | **+5.57pp** | ✅ Win |
+| PIQA | 51.07% | **52.00%** | **+0.93pp** | ✅ Win |
+| BoolQ | 55.40% | **65.48%** | **+10.08pp** | ✅ Win |
+
 #### Key Findings from SDFR-UR
 
 1. **SDFR-UR outperforms CoT on GSM8K (+6.00pp) and PIQA (+4.94pp)** — tasks where cross-lingual retrieval finds structurally similar examples (math problems, physical goal descriptions transfer well across languages).
@@ -263,13 +284,16 @@ SDFR-UR achieves 89.71% on GSM8K (+6.00pp over CoT), 70.67% on PIQA (+4.94pp ove
 **9. Retrieval-based methods consistently fail on multi-hop factual reasoning.**  
 Both RAG (−27.65pp) and SDFR-UR (−21.96pp) degrade StrategyQA performance significantly. This confirms that multi-hop factual reasoning in Urdu cannot be addressed through retrieval augmentation alone — the task requires parametric factual knowledge that retrieved examples cannot supply.
 
+**10. SDFR-UR helps Urdu-specialized models most on mathematical reasoning.**  
+Across all 3 models (Qwen3-14B, Alif, Qalb), GSM8K consistently benefits from dynamic retrieval (+5.57pp to +8.43pp). Qalb benefits more than Alif overall (avg +5.53pp vs +1.67pp), likely because Qalb's continued pre-training gives it stronger Urdu generation. Prompt engineering complexity scales inversely with model capability — Qwen3-14B required no special handling while Alif and Qalb required multiple prompt versions and extractor fixes.
+
 ---
 
 ## Ongoing Work
 
 The baseline evaluation and SDFR-UR method experiments are complete. Current focus:
 
-- Evaluating SDFR-UR on Urdu-specialized models (Alif and Qalb) to assess whether dynamic retrieval helps models with known capability limitations
+- SDFR-UR evaluated on Urdu-specialized models (Alif and Qalb) — complete
 - Thesis writing: Chapters 1–4 (Introduction, Related Work, Dataset Construction, Baseline Evaluation)
 - Preparing midterm defense materials and supervisor meeting with full results summary
 
