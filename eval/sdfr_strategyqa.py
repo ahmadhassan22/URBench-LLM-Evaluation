@@ -35,14 +35,15 @@ def format_example(item):
 
 def retrieve(embedder, index, pool, query_text, k=TOP_K):
     vec = embedder.encode([query_text], normalize_embeddings=True, convert_to_numpy=True)
-    _, ids = index.search(vec, k)
-    return [pool[i] for i in ids[0]]
+    scores, ids = index.search(vec, k)
+    return [pool[i] for i in ids[0]], scores[0]
 
 if __name__ == "__main__":
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
     pool      = read_jsonl(f"{SPLITS}/strategyqa_pool.jsonl")
     eval_data = read_jsonl(f"{SPLITS}/strategyqa_eval.jsonl")
+    if os.environ.get("TEST50"): eval_data = eval_data[:50]
     print(f"Pool: {len(pool)} | Eval: {len(eval_data)}")
 
     print("Loading FAISS index...")
@@ -61,8 +62,13 @@ if __name__ == "__main__":
 
     print("Building prompts with dynamic retrieval...")
     prompts = []
+    retrieved_log = []
     for item in eval_data:
-        neighbors  = retrieve(embedder, index, pool, item["question"], TOP_K)
+        neighbors, sims = retrieve(embedder, index, pool, item["question"], TOP_K)
+        retrieved_log.append([
+            {"q": n["question"],
+             "a": n.get("answer", n.get("expected_answer")),
+             "sim": float(s)} for n, s in zip(neighbors, sims)])
         few_shot   = "\n\n".join(format_example(n) for n in neighbors)
         system     = "آپ ایک سوال جواب کا نظام ہیں۔ ہر سوال کا جواب صرف 'ہاں' یا 'نہیں' میں دیں۔"
         raw_prompt = f"{system}\n\n{few_shot}\n\nسوال: {item['question']}\nجواب:"
@@ -87,7 +93,8 @@ if __name__ == "__main__":
         if is_correct: correct += 1
         results.append({"qid": item.get("qid", f"SQA_{i:04d}"),
                         "question": item["question"], "gold": gold,
-                        "pred": pred, "correct": is_correct, "generated": generated})
+                        "pred": pred, "correct": is_correct, "generated": generated,
+                        "retrieved": retrieved_log[i]})
         if (i + 1) % 50 == 0:
             with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
                 for r in results: f.write(json.dumps(r, ensure_ascii=False) + "\n")

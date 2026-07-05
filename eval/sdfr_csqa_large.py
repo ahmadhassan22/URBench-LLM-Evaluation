@@ -34,14 +34,15 @@ def format_example(item):
 def retrieve(embedder, index, pool, query_text, k=TOP_K):
     vec = embedder.encode([query_text], normalize_embeddings=True,
                           convert_to_numpy=True)
-    _, ids = index.search(vec, k)
-    return [pool[i] for i in ids[0]]
+    scores, ids = index.search(vec, k)
+    return [pool[i] for i in ids[0]], scores[0]
 
 if __name__ == "__main__":
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
     pool      = read_jsonl(f"{SPLITS}/csqa_pool_large_clean.jsonl")
     eval_data = read_jsonl(f"{SPLITS}/csqa_eval.jsonl")
+    if os.environ.get("TEST50"): eval_data = eval_data[:50]
     print(f"Pool: {len(pool)} | Eval: {len(eval_data)}")
 
     print("Loading FAISS index (large clean)...")
@@ -60,8 +61,13 @@ if __name__ == "__main__":
 
     print("Building prompts...")
     prompts = []
+    retrieved_log = []
     for item in eval_data:
-        neighbors  = retrieve(embedder, index, pool, item["question"], TOP_K)
+        neighbors, sims = retrieve(embedder, index, pool, item["question"], TOP_K)
+        retrieved_log.append([
+            {"q": n["question"],
+             "a": n.get("answerKey"),
+             "sim": float(s)} for n, s in zip(neighbors, sims)])
         few_shot   = "\n\n".join(format_example(n) for n in neighbors)
         choices    = item["choices"]
         opts       = "\n".join(f"{l}. {t}" for l, t in
@@ -96,6 +102,7 @@ if __name__ == "__main__":
             "pred":      pred,
             "correct":   is_correct,
             "generated": generated,
+            "retrieved": retrieved_log[i],
         })
         if (i + 1) % 50 == 0:
             with open(OUTPUT_FILE, "w", encoding="utf-8") as f:

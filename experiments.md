@@ -2666,7 +2666,7 @@ Retrieval is cross-lingual (English pool → Urdu test questions).
 
 ### SDFR-UR Results vs Qwen3-14B Baselines
 
-#### GSM8K
+#### GSM8K — ⚠️ ORIGINAL COMPARISON CONFOUNDED, SEE FAIR RE-EVAL BELOW
 - Eval examples:    700
 - Correct:          628/700
 - Accuracy:         89.71%
@@ -2674,13 +2674,14 @@ Retrieval is cross-lingual (English pool → Urdu test questions).
 - Δ vs baseline:    +6.00pp
 - Output file:      outputs/sdfr/sdfr_gsm8k_qwen3_14b.jsonl
 
-> Note: SDFR-UR achieves the highest GSM8K accuracy across all evaluated
-> methods (89.71%), surpassing CoT with thinking mode enabled (83.71%) by
-> +6.00pp. High retrieval similarity (0.777) confirms cross-lingual embeddings
-> reliably match Urdu math questions to structurally similar English examples.
-> This is the strongest result of the SDFR-UR method.
+> ⚠️ CONFOUND IDENTIFIED (2026-07-05). This SDFR run used enable_thinking=False,
+> max_tokens=512, and an answer-only prompt (no CoT instruction), while the
+> 83.71% CoT baseline it was compared to used enable_thinking=True. The two
+> runs solve different tasks under different token budgets. The comparison is
+> not same-regime. See "FAIR RE-EVALUATION — GSM8K" below for the corrected,
+> same-regime result. This entry is kept for historical record only.
 
-#### PIQA
+#### PIQA — ⚠️ ORIGINAL COMPARISON CONFOUNDED, SEE FAIR RE-EVAL BELOW
 - Eval examples:    150
 - Correct:          106/150
 - Accuracy:         70.67%
@@ -2688,9 +2689,12 @@ Retrieval is cross-lingual (English pool → Urdu test questions).
 - Δ vs baseline:    +4.94pp
 - Output file:      outputs/sdfr/sdfr_piqa_qwen3_14b.jsonl
 
-> Note: SDFR-UR achieves 70.67% on PIQA, surpassing the best baseline CoT
-> (65.73%) by +4.94pp. Physical commonsense goal descriptions transfer well
-> across languages, enabling useful retrieval (AvgTopSim=0.617).
+> ⚠️ CONFOUND IDENTIFIED (2026-07-05). This SDFR run used enable_thinking=False
+> and an answer-only prompt, compared against a baseline that also ran on 750
+> items (not the 150-item eval split SDFR used) with enable_thinking=True and
+> 31% truncation. Not a same-regime, same-eval-set comparison. See "FAIR
+> RE-EVALUATION — PIQA" below for the corrected result on the matched 150-item
+> eval split. This entry is kept for historical record only.
 
 #### BoolQ
 - Eval examples:    310
@@ -2707,8 +2711,13 @@ Retrieval is cross-lingual (English pool → Urdu test questions).
 > prompt to include the passage in both few-shot examples and the eval prompt,
 > performance recovered to match the baseline. Retrieval similarity is moderate
 > (0.580), limiting further gains.
+> Status: not re-checked for a thinking-mode regime confound this session —
+> both baseline (3-shot, enable_thinking=False) and SDFR (enable_thinking=False,
+> per method description) appear same-regime on inspection, but this has not
+> been independently re-verified against the same diff process used for
+> GSM8K/PIQA/CSQA. Treat as provisionally fair pending explicit re-check.
 
-#### CSQA (Large Clean Pool)
+#### CSQA (Large Clean Pool) — ⚠️ ORIGINAL COMPARISON CONFOUNDED, SEE FAIR RE-EVAL BELOW
 - Eval examples:    300
 - Correct:          173/300
 - Accuracy:         57.67%
@@ -2717,61 +2726,169 @@ Retrieval is cross-lingual (English pool → Urdu test questions).
 - Pool:             9,441 examples (zero overlap verified)
 - Output file:      outputs/sdfr/sdfr_csqa_large_clean_qwen3_14b.jsonl
 
-> Note: SDFR-UR with small pool (1,200 examples) scored 55.00%. Upgrading
-> to the large clean pool (9,441 examples) improved to 57.67% (+2.67pp),
-> confirming pool size matters. However, SDFR-UR still falls below CoT
-> (63.00%) by 5.33pp. Root causes identified: (1) cross-lingual mismatch
-> between English pool answer choices and Urdu eval choices confuses the
-> model; (2) CSQA commonsense knowledge is culturally grounded — English
-> examples do not reliably transfer to Urdu cultural reasoning contexts;
-> (3) only 21% of eval questions achieve retrieval similarity above 0.75,
-> meaning most retrieved examples are mediocre matches. CoT with thinking
-> mode leverages the model's full parametric commonsense knowledge, which
-> outperforms retrieved examples for this task type.
-> Important: An earlier run with the leaky large pool (9,741 examples with
-> 100% ID overlap with eval set) produced an invalid 96% accuracy — this
-> result was discarded and the pool was cleaned before the final run.
+> ⚠️ CONFOUND IDENTIFIED (2026-07-05). This SDFR run used enable_thinking=False,
+> max_tokens=8, and an answer-only prompt, while the 63.00% CoT baseline it was
+> compared to used enable_thinking=True. Additionally, the 63.00% baseline
+> itself was later found to be invalid: it was computed on the full 1500-item
+> train file (not the 300-item eval split) at max_tokens=128, with 32% of
+> outputs truncated before reaching the answer marker (true accuracy on the
+> non-truncated subset of that run was 78.18%). The three "root causes"
+> (cross-lingual mismatch / cultural grounding / low similarity) listed below
+> were guesses made before this confound was found and are RETRACTED — see
+> "FAIR RE-EVALUATION — CSQA" below for the corrected, same-regime,
+> same-eval-set result. This entry (and the root-cause guesses in the note
+> that originally followed it) is kept for historical record only.
 
 #### StrategyQA
 - Eval examples:    458
 - Correct:          284/458
 - Accuracy:         62.01%
-- Best baseline:    83.97% (3-shot, enable_thinking=False)
-- Δ vs baseline:    −21.96pp
+- Compared-to:      83.97% (3-shot, enable_thinking=False)
+- Δ as reported:    −21.96pp  ⚠️ CONFOUNDED — see note
 - Output file:      outputs/sdfr/sdfr_strategyqa_qwen3_14b.jsonl
 
-> Note: SDFR-UR performs significantly below baseline on StrategyQA
-> (−21.96pp). StrategyQA requires multi-hop factual reasoning — retrieved
-> examples provide structurally similar yes/no questions but cannot supply
-> the specific factual chains needed to answer each question. Retrieval
-> similarity is the lowest of all datasets (0.567), with MinTopSim=0.399
-> indicating some questions find essentially no useful match in the pool.
-> This finding is consistent with the earlier RAG experiment on StrategyQA
-> (−27.65pp vs baseline), where two independent retrieval-based methods
-> both fail on multi-hop factual reasoning. This confirms retrieval
-> augmentation is fundamentally mismatched with this task type.
+> ⚠️ INVALID COMPARISON — CONFOUND IDENTIFIED (2026-07-05).
+> The −21.96pp gap is NOT a retrieval effect. It is an artifact of an
+> unequal comparison: every StrategyQA baseline (zero-shot, 3-shot, CoT)
+> feeds the model the question's gold `facts` in the prompt, while SDFR-UR
+> received no facts at all. The two prompts solve different tasks —
+> "answer given the facts" vs "answer with no facts."
+>
+> Diagnostic proof: re-running SDFR-UR with the eval question's facts added
+> (retrieval otherwise unchanged) raised accuracy from 62.01% → 80.00% on
+> a test50 subset. The ~18pp gap was missing facts, not retrieval quality.
+>
+> This invalidates the earlier "multi-hop retrieval mismatch" explanation,
+> and the four retrieval-quality signals tested (similarity, label-
+> agreement, fact-coverage, flip-analysis) all showed no separation between
+> correct and incorrect cases — consistent with retrieval not being the
+> driver. StrategyQA is therefore REMOVED from the sign-flip claim pending
+> a fair (facts-matched) re-evaluation.
+>
+> Note: gold facts are not available at real inference, so "add facts" is a
+> diagnostic, not a deployable method.
+
+---
+
+### FAIR RE-EVALUATION — Same-Regime Comparisons (2026-07-05)
+
+> **Why this section exists:** The original SDFR-UR vs baseline comparisons
+> above for GSM8K, PIQA, and CSQA were found to be confounded — SDFR and its
+> baseline differed not only in retrieved demos but also in `enable_thinking`,
+> `max_tokens`, prompt wording, and/or eval-set size. Per the project rule
+> ("nothing is reportable until same-regime"), each was re-run so that SDFR
+> and baseline are IDENTICAL on: enable_thinking, max_tokens, prompt wording,
+> and answer parsing — the ONLY difference being retrieved demos (SDFR) vs
+> none (baseline). All three below are same-regime, same-eval-set, Qwen3-14B.
+
+#### GSM8K — FAIR
+- Eval set: 700 items (data/sdfr_splits/gsm8k_eval.jsonl), thinking ON, max_tokens=2048
+- Baseline-fair (CoT, no demos): 621/700 = **88.71%**
+- SDFR-fair (CoT + retrieved demos): 678/700 = **96.86%**
+- Δ vs baseline: **+8.15pp** (raw, full 700)
+- Zero-truncation floor (649/700 items where NEITHER side truncated `</think>`):
+  BASE 94.30% vs SDFR 99.38%, Δ = **+5.08pp**
+- Scripts: eval/error_analysis_tests/cot_gsm8k_baseline_fair.py,
+  eval/error_analysis_tests/sdfr_gsm8k_fair.py
+- Output: outputs/sdfr/cot_gsm8k_baseline_fair_qwen3_14b.jsonl,
+  outputs/sdfr/sdfr_gsm8k_fair_qwen3_14b.jsonl
+
+> Note: CONFIRMED FAIR WIN. The fair Δ (+8.15pp raw / +5.08pp at the
+> zero-truncation floor) is LARGER than the original confounded +6.00pp,
+> because the original SDFR run was handicapped (thinking off, answer-only,
+> 512 tokens) yet still beat the baseline. Under matched conditions the true
+> effect is bigger, not smaller. At max_tokens=1024 (an intermediate check),
+> baseline truncated 90/700 and SDFR truncated 38/700 — truncation was
+> asymmetric and inflating the raw Δ; raising both to max_tokens=2048 reduced
+> truncation to 37/700 (baseline) and 24/700 (SDFR) and is the reported
+> configuration above. Honest reporting range: +5pp (clean) to +8pp (raw).
+> Watch item: SDFR's 99.38% on the zero-truncation subset is very high and
+> merits a future parsing sanity check, though no error was found in this pass.
+
+#### PIQA — FAIR
+- Eval set: 150 items (data/sdfr_splits/piqa_eval.jsonl), thinking ON, max_tokens=2048
+- Baseline-fair (CoT, no demos): 108/150 = **72.00%**
+- SDFR-fair (CoT + retrieved demos): 116/150 = **77.33%**
+- Δ vs baseline: **+5.33pp**
+- Truncation: BASE 1/150, SDFR 0/150 (negligible, not a confound here)
+- Scripts: eval/error_analysis_tests/cot_piqa_baseline_fair.py,
+  eval/error_analysis_tests/sdfr_piqa_fair.py
+- Output: outputs/sdfr/cot_piqa_baseline_fair_qwen3_14b.jsonl,
+  outputs/sdfr/sdfr_piqa_fair_qwen3_14b.jsonl
+
+> Note: CONFIRMED FAIR WIN, but with a mechanism caveat. Gold labels on this
+> eval set are balanced (77×"1", 73×"0"), yet BOTH baseline (109×"1"/41×"0")
+> and SDFR (89×"1"/61×"0") over-predict label "1" — a prompt-format bias
+> (0-vs-1 ordering / sol1-sol2 mapping), not something introduced by
+> retrieval. Retrieved demos are themselves label-balanced (75/75, confirmed
+> by inspection), so SDFR is not copying a biased demo distribution — it is
+> partially CORRECTING the shared prompt bias relative to baseline. The
+> +5.33pp is real, but the honest framing is "retrieval mitigates a
+> label-order bias in this 2-choice format," not "retrieval improves
+> physical-commonsense reasoning" outright. The underlying prompt bias
+> (both models lean "1") is a known limitation, not yet fixed.
+
+#### CSQA — FAIR
+- Eval set: 300 items (data/sdfr_splits/csqa_eval.jsonl), thinking ON, max_tokens=1024
+- Baseline-fair (CoT, no demos): 190/300 = **63.33%**
+- SDFR-fair (CoT + retrieved demos): 183/300 = **61.00%**
+- Δ vs baseline: **−2.33pp**
+- Truncation/parsing: 0 empty predictions, 0 truncated `</think>` on either side
+- Scripts: eval/error_analysis_tests/cot_csqa_baseline_fair.py,
+  eval/error_analysis_tests/sdfr_csqa_thinking.py
+- Output: outputs/sdfr/cot_csqa_baseline_fair_qwen3_14b.jsonl,
+  outputs/sdfr/sdfr_csqa_thinking_qwen3_14b.jsonl
+
+> Note: Finding = **parity-to-slight-deficit, NOT a win.** The original
+> −5.33pp "hurt" shrank to −2.33pp once the thinking/prompt/token-budget
+> confound was removed, but a small deficit survives. This is a real,
+> reportable result, distinct from an artifact. A 50-item test run had shown
+> SDFR at 64% vs baseline 63% (near-parity) — this was small-n noise; the
+> full 300-item run is the number to trust. Leading hypothesis for the
+> residual deficit (not yet tested): CSQA's retrieved demos are answer-only
+> (no reasoning shown), which may suppress the model's own chain-of-thought
+> relative to the demo-free baseline. Worth testing before concluding CSQA
+> is a genuine SDFR weakness rather than a demo-format issue.
 
 ### Summary Table
-| Dataset     | Best Baseline      | SDFR-UR | Δ        | Verdict      |
-|-------------|--------------------|---------|----------|--------------|
-| GSM8K       | 83.71% (CoT)       | 89.71%  | +6.00pp  | ✅ Clear win  |
-| PIQA        | 65.73% (CoT)       | 70.67%  | +4.94pp  | ✅ Clear win  |
-| BoolQ       | 84.89% (3-shot)    | 84.52%  | −0.37pp  | ➡️ Match      |
-| CSQA        | 63.00% (CoT)       | 57.67%  | −5.33pp  | ❌ Loss       |
-| StrategyQA  | 83.97% (3-shot)    | 62.01%  | −21.96pp | ❌ Loss       |
+| Dataset     | Best Baseline      | SDFR-UR | Δ        | Verdict      | Regime status |
+|-------------|--------------------|---------|----------|--------------|----------------|
+| GSM8K       | 88.71% (CoT-fair)  | 96.86%  | +8.15pp  | ✅ Confirmed fair win (+5.08pp at zero-truncation floor) | Fair, same-regime |
+| PIQA        | 72.00% (CoT-fair)  | 77.33%  | +5.33pp  | ✅ Confirmed fair win (mechanism: label-bias correction) | Fair, same-regime |
+| BoolQ       | 84.89% (3-shot)    | 84.52%  | −0.37pp  | ➡️ Match      | Provisionally fair, not re-checked this session |
+| CSQA        | 63.33% (CoT-fair)  | 61.00%  | −2.33pp  | ❌ Slight loss (parity-to-deficit, not the old −5.33pp) | Fair, same-regime |
+| StrategyQA  | 83.97% (3-shot)    | 62.01%  | −21.96pp | ❌ CONFOUNDED (missing facts) — not a retrieval effect | Invalid, pending facts-matched re-eval |
+
+> The GSM8K/PIQA/CSQA rows above supersede the original (confounded) entries
+> earlier in this section, which are retained above only as a historical
+> record of what was actually run and why it was invalid.
 
 ### Key Findings
-1. SDFR-UR works when retrieval similarity is high (>0.75) and the task
-   is structurally pattern-matchable across languages (math, physical reasoning).
-2. SDFR-UR fails when tasks require factual knowledge chains (StrategyQA)
-   or culturally grounded commonsense (CSQA) that English examples cannot supply.
-3. Pool size matters for CSQA: 1,200 → 9,441 examples improved accuracy
-   by +2.67pp, but was insufficient to overcome the cross-lingual mismatch.
-4. Reading comprehension tasks (BoolQ) require passage context in the prompt —
-   omitting it causes catastrophic failure (62.26% without passage vs 84.52% with).
-5. Retrieval-based methods (both RAG and SDFR-UR) consistently underperform
-   on StrategyQA, confirming multi-hop factual reasoning is incompatible with
-   retrieval augmentation in the current setup.
+1. Under fair, same-regime conditions, SDFR-UR shows a genuine positive
+   effect on GSM8K (+5 to +8pp) and PIQA (+5.33pp), confirming that dynamic
+   cross-lingual retrieval helps mathematical and physical-commonsense
+   reasoning in Urdu even when both sides get equal thinking budget and an
+   equal prompt.
+2. On CSQA, SDFR-UR does not help under fair conditions — the corrected
+   result is a small deficit (−2.33pp), down from a previously reported
+   −5.33pp that was largely a thinking-mode and token-truncation artifact.
+   Whether the residual −2.33pp reflects a genuine cross-lingual/cultural
+   commonsense limitation or an answer-only-demo formatting issue is not
+   yet determined.
+3. PIQA's fair win is partly explained by a shared prompt-format bias
+   (both models over-predict label "1") that SDFR's balanced retrieved
+   demos partially correct — the win is real but the mechanism is narrower
+   than "better physical reasoning."
+4. StrategyQA's reported −21.96pp remains confounded (baselines receive
+   gold facts, SDFR does not) and is excluded from any fair-regime claim
+   pending a facts-matched re-evaluation.
+5. BoolQ's approximate parity (−0.37pp) has not yet been re-verified with
+   the same explicit thinking-mode/truncation diff process applied to the
+   other four datasets this session; treat as provisional.
+6. Token budget is a recurring, easy-to-miss confound: GSM8K's baseline
+   accuracy moved from 83.57% → 88.71% purely from raising max_tokens
+   1024 → 2048, with no other change. Always confirm neither side is
+   truncating before trusting a same-regime Δ.
 
 ---
 
@@ -2933,6 +3050,14 @@ not full few-shot demonstrations) — reduces model confusion on smaller models.
 | Qwen3-14B | +6.00pp ✅ | +4.94pp ✅ | +0.59pp ✅ | +3.84pp |
 | Alif-1.0-8B | +8.43pp ✅ | +0.40pp ➡️ | −3.83pp ❌ | +1.67pp |
 | Qalb-1.0-8B | +5.57pp ✅ | +0.93pp ✅ | +10.08pp ✅ | +5.53pp |
+
+> Note: The Qwen3-14B row above reflects the ORIGINAL (confounded)
+> GSM8K/PIQA comparison, not the fair re-evaluation. See "FAIR
+> RE-EVALUATION" section above for corrected Qwen3-14B GSM8K/PIQA deltas
+> (+8.15pp / +5.33pp respectively). Alif and Qalb rows have not been
+> re-checked for the same thinking-mode/token-budget confound this
+> session and should be treated as unverified pending the same fair-regime
+> diff process.
 
 ### Key Findings — Urdu-Specialized Models
 
