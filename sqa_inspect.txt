@@ -1,0 +1,241 @@
+===== 10 CORRECT =====
+
+Q     : کیا کوئی شخص جو صرف انگریزی جانتا ہے کانجی پڑھ سکتا ہے؟
+GOLD  : نہیں   PRED: نہیں   (CORRECT)
+RETRIEVED:
+   [0.593] a=نہیں | Is Cantonese spoken in Japan?
+   [0.512] a=نہیں | Did Pedubastis I know Japanese people?
+   [0.507] a=نہیں | Is the Gujarati script the same category of script as Kanji?
+THINK (last 500): ...ng Kanji requires knowledge of the characters themselves, their meanings, and their pronunciations (which can be in Japanese, like on'yomi or kun'yomi). Since the person doesn't know Japanese or any other language that uses Kanji, they wouldn't recognize the characters or their meanings. They might be able to look at the symbols and maybe guess based on shape, but that's not actual reading. Without prior knowledge of the language and the script, they can't read Kanji. So the answer should be no.
+FINAL : نہیں
+
+----------------------------------------------------------------------
+
+Q     : کیا والٹ ڈزنی اپنے خاکے دور رہنے والے لوگوں کو ای میل کر سکتے تھے؟
+GOLD  : نہیں   PRED: نہیں   (CORRECT)
+RETRIEVED:
+   [0.598] a=نہیں | Did Hamlet's author use email?
+   [0.558] a=نہیں | Did Douglas Adams use email as a child?
+   [0.535] a=نہیں | Could Steven Spielberg send emails as a child?
+THINK (last 500): ...ctive. Walt Disney was born in 1901 and passed away in 1966. Email, as we know it today, didn't exist back then. The first email systems were developed in the 1960s and 1970s, but they were very primitive and not widely used. Even if Walt Disney had access to such technology, which is unlikely given the time, the question also mentions "people who were out of town." Even if he could send emails, the infrastructure for email communication wasn't available in the 1900s. So, the answer would be no.
+FINAL : نہیں
+
+----------------------------------------------------------------------
+
+Q     : کیا ہارنٹ سمندری ماہرین کے لیے معنی خیز معلومات فراہم کرتے ہیں؟
+GOLD  : نہیں   PRED: نہیں   (CORRECT)
+RETRIEVED:
+   [0.55] a=نہیں | Can a lifeboat rescue people in the Hooke Sea?
+   [0.543] a=ہاں | Are pirate lieutenants like navy lieutenants?
+   [0.489] a=نہیں | Could all People's Volunteer Army hypothetically be transported on Symphony of the Seas?
+THINK (last 500): ...not standard equipment, then they might not provide meaningful information.
+
+Alternatively, if "Horns" refers to natural features, like underwater structures or geological formations, they could be studied for their impact on marine ecosystems. But without more context, it's hard to say. However, given the previous answers where the user sometimes expects a "No" when the answer isn't directly obvious, and considering that "Horns" isn't a standard term in marine science, the answer might be "No."
+FINAL : نہیں
+
+----------------------------------------------------------------------
+
+Q     : کیا کووڈ-19 سمندری پائلٹس میں پھیل سکتا ہے؟
+GOLD  : ہاں   PRED: ہاں   (CORRECT)
+RETRIEVED:
+   [0.493] a=نہیں | Could a Hwasong-15 missile hypothetically reach Voyager 2?
+   [0.479] a=نہیں | Can a lifeboat rescue people in the Hooke Sea?
+   [0.471] a=نہیں | Can a sniper shoot a fish past Bathypelagic Zone in ocean?
+THINK (last 500): ...the user is considering that maritime pilots are not in close contact? No, they do interact with others. So the answer should be "Yes." But the user's previous answers were "No," so maybe they expect "No" again. However, logically, the answer is "Yes." I need to make sure. The question is whether the virus can spread among them, not if it's likely. Since the virus spreads through human contact, and maritime pilots interact with others, the answer is "Yes." Therefore, the correct answer is "Yes."
+FINAL : ہاں
+
+----------------------------------------------------------------------
+
+Q     : کیا ویلور قلعے کے باشندوں کو گرزلی ریچھوں سے اپنی حفاظت کرنی پڑی؟
+GOLD  : نہیں   PRED: نہیں   (CORRECT)
+RETRIEVED:
+   [0.596] a=نہیں | Can you hunt Iberian wolves in the Southern United States?
+   [0.591] a=نہیں | Would it be wise to bring a robusto into Central Park Zoo?
+   [0.583] a=ہاں | Does the land in close proximity to beaver dams suffer?
+THINK (last 500): ...should check if there's any historical context where grizzly bears might have been present. But historically, grizzly bears were not in Europe. The closest bear species in Europe are brown bears, which are different from grizzly bears. Even if there were brown bears, the question specifically mentions grizzly bears. Therefore, the answer would be no, because grizzly bears aren't native to the area where Valour Castle is located. The residents wouldn't have needed to protect themselves from them.
+FINAL : نہیں
+
+----------------------------------------------------------------------
+
+Q     : کیا ایک گلیڈی ایٹر نے اپنے مخالف کو شاٹ گن سے مارا تھا؟
+GOLD  : نہیں   PRED: نہیں   (CORRECT)
+RETRIEVED:
+   [0.599] a=نہیں | Was dynamite used during Middle Ages warfare?
+   [0.598] a=ہاں | Did Robert Downey Jr. possess same caliber gun as Resident Evil's Barry Burton?
+   [0.575] a=نہیں | Was a nuclear bomb used in the Napoleonic Wars?
+THINK (last 500): ...ble. They didn't have access to gunpowder weapons because that technology hadn't been developed yet.
+
+Additionally, the term "shot gun" refers to a specific type of firearm that fires multiple pellets. Even if we consider the possibility of any firearm being used in ancient times, the gladiators' era predates that by several centuries. Therefore, it's impossible for a gladiator to have used a shot gun in combat. The answer should be "No" because the technology wasn't available during their time.
+FINAL : نہیں
+
+----------------------------------------------------------------------
+
+Q     : کیا 2020 میں ہاتھی کا حمل اگلے سال سے زیادہ عرصہ چلے گا جس میں 4 شمسی گرہن ہوں گے؟
+GOLD  : نہیں   PRED: نہیں   (CORRECT)
+RETRIEVED:
+   [0.541] a=نہیں | Are months based on the solar cycle?
+   [0.493] a=نہیں | Hypothetically, will an African elephant be crushed by Hulk on its back?
+   [0.48] a=نہیں | Was the Parc des Princes fully operational during June of 2020?
+THINK (last 500): ...r. But the duration of an elephant's pregnancy isn't related to the number of solar eclipses. The question seems to be mixing unrelated facts. The pregnancy duration is a biological fact, while solar eclipses are astronomical events. There's no connection between the two. So the answer is no because the pregnancy duration isn't influenced by solar eclipses, and the number of eclipses in 2021 doesn't affect the pregnancy length. The user might be confusing the two concepts, but they are separate.
+FINAL : نہیں
+
+----------------------------------------------------------------------
+
+Q     : کیا ایسپریسو خوف کو کم کرنے کا امکان رکھتا ہے؟
+GOLD  : نہیں   PRED: نہیں   (CORRECT)
+RETRIEVED:
+   [0.56] a=نہیں | Could someone in a coma experience fear?
+   [0.549] a=نہیں | Would an anxious person benefit from receiving courage from the Wizard of Oz?
+   [0.477] a=نہیں | Does Post Malone have a fear of needles?
+THINK (last 500): ...nxiety disorders. It might not reduce fear but could potentially increase it. On the other hand, in controlled situations, caffeine might help with performance under stress by improving focus, but that's different from reducing fear itself.
+
+The question is about whether espresso has the potential to reduce fear. Based on the physiological effects, it's more likely that caffeine could either have no effect or even increase anxiety. Therefore, the answer would be no, espresso doesn't reduce fear.
+FINAL : نہیں
+
+----------------------------------------------------------------------
+
+Q     : کیا برننگ مین میں لوگ عام سے زیادہ دھوپ میں جلنے کا شکار ہوتے ہیں؟
+GOLD  : ہاں   PRED: ہاں   (CORRECT)
+RETRIEVED:
+   [0.493] a=نہیں | Do the Eskimos sunbathe frequently?
+   [0.491] a=ہاں | Can a copy of The Daily Mirror sustain a campfire?
+   [0.489] a=ہاں | Would it be impossible to get to Burning Man on the Mayflower?
+THINK (last 500): ...ommunity, and endurance, it's possible that sun protection isn't a top priority for everyone. Also, the desert's reflective surfaces (like sand) can increase UV exposure, leading to more severe sunburns.
+
+So putting it all together: the environment of Burning Man (desert, summer, minimal shade) combined with the activities that require being outdoors for extended periods would result in people there getting sunburned more frequently than the average person. Therefore, the answer should be "Yes."
+FINAL : ہاں
+
+----------------------------------------------------------------------
+
+Q     : کیا راہول دراوڑ نے کبھی فیلڈ گول مارا؟
+GOLD  : نہیں   PRED: نہیں   (CORRECT)
+RETRIEVED:
+   [0.519] a=نہیں | Did Sugar Ray Robinson win a fight against Canelo Alvarez?
+   [0.517] a=ہاں | Was Krishna skilled at using the bow?
+   [0.516] a=ہاں | Could a Bengal cat hypothetically best Javier Sotomayor's record?
+THINK (last 500): ...r is confusing cricket terms with another sport, like football (soccer), where a goal is scored. However, Rahul Dravid is a well-known cricketer, not a footballer. So, the question might be based on a misunderstanding. In cricket, players don't score goals; they score runs. Dravid was a batsman and a wicket-keeper, so he might have taken catches or run-outs, but not goals. Therefore, the answer should be "No" because the term doesn't apply to cricket, and he didn't score any goals in his career.
+FINAL : نہیں
+
+----------------------------------------------------------------------
+
+
+===== 10 WRONG =====
+
+Q     : کیا امریکی 2018 کی جی ڈی پی دکھانے کے لیے تین کامے کافی ہوں گے؟
+GOLD  : نہیں   PRED: ہاں   (WRONG)
+RETRIEVED:
+   [0.48] a=نہیں | Can 1980 United States presidential election result be considered a photo finish?
+   [0.445] a=ہاں | Would a broadcast from Spirit make the news in 2020?
+   [0.426] a=ہاں | Is unanimously elected president's birthday a break for mail carriers?
+THINK (last 500): ...s correct with three commas. However, sometimes people might use a different notation, like using a decimal point for trillions, such as $20.5 trillion, which would be 20.5 followed by 12 zeros. But in that case, the commas would still be used in the full number. So, if you're writing out the full number with commas as thousand separators, three commas are needed for the trillions, billions, millions, and thousands places. Therefore, three commas are sufficient to properly format the GDP figure.
+FINAL : ہاں
+
+----------------------------------------------------------------------
+
+Q     : کیا کیتھرین ہیپ برن ایر ٹرین جے ایف کے پر سفر کر سکتی تھیں؟
+GOLD  : نہیں   PRED: ہاں   (WRONG)
+RETRIEVED:
+   [0.579] a=نہیں | Can you get a ride on Amtrak to the Underworld?
+   [0.542] a=نہیں | Did Marco Polo travel with Christopher Columbus?
+   [0.54] a=ہاں | Could Oscar Wilde have operated a motor vehicle?
+THINK (last 500): ...AirTrain opened. So technically, yes, she could have taken the AirTrain JFK if she was at the airport around that time. But maybe the question is more about whether it was possible during her lifetime. Since the AirTrain existed during her lifetime, even if only for a short time, the answer would be yes. But I need to confirm the dates again. Yes, she died in June 2003, and the AirTrain opened in June 2003. So she could have used it if she was there after June 18th. Therefore, the answer is yes.
+FINAL : ہاں
+
+----------------------------------------------------------------------
+
+Q     : کیا عظیم کساد بازاری بے روزگاری کی سب سے شدید مدت تھی؟
+GOLD  : نہیں   PRED: ہاں   (WRONG)
+RETRIEVED:
+   [0.565] a=نہیں | Could all the unemployed people due to 1933 Great Depression fit in Tiger Stadium?
+   [0.46] a=نہیں | Was the Carnation Revolution the deadliest revolution in Europe?
+   [0.455] a=ہاں | Was there fear leading up to the year 2000?
+THINK (last 500): ...r to the first question was "no," which might be because the number of unemployed people in 1933 was around 15 million in the US, and Tiger Stadium's capacity is about 100,000, so they couldn't all fit. But the current question is about the severity, not the number. So the answer is yes, the Great Depression was the worst period of unemployment. But I need to confirm if there's a period with higher unemployment rates. If the answer is no, then the answer is "no." But I think the answer is "yes."
+FINAL : ہاں
+
+----------------------------------------------------------------------
+
+Q     : کرسماس کے موقع پر، کیا کچھ فلمیں ہمیں یاد دلاتی ہیں کہ گراؤنڈہاگ ڈے قریب آ رہا ہے؟
+GOLD  : ہاں   PRED: نہیں   (WRONG)
+RETRIEVED:
+   [0.549] a=ہاں | Would New Year's Eve hypothetically be Bacchus's favorite holiday?
+   [0.54] a=ہاں | Were some people afraid of New Years Day coming in 1999?
+   [0.531] a=ہاں | Are there multiple American government holidays during winter?
+THINK (last 500): ...e that Groundhog Day is coming. Since Groundhog Day is in February, which is after Christmas, maybe some movies released around Christmas time might have references to Groundhog Day? However, I don't recall any Christmas movies that specifically mention or reference Groundhog Day. The "Groundhog Day" movie itself isn't a Christmas film. So the answer would be no, because Christmas movies don't typically remind people of Groundhog Day. They are separate events with different themes and timelines.
+FINAL : نہیں
+
+----------------------------------------------------------------------
+
+Q     : کیا مائیکل فیلپس موتی کی تلاش میں ماہر ہوں گے؟
+GOLD  : ہاں   PRED: نہیں   (WRONG)
+RETRIEVED:
+   [0.555] a=نہیں | Is Michael an unpopular name in the United States?
+   [0.537] a=نہیں | Was the son of Tsar Nicholas a daredevil?
+   [0.536] a=نہیں | Does Robert De Niro use a microscope at work?
+THINK (last 500): ... can recognize that the person mentioned is not associated with the activity in question. For example, Michael being an unpopular name, the son of Tsar Nicholas being a daredevil, and Robert De Niro using a microscope. All those answers were "No" because the individuals aren't known for those activities.
+
+Applying the same logic here, Michael Phelps isn't known for pearl hunting. There's no evidence or common knowledge suggesting he's involved in that field. Therefore, the answer should be "No."
+FINAL : نہیں
+
+----------------------------------------------------------------------
+
+Q     : کیا 500 جی بی یو ایس بی ڈیوائس روزانہ 10 گھنٹے نیٹ فلکس شو محفوظ کرنے کے لیے کافی ہے؟
+GOLD  : نہیں   PRED: ہاں   (WRONG)
+RETRIEVED:
+   [0.608] a=ہاں | Can Centurylink max internet plan upload 1000GB in a fortnight?
+   [0.579] a=نہیں | Is a thousand dollars per Days of Our Lives episodes preferred to other soaps?
+   [0.485] a=ہاں | Could one Amazon share ever buy twenty year Netflix subscription?
+THINK (last 500): ...atching 10 hours a day, the storage required would depend on how many days they want to store. However, the question is a bit ambiguous. But given the examples, the previous answers were "ہاں" and "نہیں" based on the data. Since 30 GB per day is under 500GB, the answer would be "ہاں". But if the user is asking about storing 10 hours of shows for a fortnight (14 days), then 30*14=420 GB, which is under 500. But the original question doesn't mention a fortnight, only daily. So the answer is "ہاں".
+FINAL : ہاں
+
+----------------------------------------------------------------------
+
+Q     : کیا بی کو عربی عدد کے طور پر غلط سمجھا جا سکتا ہے؟
+GOLD  : ہاں   PRED: نہیں   (WRONG)
+RETRIEVED:
+   [0.493] a=نہیں | Can binary numbers and standard alphabet satisfy criteria for a strong password?
+   [0.45] a=نہیں | Would early Eastern Canadian Natives language have use of the letter B?
+   [0.437] a=نہیں | Would an actuary be confused about what prime numbers are?
+THINK (last 500): ...ot the Arabic letter "ب". The Latin "B" isn't a numeral in Arabic. So, unless there's a specific context where "B" is used to represent a number in Arabic, which I don't think is standard, the answer would be no. Therefore, the answer is "No" because the letter "B" in the Latin alphabet isn't used as an Arabic numeral. However, if the question is about the Arabic letter "ب" being confused with a numeral, then yes, but the question specifically mentions "B", which is Latin. So the answer is "No".
+FINAL : نہیں
+
+----------------------------------------------------------------------
+
+Q     : کیا ایمانویل کانٹ بلیک لائیوز میٹر تحریک سے نفرت کرتے؟
+GOLD  : ہاں   PRED: نہیں   (WRONG)
+RETRIEVED:
+   [0.528] a=نہیں | Would Tom Cruise ever insult L. Ron Hubbard?
+   [0.516] a=نہیں | Does Nicole Kidman despise Roman Josi?
+   [0.515] a=ہاں | Would Terence Tao outperform Eminem in a math competition?
+THINK (last 500): ...ng related to race, civil rights, or contemporary social justice issues like BLM. 
+
+Additionally, Kant's views on race were problematic by today's standards. He believed in the inherent superiority of the white race and had racist views, which might lead some to think he'd oppose BLM. However, the movement itself is a modern phenomenon, so it's impossible for Kant to have hated it. The answer must be "No" because he couldn't have had any feelings towards a movement that didn't exist in his time.
+FINAL : نہیں
+
+----------------------------------------------------------------------
+
+Q     : کیا آپ اکثر پانی کے قریب مارکو پولو کا نام پکارا سنتے ہیں؟
+GOLD  : ہاں   PRED: نہیں   (WRONG)
+RETRIEVED:
+   [0.452] a=نہیں | Did Zorro carve his name into items regularly?
+   [0.45] a=ہاں | Is there a Harry Potter character named after Florence?
+   [0.45] a=ہاں | Has Nikola Tesla's name inspired multiple brands?
+THINK (last 500): ...tradition where his name is used near water. But I don't recall any such common practice. The name itself doesn't inherently relate to water, unlike names like "Nile" or "River." 
+
+Also, thinking about the previous questions, the user might be testing if I recognize specific associations. Since Marco Polo's name isn't typically linked to water in common usage, the answer would be no. Unless there's a specific context I'm missing, like a brand or a place, but generally, no. So the answer is "No."
+FINAL : نہیں
+
+----------------------------------------------------------------------
+
+Q     : کیا جولیو گونزالیز کو ایسیٹیلین پسند تھا؟
+GOLD  : ہاں   PRED: نہیں   (WRONG)
+RETRIEVED:
+   [0.637] a=ہاں | Did Rumi spend his time in a state of euphoria?
+   [0.608] a=نہیں | Did Zorro carve his name into items regularly?
+   [0.587] a=نہیں | Did Beethoven enjoy listening to EDM?
+THINK (last 500): ...ce he worked with metals, it's possible he might have used acetylene in his work, but "enjoy" implies a personal preference. There's no evidence suggesting he had a particular fondness for acetylene beyond its practical use. Most sources mention his techniques and collaborations, like with Picasso, but not his personal preferences regarding materials like acetylene. 
+
+Therefore, the answer is likely "No" because there's no indication he enjoyed it, just that he might have used it professionally.
+FINAL : نہیں
+
+----------------------------------------------------------------------
+

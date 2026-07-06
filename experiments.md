@@ -1201,6 +1201,18 @@ Total examples: 2290
 > models, surpassing Qwen3-8B CoT (85.97%) and Qwen2.5-14B-AWQ CoT
 > (76.72%). Overall accuracy (83.89%) matches zero-shot, confirming that
 > thinking mode trades coverage for higher per-answer precision.
+>
+> IMPORTANT NOTE (added 2026-07-07): This 83.89%/86.96% result was produced
+> by a general eval script that was edited in-place for each model swap
+> across the whole session; the script file itself has since been overwritten
+> to reflect the LAST model run on it (Llama-3.1-70B-AWQ) and no longer
+> represents the Qwen3-14B configuration used here. This output file
+> (strategyqa_cot_qwen3_14b.jsonl) is the sole ground truth for the
+> Qwen3-14B CoT prompt/regime: thinking ON, facts included in-prompt via
+> `{facts}`/`{question}` template (prompts/strategyqa/cot.txt). See the
+> new "StrategyQA — FAIR (No-Facts)" block under FAIR RE-EVALUATION below,
+> which strips facts from this exact prompt structure for an honest,
+> inference-realistic baseline.
 
 ## StrategyQA – Urdu – Meta-Llama-3.1-8B-Instruct
 
@@ -2110,6 +2122,17 @@ RAG reduced StrategyQA accuracy by 27.65 percentage points (83.89% → 56.24%). 
 
 This confirms that for Urdu multi-hop reasoning, corpus coverage and retrieval quality are the primary bottlenecks, not model capability. The finding highlights a critical gap in Urdu NLP infrastructure: sparse Wikipedia coverage and entity disambiguation challenges constrain RAG effectiveness in low-resource language settings.
 
+> Note (added 2026-07-07, unverified — flag for future session): The fair
+> no-facts StrategyQA diagnostic (see FAIR RE-EVALUATION below) found that
+> plain demo retrieval in SDFR is itself weak (40% of rows have top-1
+> similarity < 0.55) and that the model heavily label-copies from retrieved
+> demos rather than using them as knowledge. This raises an open question,
+> not yet investigated, about whether this RAG error analysis (entity
+> disambiguation / partial retrieval / coverage gap) fully explains the
+> −27.65pp drop, or whether part of it shares a similar mechanism-level
+> confound to what was found in SDFR. Not re-analyzed this session — flagged
+> for a future error-analysis pass, not concluded either way.
+
 ### Output File
 - rag/outputs/rag_strategyqa_qwen3_14b_final.jsonl
 
@@ -2739,7 +2762,7 @@ Retrieval is cross-lingual (English pool → Urdu test questions).
 > same-eval-set result. This entry (and the root-cause guesses in the note
 > that originally followed it) is kept for historical record only.
 
-#### StrategyQA
+#### StrategyQA — ⚠️ ORIGINAL COMPARISON CONFOUNDED, SEE FAIR RE-EVAL BELOW
 - Eval examples:    458
 - Correct:          284/458
 - Accuracy:         62.01%
@@ -2767,19 +2790,27 @@ Retrieval is cross-lingual (English pool → Urdu test questions).
 >
 > Note: gold facts are not available at real inference, so "add facts" is a
 > diagnostic, not a deployable method.
+>
+> ⚠️ UPDATE (2026-07-07): The facts-matched fair re-evaluation has now been
+> completed. See "StrategyQA — FAIR (No-Facts)" under FAIR RE-EVALUATION
+> below. This entry is kept for historical record only.
 
 ---
 
-### FAIR RE-EVALUATION — Same-Regime Comparisons (2026-07-05)
+### FAIR RE-EVALUATION — Same-Regime Comparisons (2026-07-05 / 2026-07-07)
 
 > **Why this section exists:** The original SDFR-UR vs baseline comparisons
-> above for GSM8K, PIQA, and CSQA were found to be confounded — SDFR and its
-> baseline differed not only in retrieved demos but also in `enable_thinking`,
-> `max_tokens`, prompt wording, and/or eval-set size. Per the project rule
-> ("nothing is reportable until same-regime"), each was re-run so that SDFR
-> and baseline are IDENTICAL on: enable_thinking, max_tokens, prompt wording,
+> above for GSM8K, PIQA, CSQA, and StrategyQA were found to be confounded —
+> SDFR and its baseline differed not only in retrieved demos but also in
+> `enable_thinking`, `max_tokens`, prompt wording, and/or eval-set size (and,
+> for StrategyQA, presence of gold `facts`). Per the project rule ("nothing
+> is reportable until same-regime"), each was re-run so that SDFR and
+> baseline are IDENTICAL on: enable_thinking, max_tokens, prompt wording,
 > and answer parsing — the ONLY difference being retrieved demos (SDFR) vs
-> none (baseline). All three below are same-regime, same-eval-set, Qwen3-14B.
+> none (baseline). GSM8K/PIQA/CSQA/BoolQ below are same-regime, same-eval-set,
+> Qwen3-14B. StrategyQA below is same-regime and same-eval-set, with `facts`
+> removed from BOTH sides to reflect real inference conditions (gold facts
+> are not available at deployment).
 
 #### GSM8K — FAIR
 - Eval set: 700 items (data/sdfr_splits/gsm8k_eval.jsonl), thinking ON, max_tokens=2048
@@ -2860,6 +2891,78 @@ Retrieval is cross-lingual (English pool → Urdu test questions).
   BoolQ 3-shot is stable across sizes. No rerun needed.
 - Output: outputs/sdfr/sdfr_boolq_large_passage_qwen3_14b.jsonl
 
+#### StrategyQA — FAIR (No-Facts) (added 2026-07-07)
+- Eval set: 458 items (data/sdfr_splits/strategyqa_eval.jsonl), thinking ON,
+  max_tokens=2048, `facts` field REMOVED from both the demonstration block
+  and the instruction lines that referenced it (not just the fact-bullet
+  block — the instruction text itself was rewritten to no longer say
+  "reason based on the facts given," since leaving that phrasing in with no
+  facts present would have produced an incoherent, unfairly hard prompt).
+  This matches real inference conditions, where gold facts are not available.
+- Baseline-fair (CoT, no demos, no facts): 300/458 = **65.50%** (Answered
+  457/458 = 99.8%, AnsAcc 65.65%, 2 truncated)
+- SDFR-fair (CoT + retrieved demos, no facts): 318/458 = **69.43%** (Answered
+  458/458 = 100.0%, 0 truncated)
+- Δ vs baseline: **+3.93pp**
+- Scripts: eval/error_analysis_tests/cot_strategyqa_nofacts_baseline_fair.py,
+  eval/error_analysis_tests/sdfr_strategyqa_fair.py
+- Output: outputs/sdfr/cot_strategyqa_nofacts_baseline_fair_qwen3_14b.jsonl,
+  outputs/sdfr/sdfr_strategyqa_fair_qwen3_14b.jsonl
+
+> ⚠️ NOT A REASONING WIN — mechanism-confounded, verified by direct output
+> inspection (20 hand-read cases + full-458 quantitative diagnostic on both
+> output files). The +3.93pp is real on paper (matched regime, full
+> coverage, near-zero truncation on both sides) but does NOT reflect
+> retrieval supplying facts or improving multi-hop reasoning. Evidence:
+>
+> 1. **Retrieval is weak.** Mean top-1 similarity 0.573 (median 0.566);
+>    40.39% of rows have top-1 sim < 0.55. Correct cases are barely higher
+>    (0.577) than wrong cases (0.565) — retrieval quality does not separate
+>    right from wrong answers. Hand-read cases confirm retrieved demos are
+>    frequently topically unrelated to the eval question (e.g. a Julio
+>    González/acetylene question retrieved Rumi, Zorro, and Beethoven demos).
+>
+> 2. **The model label-copies from demos rather than reasoning from them.**
+>    `pred` matches the retrieved demo-majority label in 65.50% of all rows.
+>    When the demo-majority is WRONG (≠ gold), the model still follows it
+>    into a wrong answer 45.59% of the time (93/204). This is a label-following
+>    pattern, not evidence of knowledge transfer.
+>
+> 3. **The model verbalizes this copying itself.** 99/458 rows (21.62%) of
+>    `generated` reasoning text explicitly reference the retrieved
+>    demonstrations' prior answers (e.g. reasoning that says the "previous
+>    answer" or "the examples" suggest a particular label, then follows it).
+>    This is direct evidence from the model's own output, not inference from
+>    aggregate stats alone.
+>
+> 4. **The net +3.93pp is NOT explained by bias-correction (unlike PIQA).**
+>    Gold is near-balanced (221 ہاں / 237 نہیں). Retrieved demo labels are
+>    نہیں-heavy (758/1374 = 55.17%), and demo-majority labels are 58.30%
+>    نہیں — i.e. demos push toward نہیں, AWAY from balanced gold, not toward
+>    it. Yet baseline predictions are even MORE نہیں-skewed (293→328 نہیں
+>    depending on run) than SDFR. Most likely mechanism: the no-facts
+>    baseline defaults to نہیں when it lacks knowledge; SDFR's demos (being
+>    ~45% ہاں) partially counteract that even-worse baseline default, and a
+>    portion of those flips happen to land on the correct label given gold's
+>    near-balance. Net effect: SDFR fixed 64 baseline-wrong cases (48 of them
+>    by flipping to ہاں) while breaking 46 previously-correct cases, for a
+>    net of +18 (= +3.93pp on n=458). This is a noisy, lucky interaction
+>    between two label biases — not a clean correction and not reasoning.
+>
+> **Verdict for the thesis: StrategyQA is a CONFIRMED genuine SDFR weakness
+> under fair, facts-matched conditions.** The demo-retrieval mechanism used
+> for GSM8K/PIQA/CSQA does not transfer knowledge on fact-dependent
+> multi-hop questions — it only reshuffles label bias. This is a legitimate
+> negative result, not a confound, and supports (rather than undermines) the
+> handoff-agreed framing that StrategyQA requires a fact-retrieval mode
+> distinct from demonstration-retrieval, should that direction be pursued.
+>
+> Flagged for possible future work, NOT settled this session: whether the
+> RAG experiment's reported −27.65pp (entity disambiguation / partial
+> retrieval / coverage gap explanation) might partly share this same
+> label-following/weak-retrieval mechanism rather than being fully
+> independent evidence. Not investigated — noted only as an open question.
+
 ### Summary Table
 | Dataset     | Best Baseline      | SDFR-UR | Δ        | Verdict      | Regime status |
 |-------------|--------------------|---------|----------|--------------|----------------|
@@ -2867,12 +2970,13 @@ Retrieval is cross-lingual (English pool → Urdu test questions).
 | PIQA        | 72.00% (CoT-fair)  | 77.33%  | +5.33pp  | ✅ Confirmed fair win (mechanism: label-bias correction) | Fair, same-regime |
 | BoolQ       | 84.84% (3-shot)    | 85.48%  | +0.59pp  | ➡️ Parity (fair)      | Fair, verified (both thinking-OFF, approx eval match) |
 | CSQA        | 63.33% (CoT-fair)  | 61.00%  | −2.33pp  | ❌ Slight loss (parity-to-deficit, not the old −5.33pp) | Fair, same-regime |
-| StrategyQA  | 83.97% (3-shot)    | 62.01%  | −21.96pp | ❌ CONFOUNDED (missing facts) — not a retrieval effect | Invalid, pending facts-matched re-eval |
+| StrategyQA  | 65.50% (CoT-fair, no-facts) | 69.43% | +3.93pp | ❌ NOT a reasoning win — label-following on weak retrieval (65.5% demo-copy rate, 21.6% self-verbalized, near-zero correct/wrong similarity gap). Confirmed genuine SDFR weakness on fact-dependent reasoning. | Fair, same-regime, facts-matched |
 
-> The GSM8K/PIQA/CSQA/BoolQ rows above are same-regime (fair). The
-> GSM8K/PIQA/CSQA rows supersede the original (confounded) entries earlier
-> in this section, retained above only as historical record. StrategyQA
-> remains confounded and excluded from any fair-regime claim.
+> The GSM8K/PIQA/CSQA/BoolQ/StrategyQA rows above are same-regime (fair).
+> The GSM8K/PIQA/CSQA rows supersede the original (confounded) entries
+> earlier in this section, retained above only as historical record.
+> StrategyQA's original −21.96pp entry is superseded by the fair no-facts
+> row above; both are retained for historical record.
 
 ### Key Findings
 1. Under fair, same-regime conditions, SDFR-UR shows a genuine positive
@@ -2890,16 +2994,30 @@ Retrieval is cross-lingual (English pool → Urdu test questions).
    (both models over-predict label "1") that SDFR's balanced retrieved
    demos partially correct — the win is real but the mechanism is narrower
    than "better physical reasoning."
-4. StrategyQA's reported −21.96pp remains confounded (baselines receive
-   gold facts, SDFR does not) and is excluded from any fair-regime claim
-   pending a facts-matched re-evaluation.
-5. BoolQ's approximate parity (−0.37pp) has not yet been re-verified with
-   the same explicit thinking-mode/truncation diff process applied to the
-   other four datasets this session; treat as provisional.
+4. StrategyQA's original −21.96pp was confounded (baselines received gold
+   facts, SDFR did not). The subsequent fair, facts-matched re-evaluation
+   (2026-07-07) found a nominal +3.93pp for SDFR, but direct inspection of
+   model outputs (both qualitative and quantitative, across the full
+   458-item set) showed this is mechanism-confounded: the model label-copies
+   from weak, often topically-irrelevant retrieved demos rather than
+   reasoning from supplied knowledge. StrategyQA is therefore a CONFIRMED
+   genuine SDFR weakness on fact-dependent multi-hop reasoning, not a win —
+   demonstration-retrieval does not substitute for the missing facts.
+5. BoolQ's approximate parity (+0.59pp) has been verified fair (both sides
+   thinking-OFF, both zero truncation).
 6. Token budget is a recurring, easy-to-miss confound: GSM8K's baseline
    accuracy moved from 83.57% → 88.71% purely from raising max_tokens
    1024 → 2048, with no other change. Always confirm neither side is
    truncating before trusting a same-regime Δ.
+7. Aggregate accuracy deltas can be misleading even when the regime is
+   fully fair (matched thinking, tokens, prompt, eval set). Both PIQA and
+   StrategyQA fair wins required a mechanism-level check (label balance,
+   demo-copy rate, direct output inspection) before the Δ could be honestly
+   characterized — PIQA's win holds up as bias-correction, StrategyQA's
+   does not hold up as any form of genuine retrieval benefit. A positive Δ
+   is necessary but not sufficient evidence of a real effect; mechanism
+   verification via raw output inspection should be standard practice
+   before any fair-regime win is reported to a supervisor.
 
 ---
 
