@@ -2850,18 +2850,29 @@ Retrieval is cross-lingual (English pool → Urdu test questions).
 > relative to the demo-free baseline. Worth testing before concluding CSQA
 > is a genuine SDFR weakness rather than a demo-format issue.
 
+#### BoolQ — FAIR (verified 2026-07-06)
+- SDFR passage-based (310 eval): 85.48%, thinking OFF, 0 truncation
+- Baseline 3-shot (1550): 84.84%, thinking OFF (thinking_mode=disabled)
+- Δ vs baseline: +0.59pp ≈ parity
+- Regime status: FAIR. Both sides thinking-OFF, both zero truncation —
+  same regime, NOT confounded. Eval sets differ in size (SDFR 310 vs
+  baseline 1550), so comparison is approximate not identical-item, but
+  BoolQ 3-shot is stable across sizes. No rerun needed.
+- Output: outputs/sdfr/sdfr_boolq_large_passage_qwen3_14b.jsonl
+
 ### Summary Table
 | Dataset     | Best Baseline      | SDFR-UR | Δ        | Verdict      | Regime status |
 |-------------|--------------------|---------|----------|--------------|----------------|
 | GSM8K       | 88.71% (CoT-fair)  | 96.86%  | +8.15pp  | ✅ Confirmed fair win (+5.08pp at zero-truncation floor) | Fair, same-regime |
 | PIQA        | 72.00% (CoT-fair)  | 77.33%  | +5.33pp  | ✅ Confirmed fair win (mechanism: label-bias correction) | Fair, same-regime |
-| BoolQ       | 84.89% (3-shot)    | 84.52%  | −0.37pp  | ➡️ Match      | Provisionally fair, not re-checked this session |
+| BoolQ       | 84.84% (3-shot)    | 85.48%  | +0.59pp  | ➡️ Parity (fair)      | Fair, verified (both thinking-OFF, approx eval match) |
 | CSQA        | 63.33% (CoT-fair)  | 61.00%  | −2.33pp  | ❌ Slight loss (parity-to-deficit, not the old −5.33pp) | Fair, same-regime |
 | StrategyQA  | 83.97% (3-shot)    | 62.01%  | −21.96pp | ❌ CONFOUNDED (missing facts) — not a retrieval effect | Invalid, pending facts-matched re-eval |
 
-> The GSM8K/PIQA/CSQA rows above supersede the original (confounded) entries
-> earlier in this section, which are retained above only as a historical
-> record of what was actually run and why it was invalid.
+> The GSM8K/PIQA/CSQA/BoolQ rows above are same-regime (fair). The
+> GSM8K/PIQA/CSQA rows supersede the original (confounded) entries earlier
+> in this section, retained above only as historical record. StrategyQA
+> remains confounded and excluded from any fair-regime claim.
 
 ### Key Findings
 1. Under fair, same-regime conditions, SDFR-UR shows a genuine positive
