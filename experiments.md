@@ -2968,7 +2968,7 @@ Retrieval is cross-lingual (English pool → Urdu test questions).
 |-------------|--------------------|---------|----------|--------------|----------------|
 | GSM8K       | 88.71% (CoT-fair)  | 96.86%  | +8.15pp  | ✅ Confirmed fair win (+5.08pp at zero-truncation floor) | Fair, same-regime |
 | PIQA        | 72.00% (CoT-fair)  | 77.33%  | +5.33pp  | ✅ Confirmed fair win (mechanism: label-bias correction) | Fair, same-regime |
-| BoolQ       | 84.84% (3-shot)    | 85.48%  | +0.59pp  | ➡️ Parity (fair)      | Fair, verified (both thinking-OFF, approx eval match) |
+| BoolQ       | 84.89% (3-shot)    | 85.48%  | +0.59pp  | ➡️ Parity (fair)      | Fair, verified (both thinking-OFF, approx eval match) |
 | CSQA        | 63.33% (CoT-fair)  | 61.00%  | −2.33pp  | ❌ Slight loss (parity-to-deficit, not the old −5.33pp) | Fair, same-regime |
 | StrategyQA  | 65.50% (CoT-fair, no-facts) | 69.43% | +3.93pp | ❌ NOT a reasoning win — label-following on weak retrieval (65.5% demo-copy rate, 21.6% self-verbalized, near-zero correct/wrong similarity gap). Confirmed genuine SDFR weakness on fact-dependent reasoning. | Fair, same-regime, facts-matched |
 
