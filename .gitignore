@@ -26,3 +26,6 @@ downloaded_models/
 *.tmp
 *.bak
 *.zip
+
+# Slurm job logs (kept locally, not versioned)
+logs/
