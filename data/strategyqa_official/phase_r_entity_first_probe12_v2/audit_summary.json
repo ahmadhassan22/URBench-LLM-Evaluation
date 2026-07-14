@@ -1,0 +1,25 @@
+{
+  "probe_items": 12,
+  "automatic_proxy_only": "evidence pages are not always canonical question entities",
+  "evidence_page_title_proxy": {
+    "direct": {
+      "items": 12,
+      "any_official_evidence_page_in_title_pool": 0.25,
+      "macro_best_annotator_evidence_page_recall": 0.09999999999999999
+    },
+    "translated": {
+      "items": 12,
+      "any_official_evidence_page_in_title_pool": 0.25,
+      "macro_best_annotator_evidence_page_recall": 0.16666666666666666
+    },
+    "union": {
+      "items": 12,
+      "any_official_evidence_page_in_title_pool": 0.4166666666666667,
+      "macro_best_annotator_evidence_page_recall": 0.25
+    }
+  },
+  "manual_entity_gate": "pending: union coverage >=80% and union beats both single views",
+  "manual_relation_gate": "pending: relation/gloss identity correct on >=10/12",
+  "ready_for_decomposition": false,
+  "ready_for_method_claim": false
+}

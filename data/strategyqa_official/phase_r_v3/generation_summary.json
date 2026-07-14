@@ -1,0 +1,19 @@
+{
+  "schema_version": "phase-r-fact-plan-v3.0",
+  "dev50_items": 50,
+  "parse_failures": 0,
+  "atomic_fact_goals": 85,
+  "fact_count_distribution": {
+    "1": 20,
+    "2": 26,
+    "3": 3,
+    "4": 1
+  },
+  "review_changed_items": 17,
+  "direct_query_failures": 0,
+  "translated_query_failures": 0,
+  "whole_question_like_goals_similarity_ge_0_80": 3,
+  "ready_for_manual_oracle_audit": true,
+  "ready_for_retrieval": false,
+  "note": "Manual oracle audit is mandatory; this program never auto-approves retrieval."
+}

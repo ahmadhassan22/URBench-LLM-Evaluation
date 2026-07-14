@@ -1,0 +1,309 @@
+=== DIRS (depth 2) ===
+.
+./assets
+./configs
+./data
+./data/archive
+./data/boolq_raw
+./data/csqa_raw
+./data/gsm8k_raw
+./data/piqa_raw
+./data/retrieval_pools
+./data/sdfr_indexes
+./data/sdfr_splits
+./data/strategyqa_raw
+./eval
+./eval/error_analysis_tests
+./eval/logs
+./eval/logs_archive
+./eval/__pycache__
+./eval/sbatch_scripts
+./eval/xlt_exploratory
+./logs
+./outputs
+./outputs/boolq
+./outputs/csqa
+./outputs/gsm8k
+./outputs/piqa
+./outputs/sdfr
+./outputs/strategyqa
+./prompts
+./prompts/boolq
+./prompts/csqa
+./prompts/gsm8k
+./prompts/piqa
+./prompts/strategyqa
+./prompts/xlt_exploratory
+./rag
+./rag/chunks
+./rag/index
+./rag/outputs
+./scripts
+
+=== PYTHON FILES (lines : path) ===
+   123  ./data/retrieval_pools/modelscope/gsm8k/gsm8k.py
+    30  ./eval/error_analysis_tests/control_sample.py
+    58  ./eval/error_analysis_tests/cot_csqa_baseline_fair.py
+    61  ./eval/error_analysis_tests/cot_gsm8k_baseline_fair.py
+    56  ./eval/error_analysis_tests/cot_piqa_baseline_fair.py
+    78  ./eval/error_analysis_tests/cot_strategyqa_nofacts_baseline_fair.py
+   104  ./eval/error_analysis_tests/error_analysis.py
+    53  ./eval/error_analysis_tests/fact_coverage_test.py
+    32  ./eval/error_analysis_tests/flip_analysis.py
+    25  ./eval/error_analysis_tests/flip_cases.py
+    62  ./eval/error_analysis_tests/flip_signal_test.py
+   124  ./eval/error_analysis_tests/probe_strategyqa_factretrieval_test50.py
+   120  ./eval/error_analysis_tests/probe_strategyqa_genread_gate_test50.py
+    81  ./eval/error_analysis_tests/sdfr_csqa_thinking.py
+    81  ./eval/error_analysis_tests/sdfr_gsm8k_fair.py
+    77  ./eval/error_analysis_tests/sdfr_piqa_fair.py
+   102  ./eval/error_analysis_tests/sdfr_strategyqa_fair.py
+    73  ./eval/error_analysis_tests/sdfr_strategyqa_with_facts.py
+    36  ./eval/error_analysis_tests/translate_pool_urdu.py
+   135  ./eval/eval_boolq_cot_alif.py
+   135  ./eval/eval_boolq_cot_p2_alif.py
+   142  ./eval/eval_boolq_cot_p2_qalb.py
+   127  ./eval/eval_boolq_cot_p2_vllm.py
+   135  ./eval/eval_boolq_cot_p3_alif.py
+   141  ./eval/eval_boolq_cot_p3_qalb.py
+   127  ./eval/eval_boolq_cot_p3_vllm.py
+   141  ./eval/eval_boolq_cot_qalb.py
+   193  ./eval/eval_boolq_cot_vllm.py
+   155  ./eval/eval_boolq_three_shot_p2_vllm.py
+   154  ./eval/eval_boolq_three_shot_p3_vllm.py
+   225  ./eval/eval_boolq_three_shot_vllm.py
+   156  ./eval/eval_boolq_zero_shot_p2_vllm.py
+   156  ./eval/eval_boolq_zero_shot_p3_vllm.py
+   222  ./eval/eval_boolq_zero_shot_vllm.py
+   182  ./eval/eval_csqa_cot_alif.py
+   182  ./eval/eval_csqa_cot_p2_alif.py
+   188  ./eval/eval_csqa_cot_p2_qalb.py
+   197  ./eval/eval_csqa_cot_p2_vllm.py
+   184  ./eval/eval_csqa_cot_p3_alif.py
+   190  ./eval/eval_csqa_cot_p3_qalb.py
+   199  ./eval/eval_csqa_cot_p3_vllm.py
+   188  ./eval/eval_csqa_cot_qalb.py
+   266  ./eval/eval_csqa_cot_vllm.py
+   172  ./eval/eval_csqa_three_shot_p2_vllm.py
+   174  ./eval/eval_csqa_three_shot_p3_vllm.py
+   250  ./eval/eval_csqa_three_shot_vllm.py
+   176  ./eval/eval_csqa_zero_shot_p2_vllm.py
+   176  ./eval/eval_csqa_zero_shot_p3_vllm.py
+   257  ./eval/eval_csqa_zero_shot_vllm.py
+   148  ./eval/eval_gsm8k_cot_alif.py
+   149  ./eval/eval_gsm8k_cot_p2_alif.py
+   154  ./eval/eval_gsm8k_cot_p2_qalb.py
+   157  ./eval/eval_gsm8k_cot_p2_vllm.py
+   149  ./eval/eval_gsm8k_cot_p3_alif.py
+   154  ./eval/eval_gsm8k_cot_p3_qalb.py
+   157  ./eval/eval_gsm8k_cot_p3_vllm.py
+   154  ./eval/eval_gsm8k_cot_qalb.py
+   151  ./eval/eval_gsm8k_cot_vllm.py
+   129  ./eval/eval_gsm8k_three_shot_p2_vllm.py
+   129  ./eval/eval_gsm8k_three_shot_p3_vllm.py
+   136  ./eval/eval_gsm8k_three_shot_vllm.py
+   147  ./eval/eval_gsm8k_zero_shot_p2_vllm.py
+   147  ./eval/eval_gsm8k_zero_shot_p3_vllm.py
+   152  ./eval/eval_gsm8k_zero_shot_vllm.py
+   139  ./eval/eval_piqa_cot_alif.py
+   139  ./eval/eval_piqa_cot_p2_alif.py
+   145  ./eval/eval_piqa_cot_p2_qalb.py
+   135  ./eval/eval_piqa_cot_p2_vllm.py
+   141  ./eval/eval_piqa_cot_p3_alif.py
+   147  ./eval/eval_piqa_cot_p3_qalb.py
+   137  ./eval/eval_piqa_cot_p3_vllm.py
+   145  ./eval/eval_piqa_cot_qalb.py
+   176  ./eval/eval_piqa_cot_vllm.py
+   122  ./eval/eval_piqa_three_shot_p2_vllm.py
+   124  ./eval/eval_piqa_three_shot_p3_vllm.py
+   131  ./eval/eval_piqa_three_shot_vllm.py
+   121  ./eval/eval_piqa_zero_shot_p2_vllm.py
+   123  ./eval/eval_piqa_zero_shot_p3_vllm.py
+   130  ./eval/eval_piqa_zero_shot_vllm.py
+   155  ./eval/eval_strategyqa_cot_alif.py
+   155  ./eval/eval_strategyqa_cot_p2_alif.py
+   161  ./eval/eval_strategyqa_cot_p2_qalb.py
+   183  ./eval/eval_strategyqa_cot_p2_vllm.py
+   155  ./eval/eval_strategyqa_cot_p3_alif.py
+   161  ./eval/eval_strategyqa_cot_p3_qalb.py
+   183  ./eval/eval_strategyqa_cot_p3_vllm.py
+   161  ./eval/eval_strategyqa_cot_qalb.py
+   147  ./eval/eval_strategyqa_cot_vllm.py
+   118  ./eval/eval_strategyqa_ep_cot_alif.py
+   105  ./eval/eval_strategyqa_ep_cot_qalb.py
+   137  ./eval/eval_strategyqa_three_shot_p2_vllm.py
+   137  ./eval/eval_strategyqa_three_shot_p3_vllm.py
+   153  ./eval/eval_strategyqa_three_shot_vllm.py
+   137  ./eval/eval_strategyqa_zero_shot_p2_vllm.py
+   139  ./eval/eval_strategyqa_zero_shot_p3_vllm.py
+   153  ./eval/eval_strategyqa_zero_shot_vllm.py
+   120  ./eval/sdfr_boolq_alif.py
+   121  ./eval/sdfr_boolq_alif_v2.py
+   122  ./eval/sdfr_boolq_alif_v3_test50.py
+   127  ./eval/sdfr_boolq_large_passage.py
+   125  ./eval/sdfr_boolq_large_passage_test50.py
+   127  ./eval/sdfr_boolq.py
+   121  ./eval/sdfr_boolq_qalb.py
+   125  ./eval/sdfr_boolq_qalb_v2.py
+    35  ./eval/sdfr_build_boolq_large_index.py
+    69  ./eval/sdfr_build_indexes.py
+   123  ./eval/sdfr_csqa_large.py
+   101  ./eval/sdfr_csqa.py
+   108  ./eval/sdfr_gsm8k_alif.py
+   109  ./eval/sdfr_gsm8k_alif_test50.py
+   137  ./eval/sdfr_gsm8k_alif_v2.py
+   106  ./eval/sdfr_gsm8k.py
+   117  ./eval/sdfr_gsm8k_qalb.py
+   111  ./eval/sdfr_gsm8k_qalb_test50.py
+   139  ./eval/sdfr_gsm8k_qalb_v2.py
+   139  ./eval/sdfr_gsm8k_qalb_v2_test50.py
+   117  ./eval/sdfr_piqa_alif.py
+   119  ./eval/sdfr_piqa_alif_v2.py
+   118  ./eval/sdfr_piqa_alif_v2_test50.py
+   102  ./eval/sdfr_piqa.py
+   118  ./eval/sdfr_piqa_qalb.py
+   121  ./eval/sdfr_piqa_qalb_v2.py
+    79  ./eval/sdfr_prepare_splits.py
+   109  ./eval/sdfr_strategyqa.py
+    93  ./eval/sdfr_strategyqa_urdu_demos.py
+   134  ./eval/xlt_exploratory/boolq_xlt_qwen3_14b.py
+   184  ./eval/xlt_exploratory/csqa_xlt_qwen3_14b.py
+   154  ./eval/xlt_exploratory/gsm8k_xlt_qwen3_14b.py
+   142  ./eval/xlt_exploratory/piqa_xlt_qwen3_14b.py
+   145  ./eval/xlt_exploratory/strategyqa_xlt_qwen3_14b.py
+    56  ./rag/build_chunks.py
+    58  ./rag/build_index_full.py
+    66  ./rag/build_index.py
+    55  ./rag/build_index_sample.py
+    31  ./rag/build_sample_1m.py
+   191  ./rag/eval_rag_final.py
+    49  ./rag/filter_chunks.py
+    25  ./rag/merge_shards.py
+    59  ./rag/test_retrieval.py
+    34  ./scripts/export_boolq_1550.py
+    38  ./scripts/export_csqa_1500.py
+    31  ./scripts/export_gsm8k_main_700.py
+    32  ./scripts/export_piqa_750_baber.py
+    30  ./scripts/fix_ans.py
+    35  ./scripts/normalize_digits.py
+   157  ./scripts/repair_boolq_errors.py
+   180  ./scripts/repair_piqa_errors.py
+    60  ./scripts/run_eval.py
+   134  ./scripts/translate_boolq_1550.py
+   118  ./scripts/translate_csqa_1500.py
+    98  ./scripts/translate_gsm8k_main_700.py
+   125  ./scripts/translate_piqa_750_baber.py
+   128  ./scripts/translation.py
+
+=== PROMPTS ===
+prompts/boolq/cot_p1.txt
+prompts/boolq/cot_p2.txt
+prompts/boolq/cot_p3.txt
+prompts/boolq/three_shot_p1.txt
+prompts/boolq/three_shot_p2.txt
+prompts/boolq/three_shot_p3.txt
+prompts/boolq/zero_shot_p1.txt
+prompts/boolq/zero_shot_p2.txt
+prompts/boolq/zero_shot_p3.txt
+prompts/csqa/cot_p1.txt
+prompts/csqa/cot_p2.txt
+prompts/csqa/cot_p3.txt
+prompts/csqa/three_shot_p1.txt
+prompts/csqa/three_shot_p2.txt
+prompts/csqa/three_shot_p3.txt
+prompts/csqa/zero_shot_p1.txt
+prompts/csqa/zero_shot_p2.txt
+prompts/csqa/zero_shot_p3.txt
+prompts/gsm8k/cot_p1.txt
+prompts/gsm8k/cot_p2.txt
+prompts/gsm8k/cot_p3.txt
+prompts/gsm8k/three_shot_p1.txt
+prompts/gsm8k/three_shot_p2.txt
+prompts/gsm8k/three_shot_p3.txt
+prompts/gsm8k/zero_shot_p1.txt
+prompts/gsm8k/zero_shot_p2.txt
+prompts/gsm8k/zero_shot_p3.txt
+prompts/piqa/cot_p1.txt
+prompts/piqa/cot_p2.txt
+prompts/piqa/cot_p3.txt
+prompts/piqa/three_shot_p1.txt
+prompts/piqa/three_shot_p2.txt
+prompts/piqa/three_shot_p3.txt
+prompts/piqa/zero_shot_p1.txt
+prompts/piqa/zero_shot_p2.txt
+prompts/piqa/zero_shot_p3.txt
+prompts/strategyqa/cot_p1.txt
+prompts/strategyqa/cot_p2.txt
+prompts/strategyqa/cot_p3.txt
+prompts/strategyqa/english_pivoted/ep_cot.txt
+prompts/strategyqa/three_shot_p1.txt
+prompts/strategyqa/three_shot_p2.txt
+prompts/strategyqa/three_shot_p3.txt
+prompts/strategyqa/zero_shot_p1.txt
+prompts/strategyqa/zero_shot_p2.txt
+prompts/strategyqa/zero_shot_p3.txt
+prompts/xlt_exploratory/boolq_xlt1.txt
+prompts/xlt_exploratory/csqa_xlt1.txt
+prompts/xlt_exploratory/gsm8k_xlt1.txt
+prompts/xlt_exploratory/piqa_xlt1.txt
+prompts/xlt_exploratory/strategyqa_xlt1.txt
+
+=== DATA files (depth 2) ===
+data/archive/strategyQA_train_ur2_norm.jsonl
+data/boolq_raw/boolq_train_1550_en.jsonl
+data/boolq_raw/boolq_train_1550_ur_fixed.jsonl
+data/csqa_raw/csqa_train_1500_en.jsonl
+data/csqa_raw/csqa_train_1500_ur.jsonl
+data/gsm8k_raw/gsm8k_main_train_700.jsonl
+data/gsm8k_raw/gsm8k_main_train_700_ur.jsonl
+data/piqa_raw/piqa_train_750.jsonl
+data/piqa_raw/piqa_train_750_ur_fixed.jsonl
+data/retrieval_pools/boolq_train.parquet
+data/retrieval_pools/gsm8k_train_en.jsonl
+data/sdfr_indexes/boolq_embeddings.npy
+data/sdfr_indexes/boolq_faiss.index
+data/sdfr_indexes/boolq_large_passage_embeddings.npy
+data/sdfr_indexes/boolq_large_passage_faiss.index
+data/sdfr_indexes/csqa_embeddings.npy
+data/sdfr_indexes/csqa_faiss.index
+data/sdfr_indexes/csqa_large_clean_embeddings.npy
+data/sdfr_indexes/csqa_large_clean_faiss.index
+data/sdfr_indexes/gsm8k_embeddings.npy
+data/sdfr_indexes/gsm8k_faiss.index
+data/sdfr_indexes/piqa_embeddings.npy
+data/sdfr_indexes/piqa_faiss.index
+data/sdfr_indexes/strategyqa_embeddings.npy
+data/sdfr_indexes/strategyqa_faiss.index
+data/sdfr_splits/boolq_eval.jsonl
+data/sdfr_splits/boolq_pool.jsonl
+data/sdfr_splits/boolq_pool_large_clean.jsonl
+data/sdfr_splits/csqa_eval.jsonl
+data/sdfr_splits/csqa_pool.jsonl
+data/sdfr_splits/csqa_pool_large_clean.jsonl
+data/sdfr_splits/gsm8k_eval.jsonl
+data/sdfr_splits/gsm8k_pool.jsonl
+data/sdfr_splits/piqa_eval.jsonl
+data/sdfr_splits/piqa_pool.jsonl
+data/sdfr_splits/strategyqa_eval.jsonl
+data/sdfr_splits/strategyqa_pool.jsonl
+data/sdfr_splits/strategyqa_pool_urdu.jsonl
+data/strategyqa_raw/strategyQA_train.json
+data/strategyqa_raw/strategyQA_train_ur2_norm.jsonl
+
+=== rag/ (excl big index+chunks) ===
+rag/build_chunks.py
+rag/build_index_full.py
+rag/build_index.py
+rag/build_index_sample.py
+rag/build_sample_1m.py
+rag/eval_rag_final.py
+rag/filter_chunks.py
+rag/merge_shards.py
+rag/outputs/rag_strategyqa_qwen3_14b_final.jsonl
+rag/run_index_full.slurm
+rag/run_merge.slurm
+rag/test_retrieval.py
+
+=== index/chunks sizes only ===
+96G	rag/index
+26G	rag/chunks

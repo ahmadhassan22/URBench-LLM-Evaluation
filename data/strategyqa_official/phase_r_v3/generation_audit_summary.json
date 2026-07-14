@@ -1,0 +1,9 @@
+{
+  "dev50_items": 50,
+  "items_generated_fewer_facts_than_official_evidence_steps": 31,
+  "items_with_equal_fact_counts": 15,
+  "items_generated_more_facts_than_official_evidence_steps": 4,
+  "fixed_manual_sample_size": 12,
+  "ready_for_retrieval": false,
+  "note": "Count agreement is not semantic coverage. Complete the fixed 12-item manual oracle audit before any retrieval run."
+}

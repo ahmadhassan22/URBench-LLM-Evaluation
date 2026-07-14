@@ -3213,3 +3213,59 @@ not full few-shot demonstrations) — reduces model confusion on smaller models.
    of BoolQ responses are invalid (passage-copying or apology responses)
    regardless of prompt format — consistent with earlier prompt sensitivity
    findings showing Alif is 25x more sensitive than Qwen3-14B.
+
+## StrategyQA Phase R — Dual-View Entity Canonicalization Development
+
+### DEV50 v2 Generation Gate — Rejected Before Retrieval (2026-07-11)
+
+**Purpose:** Validate the leak-free self-decomposition and dual-view query
+generation stage before loading the 35 GB Wikipedia FAISS index. This was a
+development gate only, not a retrieval or final-accuracy experiment.
+
+**Split and leakage controls:**
+
+- Fixed `dev50_seed42` drawn from the 1,832 non-evaluation StrategyQA rows.
+- Exactly 50 unique qids; zero intersection with the final 458 evaluation qids.
+- Live generation received only `urbench_qid` and `question_ur`.
+- Official decomposition was displayed only afterwards for oracle error audit.
+
+**Mechanical validation result:**
+
+| Metric | Result |
+|---|---:|
+| DEV50 items | 50 |
+| JSON/decomposition parse failures | 0 |
+| Generated RETRIEVE steps | 55 |
+| Entity-bearing RETRIEVE steps | 54 |
+| Direct-view query failures | 0 |
+| Translated-view query failures | 0 |
+
+The program therefore reported `ready_for_retrieval=true`, but this check only
+validated schema and presence of queries. It did **not** establish semantic
+correctness.
+
+**Oracle audit finding:** the semantic generation gate failed.
+
+- 45/50 questions produced only one RETRIEVE step and no REASON step.
+- 5/50 produced two RETRIEVE steps and no REASON step.
+- Thus, all 50 plans omitted explicit operation/reasoning steps, while most
+  StrategyQA questions require multiple external premises plus a comparison,
+  arithmetic, temporal, or set-inclusion operation.
+- Many RETRIEVE steps simply repeated the original yes/no question instead of
+  producing atomic factual premises.
+- Severe observed corruptions included `Audi R8 V-10 Plus` -> `Audi A8 L Plus`,
+  sound barrier -> noise cancellation, `L. Ron Hubbard` -> `Elton John`, and
+  `Darth Vader` -> `Dartmouth` / `Darryl Ward`.
+- Other plans omitted necessary comparison premises (e.g., average-man height
+  for the Great Pyramid question, usual Friday-the-13th frequency, mushroom
+  abilities for Mario, and nationality/parent-origin premises for Sara Paxton).
+
+**Decision:** retrieval job blocked and not submitted. No Phase-R retrieval
+metrics were produced. The result is logged as a rejected planner design, not a
+method result.
+
+**Next correction:** isolate the retrieval hypothesis from the still-unreliable
+R/O router. Generate only atomic external-fact lookup goals during Phase R,
+using explicit non-evaluation examples plus a question-only completeness review.
+Test typed R/O routing later as a separate answer-pipeline ablation if and only
+if dual-view canonicalization first passes the retrieval gate.   

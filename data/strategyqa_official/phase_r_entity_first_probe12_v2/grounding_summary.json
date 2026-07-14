@@ -1,0 +1,9 @@
+{
+  "schema_version": "entity-first-probe12-grounding-v2.0",
+  "probe_items": 12,
+  "query_budget_per_view_per_item": 4,
+  "logical_queries_across_items": 69,
+  "physical_queries_after_global_dedupe": 67,
+  "global_search_seconds": 108.78655092418194,
+  "hits_requested_per_query": 10
+}

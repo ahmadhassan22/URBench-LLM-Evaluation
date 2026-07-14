@@ -1,0 +1,345 @@
+{
+  "qid": "b8677742616fef051f00",
+  "question_ur": "کیا آج زیادہ لوگ جنکِس خان سے تعلق رکھتے ہیں بنسبت جولیس سیزر کے؟",
+  "question_en": "Are more people today related to Genghis Khan than Julius Caesar?",
+  "gold": "ہاں",
+  "predicted": "نہیں",
+  "raw_output": "نہیں",
+  "passages": [
+    {
+      "title": "Genghis Khan",
+      "text": "description is controversial. Genghis Khan had a notably positive reputation among some western European authors in the Middle Ages, who knew little c"
+    },
+    {
+      "title": "Genghis Khan",
+      "text": "only as a literary work, recent historians have increasingly used it to explore Genghis Khan's early life. Although it is clear that the chronology of"
+    },
+    {
+      "title": "Genghis Khan",
+      "text": "their father—led Genghis to view him as uncompromising, arrogant, and narrow-minded, despite his great knowledge of Mongol legal customs. His eliminat"
+    }
+  ]
+}
+------------------------------------------------------------
+{
+  "qid": "4668264df84fb7c25b39",
+  "question_ur": "کیا دی پولیس کے ارکان قانونی گرفتاری کر سکتے ہیں؟",
+  "question_en": "Could the members of The Police perform lawful arrests?",
+  "gold": "نہیں",
+  "predicted": "ہاں",
+  "raw_output": "ہاں",
+  "passages": [
+    {
+      "title": "Jon Jones",
+      "text": "stated that while he was being detained, a belligerent Jones headbutted the hood of the patrol vehicle, leaving a dent, they claimed Jones had made th"
+    },
+    {
+      "title": "Ted Wheeler",
+      "text": "required each one to identify themselves, and took photographs of each person. Police arrested those who refused to cooperate, and charges were brough"
+    },
+    {
+      "title": "Surveillance",
+      "text": "indiscriminate telephone taps and vice versa. Besides the types, the way in which this surveillance is done also matters a lot; i.e. indiscriminate te"
+    }
+  ]
+}
+------------------------------------------------------------
+{
+  "qid": "7419826e4373eb1e83ff",
+  "question_ur": "کیا کتا گرے سیل سے پہلے گھنٹی کی آواز پر ردعمل ظاہر کرے گا؟",
+  "question_en": "Would a dog respond to bell before Grey seal?",
+  "gold": "ہاں",
+  "predicted": "نہیں",
+  "raw_output": "نہیں",
+  "passages": [
+    {
+      "title": "Alexander Graham Bell",
+      "text": "Bell continued to experiment with a live subject, the family's Skye Terrier, Trouve. After he taught it to growl continuously, Bell would reach into i"
+    },
+    {
+      "title": "Beagle",
+      "text": "In June 2006, a trained Beagle assistance dog was credited with saving the life of its owner after using her owner's mobile phone to dial an emergency"
+    },
+    {
+      "title": "Beagle",
+      "text": "Coat Project found reports that said dogs taking part in the experiments were \"vocalizing in pain\" after being injected with foreign substances. Follo"
+    }
+  ]
+}
+------------------------------------------------------------
+{
+  "qid": "1b29d402c3e17cb3b435",
+  "question_ur": "کیا پاؤنڈ سٹرلنگ کی کوئی قیمت ہے؟",
+  "question_en": "Is a pound sterling valuable?",
+  "gold": "نہیں",
+  "predicted": "ہاں",
+  "raw_output": "ہاں",
+  "passages": [
+    {
+      "title": "Price",
+      "text": "raw materials they are expressed as currency per unit weight, e.g. euros per kilogram or Rands per KG.) Although prices could be quoted as quantities "
+    },
+    {
+      "title": "Alfred Nobel",
+      "text": "This converted to £1,687,837 (GBP) at the time. In 2012, the capital was worth around SEK 3.1 billion (US$472 million, EUR 337 million), which is almo"
+    },
+    {
+      "title": "Belmont Stakes",
+      "text": "the eighties and nineties, reaching $500,000 added, with the winner receiving roughly $400,000. In 1998, the purse was changed to $1,000,000 guarantee"
+    }
+  ]
+}
+------------------------------------------------------------
+{
+  "qid": "f231532fe17fd971d1e6",
+  "question_ur": "کیا ونڈر وومن (2017 فلم) کی باکس آفس آمدنی سے بوئنگ 737 کی قیمت پوری ہوتی ہے؟",
+  "question_en": "Is a Boeing 737 cost covered by Wonder Woman (2017 film) box office receipts?",
+  "gold": "ہاں",
+  "predicted": "نہیں",
+  "raw_output": "نہیں",
+  "passages": [
+    {
+      "title": "Boeing",
+      "text": "(in violation of the Procurement Integrity Act) while attempting to submit a revised bid to NASA for their lunar landing project. Financials For the f"
+    },
+    {
+      "title": "Boeing",
+      "text": "crashes of the Boeing 737 MAX narrow-body passenger airplanes in 2018 and 2019, aviation regulators and airlines around the world grounded all 737 MAX"
+    },
+    {
+      "title": "Titanic",
+      "text": "claims for compensation filed with Commissioner Gilchrist, following the conclusion of the Senate Inquiry, the single most highly valued item of lugga"
+    }
+  ]
+}
+------------------------------------------------------------
+{
+  "qid": "622c71f22ddb683c15a8",
+  "question_ur": "کیا آپ پیٹکو سے کیسیو مصنوعات خرید سکتے ہیں؟",
+  "question_en": "Can you buy Casio products at Petco?",
+  "gold": "نہیں",
+  "predicted": "ہاں",
+  "raw_output": "ہاں",
+  "passages": [
+    {
+      "title": "Petco",
+      "text": "market. In November 2018, Petco announced that it would stop selling pet food and treats containing artificial colors, flavors, and preservatives, ban"
+    },
+    {
+      "title": "Petco",
+      "text": "stores offer services such as obedience training, dog grooming, pet vaccinations, and veterinary care, while also hosting adoption events. Unleashed b"
+    },
+    {
+      "title": "Petco",
+      "text": "Petco Health and Wellness Company, Inc. is an American pet retailer with corporate offices in San Diego and San Antonio. Petco sells pet food, product"
+    }
+  ]
+}
+------------------------------------------------------------
+{
+  "qid": "98a30c58fdff7676076c",
+  "question_ur": "کیا حیاتی کیمیا گلوونز کا مطالعہ کرتی ہے؟",
+  "question_en": "Does Biochemistry study gluons?",
+  "gold": "نہیں",
+  "predicted": "ہاں",
+  "raw_output": "ہاں",
+  "passages": [
+    {
+      "title": "Biochemistry",
+      "text": "other \"molecular-scale\" biological sciences Researchers in biochemistry use specific techniques native to biochemistry, but increasingly combine these"
+    },
+    {
+      "title": "Biochemistry",
+      "text": "their two component monosaccharides. Glycolysis (anaerobic) Glucose is mainly metabolized by a very important ten-step pathway called glycolysis, the "
+    },
+    {
+      "title": "Biochemistry",
+      "text": "Cited literature Further reading Fruton, Joseph S. Proteins, Enzymes, Genes: The Interplay of Chemistry and Biology. Yale University Press: New Haven,"
+    }
+  ]
+}
+------------------------------------------------------------
+{
+  "qid": "ad9bf53d84f83ebc9822",
+  "question_ur": "کیا ڈریگن بال کے شو اور فلمیں فرائیڈے 13ویں کے منصوبوں کی تعداد سے کم ہیں؟",
+  "question_en": "Does Dragon Ball shows and movies fall short of Friday 13th number of projects?",
+  "gold": "ہاں",
+  "predicted": "نہیں",
+  "raw_output": "نہیں",
+  "passages": [
+    {
+      "title": "Dragon Ball",
+      "text": "during its first season. The premiere of season three of Dragon Ball Z in 1999, done by Funimation's in-house dub, was the highest-rated program ever "
+    },
+    {
+      "title": "Dragon Ball",
+      "text": "TV series; this is due to them being originally shown as back-to-back presentations alongside other Toei film productions. These films are also mostly"
+    },
+    {
+      "title": "Dragon Ball",
+      "text": "to repeat its dominance over a two-year period. Dragon Ball ranked second overall in the search number ranking for the past 10 years released by LYCOS"
+    }
+  ]
+}
+------------------------------------------------------------
+{
+  "qid": "58fd5574f3447c8f590f",
+  "question_ur": "کیا 2017 کے کلاس کے طالب علم کو 9/11 کے بارے میں یادداشت میں خلل ہو سکتا ہے؟",
+  "question_en": "Would a student of the class of 2017 have amnesia about 9/11?",
+  "gold": "ہاں",
+  "predicted": "نہیں",
+  "raw_output": "نہیں",
+  "passages": [
+    {
+      "title": "Nancy Pelosi",
+      "text": "the briefing was detailed and graphic, and at the time she did not raise substantial objections. One unnamed U.S. official present during the early br"
+    },
+    {
+      "title": "Edward Snowden",
+      "text": "classified information he had reported \"clearly problematic programs\" to ten officials, who he said did nothing in response. In a May 2014 interview, "
+    },
+    {
+      "title": "Witness",
+      "text": "through photos. A week later they were asked to pick the suspect out of lineups. 8% of the people in the lineups were mistakenly identified as crimina"
+    }
+  ]
+}
+------------------------------------------------------------
+{
+  "qid": "e9e78aa7b0c1ec3f9cf9",
+  "question_ur": "کیا ایک پھلی میں مٹر کی اوسط تعداد ارب کے لیے ضروری کاموں کی تعداد کے برابر یا زیادہ ہے؟",
+  "question_en": "Is average number of peas in a pod enough commas for a billion?",
+  "gold": "ہاں",
+  "predicted": "نہیں",
+  "raw_output": "نہیں",
+  "passages": [
+    {
+      "title": "Sesame",
+      "text": "(). The seeds are ovate, slightly flattened, and somewhat thinner at the eye of the seed (hilum) than at the opposite end. The mass of 100 seeds is 0."
+    },
+    {
+      "title": "Peanut",
+      "text": "tall, reaching a height of and a spread of . Peanut pods are borne on pegs arising from the main stem and the side branches. Most pods are clustered a"
+    },
+    {
+      "title": "Maize",
+      "text": "collection has nearly 80,000 samples. The bulk of the collection consists of several hundred named genes, plus additional gene combinations and other "
+    }
+  ]
+}
+------------------------------------------------------------
+{
+  "qid": "86ead3f15417204affc2",
+  "question_ur": "کیا ڈسٹن ہافمین بنی اسرائیل میں سے ہیں؟",
+  "question_en": "Is Dustin Hoffman one of the B'nei Yisrael?",
+  "gold": "ہاں",
+  "predicted": "نہیں",
+  "raw_output": "نہیں",
+  "passages": [
+    {
+      "title": "Dustin Hoffman",
+      "text": "mitzvahs and that he is a more observant Jew now than when he was younger. He has also lamented that he is not fluent in Hebrew. Political activism A "
+    },
+    {
+      "title": "Dustin Hoffman",
+      "text": "Alda the part. But Nichols was so impressed with Hoffman's overall audition he cast him as the male lead in the movie The Graduate (1967). Hoffman pla"
+    },
+    {
+      "title": "Dustin Hoffman",
+      "text": "good looks no longer necessary on screen: Hoffman's success amazed friends from his early years as an actor, who told him \"You were the last one I exp"
+    }
+  ]
+}
+------------------------------------------------------------
+{
+  "qid": "3e023027bb296245506a",
+  "question_ur": "اگر آپ غذا پر ہوں تو کیا آپ کو میکڈونلڈز میں دوپہر کا کھانا چھوڑنا پڑے گا؟",
+  "question_en": "If you were on a diet, would you have to skip lunch at McDonald's?",
+  "gold": "نہیں",
+  "predicted": "ہاں",
+  "raw_output": "ہاں",
+  "passages": [
+    {
+      "title": "Lunch",
+      "text": "burritos, sushi, bento boxes, and pizza. Lunch may be consumed at various types of restaurants, such as formal, fast casual and fast food restaurants."
+    },
+    {
+      "title": "Eating",
+      "text": "to meals. That means that obese individuals did not tend to eat more while having meals; rather, the amount of snacks they ate between meals was great"
+    },
+    {
+      "title": "Lunch",
+      "text": "States and Canada, lunch is usually a moderately sized meal generally eaten between 11 and 1. During the work week, North Americans generally eat a qu"
+    }
+  ]
+}
+------------------------------------------------------------
+{
+  "qid": "646d3503f3a3939e2e63",
+  "question_ur": "کیا ماؤنٹ فوجی کا چوٹی جاپان کے سمندر سے باہر نکلے گا؟",
+  "question_en": "Would the top of Mount Fuji stick out of the Sea of Japan? ",
+  "gold": "ہاں",
+  "predicted": "نہیں",
+  "raw_output": "نہیں",
+  "passages": [
+    {
+      "title": "Mount Fuji",
+      "text": "is an active stratovolcano located on the Japanese island of Honshū, with a summit elevation of . It is the tallest mountain in Japan, the second-high"
+    },
+    {
+      "title": "Mount Fuji",
+      "text": "rains. The station, which was the highest in Japan at , was replaced by a fully automated meteorological system. Mount Fuji was added to the World Her"
+    },
+    {
+      "title": "Mount Fuji",
+      "text": "alternative hypothesis based on Old Japanese reading : the word may have been borrowed from Eastern Old Japanese 火主, meaning \"fire master\". Variations"
+    }
+  ]
+}
+------------------------------------------------------------
+{
+  "qid": "a96d28e1221bfbcf50a9",
+  "question_ur": "کیا بغیر بیمہ والا شخص بیمہ شدہ شخص کے مقابلے میں سی ٹی اسکین سے انکار کرنے کا زیادہ امکان رکھتا ہے؟",
+  "question_en": "Would an uninsured person be more likely than an insured person to decline a CT scan?",
+  "gold": "ہاں",
+  "predicted": "نہیں",
+  "raw_output": "نہیں",
+  "passages": [
+    {
+      "title": "Lymphoma",
+      "text": "evaluated whether positron-emission-tomography scans between the chemotherapy cycles can be used to make assumptions about the survival. The evidence "
+    },
+    {
+      "title": "Surgery",
+      "text": "unremarkable medical history and presented with a physical exam which did not indicate a chest x-ray. Routine x-ray examination is more likely to resu"
+    },
+    {
+      "title": "Cancer",
+      "text": "testing Genetic testing for individuals at high-risk of certain cancers is recommended by unofficial groups. Carriers of these mutations may then unde"
+    }
+  ]
+}
+------------------------------------------------------------
+{
+  "qid": "7870b1cef39a4f685911",
+  "question_ur": "کیا آدم سینڈلر کو کول سپروس اور ایک سکوبا آدمک کے حوالے سے کوئی بات سمجھ آئے گی؟",
+  "question_en": "Would Adam Sandler get a reference to Cole Spouse and a scuba man doll?",
+  "gold": "ہاں",
+  "predicted": "نہیں",
+  "raw_output": "نہیں",
+  "passages": [
+    {
+      "title": "Adam Sandler",
+      "text": "Getting Old\". He was also referenced in the video game Half-Life: Opposing Force. The HBO series Animals episode \"The Trial\" features a mock court cas"
+    },
+    {
+      "title": "Squidward Tentacles",
+      "text": "who had worked with Hillenburg and Drymon on Rocko's Modern Life, was Hillenburg's first choice for the role. Hillenburg had invited Lawrence to audit"
+    },
+    {
+      "title": "Adam Sandler",
+      "text": "in the romantic comedy film Just Go with It. He also voiced a capuchin monkey in Kevin James's Zookeeper, released on July 8, 2011. In 2012, he starre"
+    }
+  ]
+}
+------------------------------------------------------------
