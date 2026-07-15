@@ -314,7 +314,9 @@ A correct full-Wikipedia dense index was rebuilt and verified:
 | Size | ~35 GB |
 | Metadata access | cached byte-offset seek (never fully loaded into memory) |
 
-The rebuilt index **verifiably fixes the coverage gap**. Semantic drift and entity resolution remained open — which motivated the next branch.
+> **Correction (2026-07-15): the rebuilt index does NOT fully fix the coverage gap.** While preparing EFBPT audit data, the index was found to be **incomplete**: across a 30-question audit sample, 28 of 86 official evidence pages (~33%) were absent from the index title space, including major head articles (Woodrow Wilson, Vietnam War, Bucharest, Vlad the Impaler, and others). Root cause: `rag/build_chunks.py` globs whatever parquet shards happen to sit in the ModelScope download cache; ModelScope throttling (~60 KB/s) makes a partial download likely, so an unknown fraction of Wikipedia shards were never chunked. The chunker itself is not at fault. The index title space holds 6,407,814 unique titles — near-complete but missing head articles in a non-random pattern consistent with missing shards.
+>
+> **Consequence for the entity-first branch below:** its 41.7% union coverage measured **index gaps mixed with entity-corruption failures**, not entity grounding in isolation. With ~33% of evidence pages absent from the index, the maximum reachable coverage was already capped well below the 80% gate. The **entity-corruption taxonomy still stands** (it was observed directly), but the 41.7% figure must not be read as a pure measure of entity grounding. Rebuilding the index is deferred — the current EFBPT direction constructs training data from official evidence paragraphs and does not depend on this index.
 
 ---
 
@@ -342,6 +344,8 @@ A 12-item manual oracle probe (DEV50, leakage-safe) produced:
 | **Required gate** | **≥80%** |
 
 The dual views are genuinely **complementary** (union > either single view), but absolute quality is far below the deployable threshold. **The branch was rejected and not promoted to full evaluation.**
+
+> **Caveat (2026-07-15):** this probe ran against the incomplete index described above. Because ~33% of official evidence pages were absent from the index, the 41.7% union figure conflates missing-page coverage gaps with genuine entity-corruption failures. The rejection verdict stands (union was far below 80% under any reading), but the number is a *lower bound mixed with an index artifact*, not a clean entity-grounding measurement. The corruption taxonomy below was observed directly and is unaffected by the index gap.
 
 ### Why it failed — a reusable failure taxonomy
 
