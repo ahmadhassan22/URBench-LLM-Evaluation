@@ -3269,3 +3269,46 @@ R/O router. Generate only atomic external-fact lookup goals during Phase R,
 using explicit non-evaluation examples plus a question-only completeness review.
 Test typed R/O routing later as a separate answer-pipeline ablation if and only
 if dual-view canonicalization first passes the retrieval gate.   
+
+---
+
+## EFBPT — AUDIT30 Data-Construction Probe (2026-07-15)
+
+**Purpose:** One-day feasibility probe. Can clean entity-faithful training examples be constructed from official StrategyQA decompositions? Frozen 30 qids (seed 42, TRAIN pool, disjoint from DEV50/eval458). Manual audit of prefilled candidates against official evidence paragraphs. Predeclared gates G-A…G-E.
+
+### Headline result: G-A FAILED (as written)
+
+| Verdict | Count |
+|---|---|
+| CLEAN | 11 |
+| USABLE-WITH-EDIT | 9 |
+| BROKEN | 10 |
+| **CLEAN + USABLE** | **20 / 30** |
+
+**G-A threshold was CLEAN+USABLE ≥ 24/30. Result 20/30 → FAIL.**
+
+95% CI on the 20/30 CLEAN+USABLE rate is approximately 47–80%. Thirty rows do not support any claim about the full 1,782-row yield.
+
+### BROKEN breakdown (3 distinct causes, not one)
+
+- **World-knowledge quantities (6):** rows 8, 10, 12, 18, 20, 25. Step requires a number no Wikipedia page states (palm area, family size, celebrity home size, dosa calories, Aldi bag policy, CNMI passport rule). StrategyQA answers these from common sense; no evidence span exists to link. These are out of EFBPT's target scope (not entity-bridge questions).
+- **Single-step decomposition (2):** rows 3, 11. Official decomposition length < 2. Auto-drop rule: `len(official_decomposition) < 2 → drop`.
+- **Structural / translation (2):** row 14 (translation corruption: Urdu "be born" vs English "give birth" — semantic_mismatch), row 22 (plan ends on a distance with no decision step).
+
+### Critical observation
+
+**Zero entity-disambiguation failures across 30 rows.** EFBPT's stated premise is that cross-lingual entity confusion is the reasoning bottleneck. The probe observed no instance of that failure. This is a small sample, but it is a direct threat to the method's motivation and must be resolved before GPU time: EFBPT cannot be justified as a fix for a failure mode not yet shown to be present. Note that some hard entity cases may be hidden inside the BROKEN/filtered pile — this needs checking, not assuming.
+
+### Interpretation (honest)
+
+- G-A failed on the literal threshold. This is the recorded result.
+- A reframe onto EFBPT's target subpopulation (entity-bridge questions only, dropping the 6 world-knowledge and 2 single-step rows) gives 20/22 in-scope CLEAN+USABLE. This is a **hypothesis to test on the full pool via mechanical pre-declared filters**, NOT an established yield. The reframe is post-hoc and is only valid if the filters are applied mechanically without reference to verdicts. Do not report the in-scope figure as a proven result.
+- Verdict tracks structure: every CLEAN/USABLE row is an entity-bridge question whose intermediate answers are page-stated facts. Every BROKEN row fails on evidence availability, decomposition length, or translation — none on entity resolution.
+
+### Cost finding
+
+9 of 30 rows (USABLE-WITH-EDIT) required manual fixes (typos, re-typed steps, added entities, transliteration-span mapping, premise softening). If this rate holds, ~530 of 1,782 rows would need human touch. Urdu-specific checks (semantic mismatch, transliteration) are irreducibly manual and are central to EFBPT's thesis — human review can shrink but not disappear.
+
+### Decision
+
+AUDIT30 does not settle EFBPT go/no-go. Next stage: (1) pre-declare mechanical filters in writing; (2) build auto-construction + auto-verification pipeline on full TRAIN pool; (3) the resulting auto-CLEAN pool *size* is the real feasibility number; (4) human-audit a fixed sample for precision; (5) resolve the zero-entity-failure question before committing to C0–C3. This failure/reframe is logged as a finding, not a deletion.
