@@ -445,7 +445,9 @@ The evidence points to a specific missing capability: **stable bilingual entity 
 
 Current work therefore investigates **failure-derived, entity-faithful bilingual reasoning adaptation**: parameter-efficient fine-tuning supervised with canonical entity targets and contrastive hard negatives constructed directly from the observed corruption taxonomy, evaluated under the existing fair-regime and leakage controls against answer-only and plan-only tuning ablations.
 
-This is a hypothesis under test, not a claimed result.
+**The target failure mode is confirmed (2026-07-17).** A direct probe fed 28 multi-hop Urdu questions to Qwen3-14B with no retrieval and inspected its own reasoning traces for entity faithfulness. Three independent readers scored the traces and agreed that the model corrupts named entities in **~18–26% of testable (transliteration-ambiguous) entities** and in **39% of rows** — resolving Urdu entity mentions to wrong or fabricated identities (e.g. ŽRK Kumanovo → a pop song, Alexander Nevsky → a fabricated archbishop, llama → a Tibetan Buddhist "Lama"), which directly produces wrong answers. The corruption concentrates on rare and transliteration-hard entities; famous entities resolve correctly. This confirms EFBPT's target failure mode exists at the model level, independent of retrieval.
+
+**The method itself remains a hypothesis under test.** Confirming the target does not establish that entity-faithful tuning fixes it; that is what the C0–C3 ablations will decide.
 
 ---
 
