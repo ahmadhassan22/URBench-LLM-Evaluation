@@ -3312,3 +3312,56 @@ if dual-view canonicalization first passes the retrieval gate.
 ### Decision
 
 AUDIT30 does not settle EFBPT go/no-go. Next stage: (1) pre-declare mechanical filters in writing; (2) build auto-construction + auto-verification pipeline on full TRAIN pool; (3) the resulting auto-CLEAN pool *size* is the real feasibility number; (4) human-audit a fixed sample for precision; (5) resolve the zero-entity-failure question before committing to C0–C3. This failure/reframe is logged as a finding, not a deletion.
+
+---
+
+## EFBPT — (c)-Probe: Mid-Reasoning Entity Corruption (2026-07-17)
+
+**Purpose:** Before building EFBPT training data or spending GPU time on tuning, test whether the failure EFBPT claims to fix actually occurs. EFBPT's premise: Qwen3-14B corrupts named entities *inside its own Urdu reasoning trace* (no retrieval involved) because Urdu transliteration drops short vowels, making proper nouns ambiguous. If this failure does not occur, EFBPT has no target.
+
+**Why this probe and not AUDIT30:** AUDIT30 measured whether a *human* could construct clean entity-faithful training data — it found zero entity failures, but it could not have detected model-level corruption because a fluent human reads the entities correctly. This probe measures the *model's* behavior directly: does Qwen3-14B name the correct entity while reasoning?
+
+### Method
+
+- Fed 28 multi-hop Urdu questions (all AUDIT30 rows with ≥1 testable entity) to Qwen3-14B, thinking ON, temperature 0.0, **no retrieval, no few-shot** — bare Urdu question only. Captured the full `<think>` trace.
+- **Testable entity** = a proper noun with transliteration-drift risk (could resolve to a different identity). Generic/phonetically-transparent entities (Hand, Soup, Brain, Teddy bear, etc.) excluded — including them would pad the denominator with guaranteed-faithful cases. 51 testable entities across 28 rows.
+- Scored each testable entity as FAITHFUL / MIS-RESOLVED (wrong or fabricated identity) / DROPPED-SUBSTITUTED (entity absent or silently swapped).
+- **Three independent readers** scored the same traces: Claude, ChatGPT, Gemini. Triangulation to avoid single-reader bias (project rule: verify before believing).
+
+Scripts: `eval/error_analysis_tests/build_c_probe.py` (test-set builder), `eval/error_analysis_tests/c_probe_run_full.py` (trace capture). Outputs: `data/strategyqa_official/efbpt/c_probe_full_traces.{txt,jsonl}`.
+
+### Result: the failure mode is confirmed and substantial
+
+| Reader | Entities corrupted / 51 | Rate | Rows with ≥1 corruption / 28 |
+|---|---|---|---|
+| Claude | 9 | 18% | 11 (39%) |
+| ChatGPT | 13 | 25.5% | 11 (39%) |
+| Gemini | 11 | 21.6% | 11 (39%) |
+
+**All three readers independently agreed on 11/28 rows (39%) having ≥1 corrupted entity.** Entity-level rate spans 18–26% depending on strictness.
+
+**Unanimous corruptions (all three readers agreed — the defensible floor, 9 entities):**
+
+| Entity | Urdu span | Corrupted to | Type |
+|---|---|---|---|
+| Roewe 550 | روو 550 | "Row 550" / rowing boat / not-real | mis-resolved |
+| ŽRK Kumanovo | ژ آر کے کمانوو | Zara Larsson's song "Karma" | mis-resolved |
+| Alexander Nevsky | الیگزینڈر نیوسکی | fabricated 1991–2000 archbishop | mis-resolved |
+| Llama | لاما | Tibetan Buddhist "Lama" (reincarnation) | mis-resolved |
+| Yeti | یٹی | "YTI" = typo for AI | mis-resolved |
+| Little Women | چھوٹی عورتوں | "small women" (literal) | mis-resolved |
+| Bucharest | بخارست | Transylvania (substituted) | dropped/substituted |
+| Family of Donald Trump (Barron) | بیرون ٹرمپ | Donald Trump (father, not Barron) | dropped/substituted |
+| Elisabeth Haub School of Law | ہوب | absent from trace | dropped/substituted |
+
+**Reportable range:** floor **18%** (unanimous), majority-vote **~22%**, ceiling **~26%**. Row-level **39%** (all readers agreed).
+
+### Interpretation
+
+- **The disease is real, measured, and triangulated.** Three independent AI readers converged on 18–26% entity corruption and *identically* on 39% of rows. This is no longer a hypothesis — it is EFBPT's confirmed target. The mechanism is exactly as EFBPT predicts: Urdu transliteration ambiguity → wrong or fabricated English identity → wrong reasoning → wrong final answer (Roewe, ŽRK, Nevsky, Yeti all produced wrong answers via entity corruption).
+- **Scope boundary (must be stated honestly):** corruption concentrates on **rare and transliteration-hard entities** (Roewe, ŽRK, Nevsky, Llama) and ambiguous literal renderings (Little Women → "small women", Yeti → "YTI"). Famous entities (Woodrow Wilson, Jean-Paul Sartre, Elizabeth I, Bern, Dopamine, Spice Girls) resolved faithfully. **The EFBPT claim must be scoped to "rare / transliteration-ambiguous entities," not "Urdu entities in general."**
+- **Distinction to preserve:** some corruptions (Little Women → "small women", Yeti → "YTI") are partly Urdu *translation-layer* artifacts, not purely model reasoning failures. The clean transliteration cases (Roewe, ŽRK, Nevsky, Llama) are the strongest evidence and should be foregrounded.
+
+### Decision
+
+The (c)-probe passes: EFBPT has a confirmed, mechanism-verified, triangulated target. This justifies proceeding to (1) mechanical data-construction pipeline over the TRAIN pool, and (2) the C0–C3 tuning spec. The probe is logged as a positive finding. Remaining caveat carried forward: the probe tests entity resolution across 28 rows / one model; corruption rate on the full 1,782 pool is not yet known and should be re-estimated during data construction.
