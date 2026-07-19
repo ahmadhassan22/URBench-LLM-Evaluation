@@ -1,0 +1,45 @@
+STAGE 2 PILOT — accuracy vs gold (audit30_answers.jsonl)
+============================================================
+entity precision        : 93.9% (n=30)
+entity recall           : 70.6% (n=30)
+urdu_span accuracy      : 95.1% (n=41)
+step type  — LLM        : 96.6% (n=88)
+step type  — rule       : 94.3% (n=88)
+entity_ref accuracy     : 83.0% (n=88)
+evidence precision      : 73.5% (n=88)
+evidence recall         : 84.8% (n=88)
+answer type — LLM       : 84.1% (n=88)
+answer type — rule      : 67.0% (n=88)
+rows fully auto (0 diff): 1 / 30
+rows needing review     : 29 / 30
+
+REVIEW ROWS + REASONS:
+  1515242f123df1362ad7: evidence:step1
+  ed28d8dc67d5ee85b85c: 
+  d07d517db865174dcee4: entity mismatch, evidence:step1
+  5fe8b705fc7bb1783a61: entity mismatch, entity_ref:step2, evidence:step2, type:step2
+  61dd8e3c0e1e6aa4422f: entity mismatch
+  1463354ede2204c8a171: entity mismatch, entity_ref:step2
+  ec13093ea857962c647f: entity mismatch, entity_ref:step2, evidence:step2
+  594aac879ebd2a4123cb: evidence:step1, evidence:step2
+  0aa6769cb88143b3dba1: entity mismatch, evidence:step1, evidence:step2
+  05ab64dd540d095d9c62: entity mismatch, evidence:step1
+  ed91d5142b8037b07abb: entity mismatch, entity_ref:step1, entity_ref:step2, evidence:step3
+  f9fcf86196d1847b2f0b: entity_ref:step2, evidence:step1, evidence:step2, type:step2
+  e44e24c2c3b8599b85ad: evidence:step1
+  3f59cf2d6b48378dbefe: entity_ref:step1, entity_ref:step2, evidence:step2, evidence:step5
+  361f7e0cd93f9826b7f6: entity mismatch, evidence:step2
+  97d147b2e3e29fa85a71: entity mismatch, evidence:step3
+  50d09b10f985b4763225: urdu_span:chevrolet corvette
+  29842ce280ccd460dd7e: entity mismatch, evidence:step3
+  85a77e70dd0e86d50995: entity mismatch
+  519de84458db613f0364: evidence:step2
+  2295eaf3cdbecc17ca0a: entity mismatch, entity_ref:step1, entity_ref:step3, evidence:step1, type:step3
+  3d80646ef0844fac8da5: 
+  66b9bb0849ceff60cfde: entity mismatch, entity_ref:step2, entity_ref:step3, evidence:step1, evidence:step2, evidence:step3
+  ee284d0d4524904d39cb: entity mismatch, evidence:step2
+  69a5a14c29857fef4010: evidence:step1, evidence:step2
+  8ce466f6f1430a309edf: entity mismatch, entity_ref:step1, evidence:step2
+  b331cd0701aa703e188b: entity mismatch, entity_ref:step1, evidence:step1, evidence:step2, evidence:step3
+  979b4b0fa0a8606bfcae: entity mismatch, entity_ref:step3, evidence:step2, urdu_span:quiet (metal gear)
+  caad75c2382565a4668c: entity mismatch, evidence:step2

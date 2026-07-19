@@ -99,11 +99,14 @@ def build_prompt(row, paras):
     steps_block = "\n\n".join(steps_txt)
 
     term = row.get("term") or ""
+    page_titles = [p.get("title") for p in row.get("evidence_pages", []) if p.get("title")]
+    titles_block = ", ".join(page_titles) if page_titles else "(none)"
     return f"""You are annotating a multi-hop reasoning question for a dataset. Return ONLY a JSON object, no prose, no markdown fences.
 
 URDU QUESTION: {row.get('question_ur')}
 ENGLISH QUESTION: {row.get('question_en')}
 GOLD TERM ENTITY: {term}
+CANDIDATE PAGE TITLES (Wikipedia pages relevant to this question): {titles_block}
 
 {steps_block}
 
@@ -116,7 +119,7 @@ TASK — produce this exact JSON structure:
   "typed_plan": [
     {{"id": <step id>,
       "type": "RETRIEVE" or "REASON",
-      "entity_ref": "<canonical_title of the entity this step is about, or empty string for REASON steps>",
+      "entity_ref": "<canonical_title of the entity this step looks up a fact about; for a step that says #N, use the entity step N's answer resolved to (not step N's own entity_ref); empty string for REASON steps>",
       "expected_answer_type": one of {ANSWER_TYPES},
       "evidence_ref": ["<only the candidate paragraph IDs that TRULY answer this step>"],
       "gold_intermediate_answer": "<short answer read from the kept evidence, or null>"}}
@@ -124,13 +127,13 @@ TASK — produce this exact JSON structure:
 }}
 
 RULES:
-- question_entities: include the gold term entity plus any OTHER entity named in the question. Do not invent entities not in the question.
+- question_entities: For EACH title in CANDIDATE PAGE TITLES, decide YES/NO: is this entity referred to in the question (by its name, a different word-form like "body builder" for Bodybuilding, or an Urdu word)? Include EVERY title you answer YES for. Most questions name 2 or more entities — outputting only one is usually wrong. The gold term entity is always included. Add a non-listed entity only if clearly named in the question.
 - urdu_span must be copied verbatim from the Urdu question. If you cannot find it, use empty string.
 - type: RETRIEVE = looks up an external fact, INCLUDING bridge lookups about a previous answer (e.g. "Where was #1 born?" or age/date lookups). REASON = compares, computes, decides using earlier answers.
+- entity_ref: the entity whose fact THIS step looks up. If the step text names an entity directly, use that. If the step refers to "#N", use the entity that step N's answer RESOLVED TO (the fact step N returned), NOT step N's own entity_ref. Follow the chain. REASON steps use empty string.
 - evidence_ref: keep a candidate ONLY if its text actually answers the step. Drop topically-related but non-answering paragraphs. REASON steps usually keep [].
 - gold_intermediate_answer: only if stated in kept evidence; else null.
 - Output the JSON object only."""
-
 
 def parse_llm_json(text):
     t = text.strip()
@@ -148,7 +151,7 @@ def parse_llm_json(text):
 # ---------------- scoring helpers ----------------
 
 def norm(s):
-    return re.sub(r"\s+", " ", (s or "")).strip().casefold()
+    return re.sub(r"\s+", " ", (s or "").replace("_", " ")).strip().casefold()
 
 def prf(pred_set, gold_set):
     tp = len(pred_set & gold_set)

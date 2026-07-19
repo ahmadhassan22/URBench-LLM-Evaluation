@@ -3365,3 +3365,48 @@ Scripts: `eval/error_analysis_tests/build_c_probe.py` (test-set builder), `eval/
 ### Decision
 
 The (c)-probe passes: EFBPT has a confirmed, mechanism-verified, triangulated target. This justifies proceeding to (1) mechanical data-construction pipeline over the TRAIN pool, and (2) the C0–C3 tuning spec. The probe is logged as a positive finding. Remaining caveat carried forward: the probe tests entity resolution across 28 rows / one model; corruption rate on the full 1,782 pool is not yet known and should be re-estimated during data construction.
+
+## EFBPT Stage 2 pilot — CLOSED (final run 56070, 2026-07-20)
+
+Annotation pipeline pilot on frozen AUDIT30 (30 rows, 88 steps). Qwen3-14B,
+thinking OFF, temp 0, strict JSON. Three GPU runs; four sequential prompt/scorer
+fixes: (1) underscore normalization in norm(); (2) evidence_pages title-seeding;
+(3) entity_ref = entity the step's #N resolved to (chain rule, matches gold);
+(4) forced per-title YES/NO selection. Run 56070 declared final — no further
+AUDIT30 tuning (overfit guard).
+
+Field                     run1    final   routing
+entity precision          80.0    93.9    AUTO-ACCEPT
+entity recall             52.8    70.6    REVIEW (human adds misses)
+urdu_span                 96.7    95.1    AUTO-ACCEPT
+step type (LLM/rule)      95.5/94.3  96.6/94.3  AUTO-ACCEPT
+entity_ref                70.5    83.0    REVIEW
+evidence P/R              76.3/85.4  73.5/84.8  REVIEW
+answer type (LLM/rule)    81.8/67.0  84.1/67.0  REVIEW (light)
+gold_intermediate_answer  n/a     22.7 (exact-match floor; mostly paraphrase)  REVIEW
+
+Mechanisms (verified from diffs, not summary):
+- Recall split: gold entities IN evidence_pages 38/48 = 79.2% found; NOT in
+  pages 3/11 = 27.3%. Seeding works; unseeded entities are structurally
+  unreachable by selection — human review required for them.
+- Run-2 flat recall root cause: 25/30 rows output exactly one entity
+  (pattern-matching to gold term); fixed by forced per-title iteration (+12.8pp
+  recall for −1.1pp precision).
+- Entity errors, final: 16 real misses, 2 real extras, 1 alias
+  (dosa/dosa (food)), 1 near-alias (united states/federal government of the US).
+- GIA issues: LLM emits string 'null' instead of JSON null; exact-match
+  penalizes verbose-but-correct answers; a few true value errors exist.
+- Annotator-disease finding (run 1): LLM wrote Lil_Weane for Lil Wayne —
+  annotation pipeline itself exhibits the target corruption.
+- Blank-reason bug: expected_answer_type diffs logged but never added to
+  needs_review; fixed in final report script.
+
+Artifacts (data/strategyqa_official/efbpt/): stage2_pilot_run56070_{predictions,
+diffs,summary}.jsonl/txt, stage2_pilot_run56070.log,
+stage2_run56070_final_report.txt. Prompt+schema now FROZEN pending blind check.
+
+Next (pre-declared): schema v2 = one explicit per-title decision object,
+parser-enforced completeness (missing/duplicate title → review). Fresh 30-row
+blind sample disjoint from AUDIT30/DEV50/eval458 — validation only, NO tuning
+on it. No 1,770 processing, no hard negatives, no validation split until blind
+check passes.

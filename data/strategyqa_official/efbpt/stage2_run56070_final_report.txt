@@ -1,0 +1,116 @@
+STAGE 2 PILOT — FINAL REPORT (run run56070)
+============================================================
+preserved files: ['stage2_pilot_run56070_predictions.jsonl', 'stage2_pilot_run56070_diffs.jsonl', 'stage2_pilot_run56070_summary.txt', 'stage2_pilot_run56070.log']
+
+1. ENTITY RECALL SPLIT
+   gold entities IN evidence_pages : 38/48 = 79.2%
+   gold entities NOT in pages      : 3/11 = 27.3%
+
+2. ENTITY ERROR CLASSIFICATION
+   ALIAS (same entity, format diff)  : 1  [('ed91d514', 'dosa (food)', 'dosa')]
+   NEAR-ALIAS (human call needed)    : 1  [('b331cd07', 'united states', 'federal government of the united states')]
+   REAL missed                       : 16
+      d07d517d  liquid diet
+      5fe8b705  europe
+      1463354e  family of donald trump
+      ec13093e  hand
+      0aa6769c  nuclear family
+      05ab64dd  institutionalisation
+      361f7e0c  brain
+      97d147b2  alexander nevsky
+      29842ce2  paris
+      85a77e70  shopping bag
+      2295eaf3  vlad the impaler
+      66b9bb08  taraxacum
+      ee284d0d  mark cuban
+      8ce466f6  prehensility
+      979b4b0f  elisabeth haub school of law
+      caad75c2  france
+   REAL extra                        : 2  [('61dd8e3c', 'louisa may alcott'), ('ec13093e', 'human body')]
+
+3. REVIEW REASONS (recomputed — blank-reason bug was: expected_answer_type
+   diffs were logged but never added to needs_review in the pilot script)
+   1515242f: evidence_ref:step1, expected_answer_type:step1
+   ed28d8dc: expected_answer_type:step1, expected_answer_type:step2
+   d07d517d: entities, evidence_ref:step1
+   5fe8b705: entities, entity_ref:step2, evidence_ref:step2, type:step2
+   61dd8e3c: entities
+   1463354e: entities, entity_ref:step2, expected_answer_type:step1, expected_answer_type:step2
+   ec13093e: entities, entity_ref:step2, evidence_ref:step2
+   594aac87: evidence_ref:step1, evidence_ref:step2
+   0aa6769c: entities, evidence_ref:step1, evidence_ref:step2
+   05ab64dd: entities, evidence_ref:step1
+   ed91d514: entities, entity_ref:step1, entity_ref:step2, evidence_ref:step3
+   f9fcf861: entity_ref:step2, evidence_ref:step1, evidence_ref:step2, type:step2
+   e44e24c2: evidence_ref:step1, expected_answer_type:step1
+   3f59cf2d: entity_ref:step1, entity_ref:step2, evidence_ref:step2, evidence_ref:step5, expected_answer_type:step3, expected_answer_type:step4
+   361f7e0c: entities, evidence_ref:step2
+   97d147b2: entities, evidence_ref:step3, expected_answer_type:step1, expected_answer_type:step2
+   50d09b10: urdu_span
+   29842ce2: entities, evidence_ref:step3
+   85a77e70: entities
+   519de844: evidence_ref:step2
+   2295eaf3: entities, entity_ref:step1, entity_ref:step3, evidence_ref:step1, expected_answer_type:step3, type:step3
+   3d80646e: expected_answer_type:step2
+   66b9bb08: entities, entity_ref:step2, entity_ref:step3, evidence_ref:step1, evidence_ref:step2, evidence_ref:step3
+   ee284d0d: entities, evidence_ref:step2, expected_answer_type:step2
+   69a5a14c: evidence_ref:step1, evidence_ref:step2
+   8ce466f6: entities, entity_ref:step1, evidence_ref:step2, expected_answer_type:step2
+   b331cd07: entities, entity_ref:step1, evidence_ref:step1, evidence_ref:step2, evidence_ref:step3
+   979b4b0f: entities, entity_ref:step3, evidence_ref:step2, urdu_span
+   caad75c2: entities, evidence_ref:step2
+
+4. GOLD_INTERMEDIATE_ANSWER (exact match after norm)
+   all steps       : 22/88 = 25.0%
+   gold non-null   : 17/75 = 22.7%
+   NOTE: exact-match is a FLOOR — paraphrases score 0. Mismatches (pred vs gold):
+      1515242f step1: 'Bodybuilders require more calories than the average person of the same weight to provide the protein and energy requirements needed to support their training and increase muscle mass. The ratios of calories from carbohydrates, proteins, and fats vary depending on the goals of the bodybuilder. Current recommendations suggest that bodybuilders should consume 25–30% of protein per total calorie intake to further their goal of maintaining and improving their body composition.' vs 'high protein, low fat'
+      1515242f step2: 'Elk meat is leaner and higher in protein than beef or chicken.' vs 'elk meat is leaner and higher in protein than beef'
+      ed28d8dc step1: 'Hepatitis is inflammation of the liver tissue.' vs 'Liver'
+      ed28d8dc step2: 'Tonsillectomy is a surgical procedure in which both palatine tonsils are fully removed from the back of the throat.' vs 'Both palatine tonsils'
+      ed28d8dc step3: None vs 'false'
+      d07d517d step1: 'null' vs 'Yes'
+      5fe8b705 step1: 'The Foreign and Commonwealth Office (FCO), commonly called the Foreign Office (which was the formal name of its predecessor until 1968), or British Foreign Office, is a department of the Government of the United Kingdom.' vs 'United Kingdom'
+      5fe8b705 step2: 'false' vs 'Yes'
+      61dd8e3c step3: '1832–1888' vs 'November 29, 1832 – March 6, 1888'
+      61dd8e3c step4: 'null' vs 'true'
+      46d5eda4 step1: '24 March 1603' vs 'March 24, 1603'
+      46d5eda4 step2: '21 June 1905' vs 'June 21, 1905'
+      1463354e step1: '1910 to 1920' vs 'roughly 1910 to 1920 (about 10 years)'
+      1463354e step2: '14' vs 'March 20, 2006'
+      1463354e step3: 'false' vs 'true'
+      ec13093e step1: '8.12 sq mi (21.0 km2)' vs 'approximately 8.12 square miles'
+      ec13093e step3: 'null' vs 'false'
+      594aac87 step1: 'A hidden camera or spy camera or security camera is a still or video camera used to record people without their knowledge. Hidden cameras may be installed within common household objects to monitor and record the activities of caregivers.' vs 'hidden cameras (nanny cams) placed in household objects to monitor caregivers'
+      594aac87 step2: None vs 'true'
+      0aa6769c step3: 'null' vs 'false'
+      ed91d514 step1: 'A dosa is a rice pancake, originating from South Asia, made from a fermented batter. It is somewhat similar to a crepe in appearance. Its main ingredients are rice and black gram, ground together in a fine, smooth batter with a dash of salt. Dosas are a typical part of the Southern Indian and Sri Lankan Tamil diets, but the dish is now popular all over the Indian subcontinent. Traditionally, dosas are served hot along with sambar and chutney. They can be consumed with idli podi as well.' vs 'a South Asian rice pancake'
+      ed91d514 step4: None vs 'false'
+      f9fcf861 step1: '2008 Beijing Motor Show' vs '2008 (launched at 2008 Beijing Motor Show)'
+      f9fcf861 step2: None vs 'held 8-24 August 2008'
+      e44e24c2 step2: 'The gestation period of a llama is 11.5 months (350 days).' vs '11.5 months (350 days)'
+      97d147b2 step3: 'null' vs 'false'
+      50d09b10 step1: 'two' vs 'two passengers'
+      50d09b10 step3: None vs 'false'
+      29842ce2 step1: 'Paris is the capital and most populous city of France.' vs 'France'
+      29842ce2 step2: 'Bern is the de facto capital of Switzerland.' vs 'Switzerland'
+      29842ce2 step3: 'null' vs 'true'
+      85a77e70 step3: None vs 'true'
+      519de844 step1: 'Dopamine is an organic chemical of the catecholamine and phenethylamine families. It functions both as a hormone and a neurotransmitter, and plays several important roles in the brain and body.' vs 'an organic chemical functioning as a hormone and neurotransmitter, produced in the body'
+      519de844 step2: None vs 'false'
+      2295eaf3 step1: 'Vlad the Impaler' vs 'Vlad III (Vlad the Impaler)'
+      2295eaf3 step2: 'Sighișoara' vs 'Sighișoara, Transylvania'
+      3d80646e step1: 'five' vs 'five members'
+      3d80646e step3: 'seven' vs 'seven players per team'
+      3d80646e step4: 'true' vs 'false'
+      66b9bb08 step1: 'Hepatitis is inflammation of the liver tissue.' vs 'liver tissue'
+
+5. ROUTING (threshold 90%, from run-56070 summary)
+   urdu_span                   95.1%  -> AUTO-ACCEPT
+   step type (LLM)             96.6%  -> AUTO-ACCEPT
+   entity precision            93.9%  -> AUTO-ACCEPT (additions rare)
+   entity recall               70.6%  -> REVIEW — human adds missed entities
+   entity_ref                  83.0%  -> REVIEW
+   evidence P/R                73.5%  -> REVIEW
+   answer type (LLM)           84.1%  -> REVIEW (light)
+   gold_intermediate_answer    22.7%  -> see item 4
