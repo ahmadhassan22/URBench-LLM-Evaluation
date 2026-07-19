@@ -1,201 +1,593 @@
-=== DIRS (depth 2) ===
-.
-./assets
-./configs
-./data
-./data/archive
-./data/boolq_raw
-./data/csqa_raw
-./data/gsm8k_raw
-./data/piqa_raw
-./data/retrieval_pools
-./data/sdfr_indexes
-./data/sdfr_splits
-./data/strategyqa_raw
-./eval
-./eval/error_analysis_tests
-./eval/logs
-./eval/logs_archive
-./eval/__pycache__
-./eval/sbatch_scripts
-./eval/xlt_exploratory
-./logs
-./outputs
-./outputs/boolq
-./outputs/csqa
-./outputs/gsm8k
-./outputs/piqa
-./outputs/sdfr
-./outputs/strategyqa
-./prompts
-./prompts/boolq
-./prompts/csqa
-./prompts/gsm8k
-./prompts/piqa
-./prompts/strategyqa
-./prompts/xlt_exploratory
-./rag
-./rag/chunks
-./rag/index
-./rag/outputs
-./scripts
-
-=== PYTHON FILES (lines : path) ===
-   123  ./data/retrieval_pools/modelscope/gsm8k/gsm8k.py
-    30  ./eval/error_analysis_tests/control_sample.py
-    58  ./eval/error_analysis_tests/cot_csqa_baseline_fair.py
-    61  ./eval/error_analysis_tests/cot_gsm8k_baseline_fair.py
-    56  ./eval/error_analysis_tests/cot_piqa_baseline_fair.py
-    78  ./eval/error_analysis_tests/cot_strategyqa_nofacts_baseline_fair.py
-   104  ./eval/error_analysis_tests/error_analysis.py
-    53  ./eval/error_analysis_tests/fact_coverage_test.py
-    32  ./eval/error_analysis_tests/flip_analysis.py
-    25  ./eval/error_analysis_tests/flip_cases.py
-    62  ./eval/error_analysis_tests/flip_signal_test.py
-   124  ./eval/error_analysis_tests/probe_strategyqa_factretrieval_test50.py
-   120  ./eval/error_analysis_tests/probe_strategyqa_genread_gate_test50.py
-    81  ./eval/error_analysis_tests/sdfr_csqa_thinking.py
-    81  ./eval/error_analysis_tests/sdfr_gsm8k_fair.py
-    77  ./eval/error_analysis_tests/sdfr_piqa_fair.py
-   102  ./eval/error_analysis_tests/sdfr_strategyqa_fair.py
-    73  ./eval/error_analysis_tests/sdfr_strategyqa_with_facts.py
-    36  ./eval/error_analysis_tests/translate_pool_urdu.py
-   135  ./eval/eval_boolq_cot_alif.py
-   135  ./eval/eval_boolq_cot_p2_alif.py
-   142  ./eval/eval_boolq_cot_p2_qalb.py
-   127  ./eval/eval_boolq_cot_p2_vllm.py
-   135  ./eval/eval_boolq_cot_p3_alif.py
-   141  ./eval/eval_boolq_cot_p3_qalb.py
-   127  ./eval/eval_boolq_cot_p3_vllm.py
-   141  ./eval/eval_boolq_cot_qalb.py
-   193  ./eval/eval_boolq_cot_vllm.py
-   155  ./eval/eval_boolq_three_shot_p2_vllm.py
-   154  ./eval/eval_boolq_three_shot_p3_vllm.py
-   225  ./eval/eval_boolq_three_shot_vllm.py
-   156  ./eval/eval_boolq_zero_shot_p2_vllm.py
-   156  ./eval/eval_boolq_zero_shot_p3_vllm.py
-   222  ./eval/eval_boolq_zero_shot_vllm.py
-   182  ./eval/eval_csqa_cot_alif.py
-   182  ./eval/eval_csqa_cot_p2_alif.py
-   188  ./eval/eval_csqa_cot_p2_qalb.py
-   197  ./eval/eval_csqa_cot_p2_vllm.py
-   184  ./eval/eval_csqa_cot_p3_alif.py
-   190  ./eval/eval_csqa_cot_p3_qalb.py
-   199  ./eval/eval_csqa_cot_p3_vllm.py
-   188  ./eval/eval_csqa_cot_qalb.py
-   266  ./eval/eval_csqa_cot_vllm.py
-   172  ./eval/eval_csqa_three_shot_p2_vllm.py
-   174  ./eval/eval_csqa_three_shot_p3_vllm.py
-   250  ./eval/eval_csqa_three_shot_vllm.py
-   176  ./eval/eval_csqa_zero_shot_p2_vllm.py
-   176  ./eval/eval_csqa_zero_shot_p3_vllm.py
-   257  ./eval/eval_csqa_zero_shot_vllm.py
-   148  ./eval/eval_gsm8k_cot_alif.py
-   149  ./eval/eval_gsm8k_cot_p2_alif.py
-   154  ./eval/eval_gsm8k_cot_p2_qalb.py
-   157  ./eval/eval_gsm8k_cot_p2_vllm.py
-   149  ./eval/eval_gsm8k_cot_p3_alif.py
-   154  ./eval/eval_gsm8k_cot_p3_qalb.py
-   157  ./eval/eval_gsm8k_cot_p3_vllm.py
-   154  ./eval/eval_gsm8k_cot_qalb.py
-   151  ./eval/eval_gsm8k_cot_vllm.py
-   129  ./eval/eval_gsm8k_three_shot_p2_vllm.py
-   129  ./eval/eval_gsm8k_three_shot_p3_vllm.py
-   136  ./eval/eval_gsm8k_three_shot_vllm.py
-   147  ./eval/eval_gsm8k_zero_shot_p2_vllm.py
-   147  ./eval/eval_gsm8k_zero_shot_p3_vllm.py
-   152  ./eval/eval_gsm8k_zero_shot_vllm.py
-   139  ./eval/eval_piqa_cot_alif.py
-   139  ./eval/eval_piqa_cot_p2_alif.py
-   145  ./eval/eval_piqa_cot_p2_qalb.py
-   135  ./eval/eval_piqa_cot_p2_vllm.py
-   141  ./eval/eval_piqa_cot_p3_alif.py
-   147  ./eval/eval_piqa_cot_p3_qalb.py
-   137  ./eval/eval_piqa_cot_p3_vllm.py
-   145  ./eval/eval_piqa_cot_qalb.py
-   176  ./eval/eval_piqa_cot_vllm.py
-   122  ./eval/eval_piqa_three_shot_p2_vllm.py
-   124  ./eval/eval_piqa_three_shot_p3_vllm.py
-   131  ./eval/eval_piqa_three_shot_vllm.py
-   121  ./eval/eval_piqa_zero_shot_p2_vllm.py
-   123  ./eval/eval_piqa_zero_shot_p3_vllm.py
-   130  ./eval/eval_piqa_zero_shot_vllm.py
-   155  ./eval/eval_strategyqa_cot_alif.py
-   155  ./eval/eval_strategyqa_cot_p2_alif.py
-   161  ./eval/eval_strategyqa_cot_p2_qalb.py
-   183  ./eval/eval_strategyqa_cot_p2_vllm.py
-   155  ./eval/eval_strategyqa_cot_p3_alif.py
-   161  ./eval/eval_strategyqa_cot_p3_qalb.py
-   183  ./eval/eval_strategyqa_cot_p3_vllm.py
-   161  ./eval/eval_strategyqa_cot_qalb.py
-   147  ./eval/eval_strategyqa_cot_vllm.py
-   118  ./eval/eval_strategyqa_ep_cot_alif.py
-   105  ./eval/eval_strategyqa_ep_cot_qalb.py
-   137  ./eval/eval_strategyqa_three_shot_p2_vllm.py
-   137  ./eval/eval_strategyqa_three_shot_p3_vllm.py
-   153  ./eval/eval_strategyqa_three_shot_vllm.py
-   137  ./eval/eval_strategyqa_zero_shot_p2_vllm.py
-   139  ./eval/eval_strategyqa_zero_shot_p3_vllm.py
-   153  ./eval/eval_strategyqa_zero_shot_vllm.py
-   120  ./eval/sdfr_boolq_alif.py
-   121  ./eval/sdfr_boolq_alif_v2.py
-   122  ./eval/sdfr_boolq_alif_v3_test50.py
-   127  ./eval/sdfr_boolq_large_passage.py
-   125  ./eval/sdfr_boolq_large_passage_test50.py
-   127  ./eval/sdfr_boolq.py
-   121  ./eval/sdfr_boolq_qalb.py
-   125  ./eval/sdfr_boolq_qalb_v2.py
-    35  ./eval/sdfr_build_boolq_large_index.py
-    69  ./eval/sdfr_build_indexes.py
-   123  ./eval/sdfr_csqa_large.py
-   101  ./eval/sdfr_csqa.py
-   108  ./eval/sdfr_gsm8k_alif.py
-   109  ./eval/sdfr_gsm8k_alif_test50.py
-   137  ./eval/sdfr_gsm8k_alif_v2.py
-   106  ./eval/sdfr_gsm8k.py
-   117  ./eval/sdfr_gsm8k_qalb.py
-   111  ./eval/sdfr_gsm8k_qalb_test50.py
-   139  ./eval/sdfr_gsm8k_qalb_v2.py
-   139  ./eval/sdfr_gsm8k_qalb_v2_test50.py
-   117  ./eval/sdfr_piqa_alif.py
-   119  ./eval/sdfr_piqa_alif_v2.py
-   118  ./eval/sdfr_piqa_alif_v2_test50.py
-   102  ./eval/sdfr_piqa.py
-   118  ./eval/sdfr_piqa_qalb.py
-   121  ./eval/sdfr_piqa_qalb_v2.py
-    79  ./eval/sdfr_prepare_splits.py
-   109  ./eval/sdfr_strategyqa.py
-    93  ./eval/sdfr_strategyqa_urdu_demos.py
-   134  ./eval/xlt_exploratory/boolq_xlt_qwen3_14b.py
-   184  ./eval/xlt_exploratory/csqa_xlt_qwen3_14b.py
-   154  ./eval/xlt_exploratory/gsm8k_xlt_qwen3_14b.py
-   142  ./eval/xlt_exploratory/piqa_xlt_qwen3_14b.py
-   145  ./eval/xlt_exploratory/strategyqa_xlt_qwen3_14b.py
-    56  ./rag/build_chunks.py
-    58  ./rag/build_index_full.py
-    66  ./rag/build_index.py
-    55  ./rag/build_index_sample.py
-    31  ./rag/build_sample_1m.py
-   191  ./rag/eval_rag_final.py
-    49  ./rag/filter_chunks.py
-    25  ./rag/merge_shards.py
-    59  ./rag/test_retrieval.py
-    34  ./scripts/export_boolq_1550.py
-    38  ./scripts/export_csqa_1500.py
-    31  ./scripts/export_gsm8k_main_700.py
-    32  ./scripts/export_piqa_750_baber.py
-    30  ./scripts/fix_ans.py
-    35  ./scripts/normalize_digits.py
-   157  ./scripts/repair_boolq_errors.py
-   180  ./scripts/repair_piqa_errors.py
-    60  ./scripts/run_eval.py
-   134  ./scripts/translate_boolq_1550.py
-   118  ./scripts/translate_csqa_1500.py
-    98  ./scripts/translate_gsm8k_main_700.py
-   125  ./scripts/translate_piqa_750_baber.py
-   128  ./scripts/translation.py
-
-=== PROMPTS ===
+.gitignore
+README.md
+README.md.bak
+assets/urbench_results_best_per_dataset.png
+configs/example_eval.yaml
+data/boolq_raw/boolq_train_1550_en.jsonl
+data/boolq_raw/boolq_train_1550_ur_fixed.jsonl
+data/csqa_raw/csqa_train_1500_en.jsonl
+data/csqa_raw/csqa_train_1500_ur.jsonl
+data/gsm8k_raw/gsm8k_main_train_700.jsonl
+data/gsm8k_raw/gsm8k_main_train_700_ur.jsonl
+data/piqa_raw/piqa_train_750.jsonl
+data/piqa_raw/piqa_train_750_ur_fixed.jsonl
+data/retrieval_pools/.lock/modelscope___gsm8k
+data/retrieval_pools/boolq_train.parquet
+data/retrieval_pools/gsm8k_train_en.jsonl
+data/retrieval_pools/modelscope/gsm8k/.mdl
+data/retrieval_pools/modelscope/gsm8k/.msc
+data/retrieval_pools/modelscope/gsm8k/.mv
+data/retrieval_pools/modelscope/gsm8k/README.md
+data/retrieval_pools/modelscope/gsm8k/dataset_infos.json
+data/retrieval_pools/modelscope/gsm8k/gsm8k.py
+data/sdfr_indexes/boolq_embeddings.npy
+data/sdfr_indexes/boolq_faiss.index
+data/sdfr_indexes/boolq_large_passage_embeddings.npy
+data/sdfr_indexes/boolq_large_passage_faiss.index
+data/sdfr_indexes/csqa_embeddings.npy
+data/sdfr_indexes/csqa_faiss.index
+data/sdfr_indexes/csqa_large_clean_embeddings.npy
+data/sdfr_indexes/csqa_large_clean_faiss.index
+data/sdfr_indexes/gsm8k_embeddings.npy
+data/sdfr_indexes/gsm8k_faiss.index
+data/sdfr_indexes/piqa_embeddings.npy
+data/sdfr_indexes/piqa_faiss.index
+data/sdfr_indexes/strategyqa_embeddings.npy
+data/sdfr_indexes/strategyqa_faiss.index
+data/sdfr_splits/boolq_eval.jsonl
+data/sdfr_splits/boolq_pool.jsonl
+data/sdfr_splits/boolq_pool_large_clean.jsonl
+data/sdfr_splits/csqa_eval.jsonl
+data/sdfr_splits/csqa_pool.jsonl
+data/sdfr_splits/csqa_pool_large_clean.jsonl
+data/sdfr_splits/gsm8k_eval.jsonl
+data/sdfr_splits/gsm8k_pool.jsonl
+data/sdfr_splits/piqa_eval.jsonl
+data/sdfr_splits/piqa_pool.jsonl
+data/sdfr_splits/strategyqa_eval.jsonl
+data/sdfr_splits/strategyqa_pool.jsonl
+data/sdfr_splits/strategyqa_pool_urdu.jsonl
+data/strategyqa_official/dev.json
+data/strategyqa_official/dev50_seed42.jsonl
+data/strategyqa_official/dev50_seed42_qids.txt
+data/strategyqa_official/efbpt/audit30_answers.jsonl
+data/strategyqa_official/efbpt/audit30_candidates.jsonl
+data/strategyqa_official/efbpt/audit30_manual_report_template.md
+data/strategyqa_official/efbpt/audit30_qids.txt
+data/strategyqa_official/efbpt/audit30_readable.txt
+data/strategyqa_official/efbpt/c_probe_TEST5_traces.jsonl
+data/strategyqa_official/efbpt/c_probe_TEST5_traces.txt
+data/strategyqa_official/efbpt/c_probe_full_traces.jsonl
+data/strategyqa_official/efbpt/c_probe_full_traces.txt
+data/strategyqa_official/efbpt/c_probe_readable.txt
+data/strategyqa_official/efbpt/c_probe_testset.jsonl
+data/strategyqa_official/efbpt/stage1_report.jsonl
+data/strategyqa_official/efbpt/stage1_summary.txt
+data/strategyqa_official/efbpt/stage2_pilot_diffs.jsonl
+data/strategyqa_official/efbpt/stage2_pilot_predictions.jsonl
+data/strategyqa_official/efbpt/stage2_pilot_summary.txt
+data/strategyqa_official/efbpt/title_space_cache.txt
+data/strategyqa_official/phase_r_entity_first_probe12_v1/generation_records.jsonl
+data/strategyqa_official/phase_r_entity_first_probe12_v1/generation_summary.json
+data/strategyqa_official/phase_r_entity_first_probe12_v2/audit_summary.json
+data/strategyqa_official/phase_r_entity_first_probe12_v2/grounding_records.jsonl
+data/strategyqa_official/phase_r_entity_first_probe12_v2/grounding_summary.json
+data/strategyqa_official/phase_r_entity_first_probe12_v2/manual_audit_packet.jsonl
+data/strategyqa_official/phase_r_entity_first_probe12_v2/manual_audit_report.txt
+data/strategyqa_official/phase_r_v2/generation_summary.json
+data/strategyqa_official/phase_r_v3/generation_audit_summary.json
+data/strategyqa_official/phase_r_v3/generation_count_audit.jsonl
+data/strategyqa_official/phase_r_v3/generation_oracle_sample_seed42.jsonl
+data/strategyqa_official/phase_r_v3/generation_oracle_sample_seed42.txt
+data/strategyqa_official/phase_r_v3/generation_records.jsonl
+data/strategyqa_official/phase_r_v3/generation_summary.json
+data/strategyqa_official/strategyqa_official_mapped_urbench_qid.jsonl
+data/strategyqa_official/strategyqa_train_paragraphs.json
+data/strategyqa_official/train.json
+data/strategyqa_raw/strategyQA_train.json
+data/strategyqa_raw/strategyQA_train_ur2_norm.jsonl
+eval/error_analysis_tests/build_c_probe.py
+eval/error_analysis_tests/c_probe.sbatch
+eval/error_analysis_tests/c_probe_55671.log
+eval/error_analysis_tests/c_probe_run_TEST5.py
+eval/error_analysis_tests/c_probe_run_full.py
+eval/error_analysis_tests/control_sample.py
+eval/error_analysis_tests/cot_csqa_baseline_fair.py
+eval/error_analysis_tests/cot_gsm8k_baseline_fair.py
+eval/error_analysis_tests/cot_piqa_baseline_fair.py
+eval/error_analysis_tests/cot_strategyqa_nofacts_baseline_fair.py
+eval/error_analysis_tests/efbpt_audit30_prefill.py
+eval/error_analysis_tests/efbpt_audit30_prefill_v2.py
+eval/error_analysis_tests/efbpt_audit30_viewer.py
+eval/error_analysis_tests/efbpt_stage1_prefilter.py
+eval/error_analysis_tests/efbpt_stage2_pilot.py
+eval/error_analysis_tests/entity_first_ground_audit_v2.py
+eval/error_analysis_tests/entity_first_probe12_v1.py
+eval/error_analysis_tests/error_analysis.py
+eval/error_analysis_tests/fact_coverage_test.py
+eval/error_analysis_tests/flip_analysis.py
+eval/error_analysis_tests/flip_cases.py
+eval/error_analysis_tests/flip_signal_test.py
+eval/error_analysis_tests/integrate_official_strategyqa.py
+eval/error_analysis_tests/integrate_official_strategyqa_v2.py
+eval/error_analysis_tests/integrate_official_strategyqa_v3.py
+eval/error_analysis_tests/phase_r_dev50.py
+eval/error_analysis_tests/phase_r_dev50_v2.py
+eval/error_analysis_tests/phase_r_generate_dev50_v3.py
+eval/error_analysis_tests/probe_rerank_test.py
+eval/error_analysis_tests/probe_retrieval_coverage_test.py
+eval/error_analysis_tests/probe_selfdecomp_test.py
+eval/error_analysis_tests/probe_selfdecomp_translated_test.py
+eval/error_analysis_tests/probe_strategyqa_factretrieval_test50.py
+eval/error_analysis_tests/probe_strategyqa_genread_gate_test50.py
+eval/error_analysis_tests/run_csqa.log
+eval/error_analysis_tests/run_entity_first_ground_audit_v2.slurm
+eval/error_analysis_tests/run_entity_first_probe12_v1.slurm
+eval/error_analysis_tests/run_gsm8k.log
+eval/error_analysis_tests/run_gsm8k_2048.log
+eval/error_analysis_tests/run_phase_r_dev50.slurm
+eval/error_analysis_tests/run_phase_r_generate_dev50_v2.slurm
+eval/error_analysis_tests/run_phase_r_generate_dev50_v3.slurm
+eval/error_analysis_tests/run_phase_r_retrieve_dev50_v2.slurm
+eval/error_analysis_tests/run_piqa.log
+eval/error_analysis_tests/s2_pilot_55836.log
+eval/error_analysis_tests/sdfr_csqa_thinking.py
+eval/error_analysis_tests/sdfr_gsm8k_fair.py
+eval/error_analysis_tests/sdfr_piqa_fair.py
+eval/error_analysis_tests/sdfr_strategyqa_fair.py
+eval/error_analysis_tests/sdfr_strategyqa_with_facts.py
+eval/error_analysis_tests/stage2_pilot.sbatch
+eval/error_analysis_tests/translate_pool_urdu.py
+eval/eval_boolq_cot_alif.py
+eval/eval_boolq_cot_p2_alif.py
+eval/eval_boolq_cot_p2_qalb.py
+eval/eval_boolq_cot_p2_vllm.py
+eval/eval_boolq_cot_p3_alif.py
+eval/eval_boolq_cot_p3_qalb.py
+eval/eval_boolq_cot_p3_vllm.py
+eval/eval_boolq_cot_qalb.py
+eval/eval_boolq_cot_vllm.py
+eval/eval_boolq_three_shot_p2_vllm.py
+eval/eval_boolq_three_shot_p3_vllm.py
+eval/eval_boolq_three_shot_vllm.py
+eval/eval_boolq_zero_shot_p2_vllm.py
+eval/eval_boolq_zero_shot_p3_vllm.py
+eval/eval_boolq_zero_shot_vllm.py
+eval/eval_csqa_cot_alif.py
+eval/eval_csqa_cot_p2_alif.py
+eval/eval_csqa_cot_p2_qalb.py
+eval/eval_csqa_cot_p2_vllm.py
+eval/eval_csqa_cot_p3_alif.py
+eval/eval_csqa_cot_p3_qalb.py
+eval/eval_csqa_cot_p3_vllm.py
+eval/eval_csqa_cot_qalb.py
+eval/eval_csqa_cot_vllm.py
+eval/eval_csqa_three_shot_p2_vllm.py
+eval/eval_csqa_three_shot_p3_vllm.py
+eval/eval_csqa_three_shot_vllm.py
+eval/eval_csqa_zero_shot_p2_vllm.py
+eval/eval_csqa_zero_shot_p3_vllm.py
+eval/eval_csqa_zero_shot_vllm.py
+eval/eval_gsm8k_cot_alif.py
+eval/eval_gsm8k_cot_p2_alif.py
+eval/eval_gsm8k_cot_p2_qalb.py
+eval/eval_gsm8k_cot_p2_vllm.py
+eval/eval_gsm8k_cot_p3_alif.py
+eval/eval_gsm8k_cot_p3_qalb.py
+eval/eval_gsm8k_cot_p3_vllm.py
+eval/eval_gsm8k_cot_qalb.py
+eval/eval_gsm8k_cot_vllm.py
+eval/eval_gsm8k_three_shot_p2_vllm.py
+eval/eval_gsm8k_three_shot_p3_vllm.py
+eval/eval_gsm8k_three_shot_vllm.py
+eval/eval_gsm8k_zero_shot_p2_vllm.py
+eval/eval_gsm8k_zero_shot_p3_vllm.py
+eval/eval_gsm8k_zero_shot_vllm.py
+eval/eval_piqa_cot_alif.py
+eval/eval_piqa_cot_p2_alif.py
+eval/eval_piqa_cot_p2_qalb.py
+eval/eval_piqa_cot_p2_vllm.py
+eval/eval_piqa_cot_p3_alif.py
+eval/eval_piqa_cot_p3_qalb.py
+eval/eval_piqa_cot_p3_vllm.py
+eval/eval_piqa_cot_qalb.py
+eval/eval_piqa_cot_vllm.py
+eval/eval_piqa_three_shot_p2_vllm.py
+eval/eval_piqa_three_shot_p3_vllm.py
+eval/eval_piqa_three_shot_vllm.py
+eval/eval_piqa_zero_shot_p2_vllm.py
+eval/eval_piqa_zero_shot_p3_vllm.py
+eval/eval_piqa_zero_shot_vllm.py
+eval/eval_strategyqa_cot_alif.py
+eval/eval_strategyqa_cot_p2_alif.py
+eval/eval_strategyqa_cot_p2_qalb.py
+eval/eval_strategyqa_cot_p2_vllm.py
+eval/eval_strategyqa_cot_p3_alif.py
+eval/eval_strategyqa_cot_p3_qalb.py
+eval/eval_strategyqa_cot_p3_vllm.py
+eval/eval_strategyqa_cot_qalb.py
+eval/eval_strategyqa_cot_vllm.py
+eval/eval_strategyqa_ep_cot_alif.py
+eval/eval_strategyqa_ep_cot_qalb.py
+eval/eval_strategyqa_three_shot_p2_vllm.py
+eval/eval_strategyqa_three_shot_p3_vllm.py
+eval/eval_strategyqa_three_shot_vllm.py
+eval/eval_strategyqa_zero_shot_p2_vllm.py
+eval/eval_strategyqa_zero_shot_p3_vllm.py
+eval/eval_strategyqa_zero_shot_vllm.py
+eval/logs/boolq_large_index_49156.log
+eval/logs/csqa_large_index_49147.log
+eval/logs/sdfr_boolq_49100.log
+eval/logs/sdfr_boolq_49106.log
+eval/logs/sdfr_boolq_49143.log
+eval/logs/sdfr_boolq_alif_49209.log
+eval/logs/sdfr_boolq_alif_v2_49215.log
+eval/logs/sdfr_boolq_alif_v3_test50_49305.log
+eval/logs/sdfr_boolq_large_passage_49160.log
+eval/logs/sdfr_boolq_large_passage_test50_49157.log
+eval/logs/sdfr_boolq_qalb_49222.log
+eval/logs/sdfr_boolq_qalb_v2_49303.log
+eval/logs/sdfr_boolq_test50_49141.log
+eval/logs/sdfr_csqa_49101.log
+eval/logs/sdfr_csqa_49107.log
+eval/logs/sdfr_csqa_large_49149.log
+eval/logs/sdfr_csqa_large_clean_test50_49148.log
+eval/logs/sdfr_csqa_large_test50_49145.log
+eval/logs/sdfr_gsm8k_49098.log
+eval/logs/sdfr_gsm8k_49099.log
+eval/logs/sdfr_gsm8k_49105.log
+eval/logs/sdfr_gsm8k_alif_49203.log
+eval/logs/sdfr_gsm8k_alif_v2_49304.log
+eval/logs/sdfr_gsm8k_qalb_49220.log
+eval/logs/sdfr_gsm8k_qalb_test50_49218.log
+eval/logs/sdfr_gsm8k_qalb_v2_49299.log
+eval/logs/sdfr_gsm8k_qalb_v2_test50_49297.log
+eval/logs/sdfr_piqa_49102.log
+eval/logs/sdfr_piqa_49108.log
+eval/logs/sdfr_piqa_alif_49206.log
+eval/logs/sdfr_piqa_alif_49208.log
+eval/logs/sdfr_piqa_alif_v2_49212.log
+eval/logs/sdfr_piqa_alif_v2_test50_49211.log
+eval/logs/sdfr_piqa_qalb_49221.log
+eval/logs/sdfr_piqa_qalb_v2_49300.log
+eval/logs/sdfr_strategyqa_49103.log
+eval/logs/sdfr_strategyqa_49109.log
+eval/logs_archive/alif/alif_all.err
+eval/logs_archive/alif/alif_all.log
+eval/logs_archive/qalb/qalb_all.err
+eval/logs_archive/qalb/qalb_all.log
+eval/logs_archive/qalb/qalb_rerun.err
+eval/logs_archive/qalb/qalb_rerun.log
+eval/logs_archive/xlt_strategyqa_run.log
+eval/logs_archive/xlt_strategyqa_slurm.err
+eval/logs_archive/xlt_strategyqa_slurm.log
+eval/logs_archive/xlt_strategyqa_v2_slurm.err
+eval/logs_archive/xlt_strategyqa_v2_slurm.log
+eval/sbatch_scripts/build_boolq_large_index.sh
+eval/sbatch_scripts/run_alif_all.sh
+eval/sbatch_scripts/run_qalb_all.sh
+eval/sbatch_scripts/run_qalb_rerun.sh
+eval/sbatch_scripts/sdfr_boolq.sh
+eval/sbatch_scripts/sdfr_boolq_alif.sh
+eval/sbatch_scripts/sdfr_boolq_alif_v2.sh
+eval/sbatch_scripts/sdfr_boolq_alif_v3_test50.sh
+eval/sbatch_scripts/sdfr_boolq_large_passage.sh
+eval/sbatch_scripts/sdfr_boolq_large_passage_test50.sh
+eval/sbatch_scripts/sdfr_boolq_qalb.sh
+eval/sbatch_scripts/sdfr_boolq_qalb_v2.sh
+eval/sbatch_scripts/sdfr_csqa_large.sh
+eval/sbatch_scripts/sdfr_gsm8k.sh
+eval/sbatch_scripts/sdfr_gsm8k_alif.sh
+eval/sbatch_scripts/sdfr_gsm8k_alif_v2.sh
+eval/sbatch_scripts/sdfr_gsm8k_qalb.sh
+eval/sbatch_scripts/sdfr_gsm8k_qalb_test50.sh
+eval/sbatch_scripts/sdfr_gsm8k_qalb_v2.sh
+eval/sbatch_scripts/sdfr_gsm8k_qalb_v2_test50.sh
+eval/sbatch_scripts/sdfr_piqa.sh
+eval/sbatch_scripts/sdfr_piqa_alif.sh
+eval/sbatch_scripts/sdfr_piqa_alif_v2.sh
+eval/sbatch_scripts/sdfr_piqa_alif_v2_test50.sh
+eval/sbatch_scripts/sdfr_piqa_qalb.sh
+eval/sbatch_scripts/sdfr_piqa_qalb_v2.sh
+eval/sbatch_scripts/sdfr_strategyqa.sh
+eval/sdfr_boolq.py
+eval/sdfr_boolq_alif.py
+eval/sdfr_boolq_alif_v2.py
+eval/sdfr_boolq_alif_v3_test50.py
+eval/sdfr_boolq_large_passage.py
+eval/sdfr_boolq_large_passage_test50.py
+eval/sdfr_boolq_qalb.py
+eval/sdfr_boolq_qalb_v2.py
+eval/sdfr_build_boolq_large_index.py
+eval/sdfr_build_indexes.py
+eval/sdfr_csqa.py
+eval/sdfr_csqa_large.py
+eval/sdfr_gsm8k.py
+eval/sdfr_gsm8k_alif.py
+eval/sdfr_gsm8k_alif_test50.py
+eval/sdfr_gsm8k_alif_v2.py
+eval/sdfr_gsm8k_qalb.py
+eval/sdfr_gsm8k_qalb_test50.py
+eval/sdfr_gsm8k_qalb_v2.py
+eval/sdfr_gsm8k_qalb_v2_test50.py
+eval/sdfr_piqa.py
+eval/sdfr_piqa_alif.py
+eval/sdfr_piqa_alif_v2.py
+eval/sdfr_piqa_alif_v2_test50.py
+eval/sdfr_piqa_qalb.py
+eval/sdfr_piqa_qalb_v2.py
+eval/sdfr_prepare_splits.py
+eval/sdfr_strategyqa.py
+eval/sdfr_strategyqa.py.bak
+eval/sdfr_strategyqa_urdu_demos.py
+eval/xlt_exploratory/boolq_xlt_qwen3_14b.py
+eval/xlt_exploratory/csqa_xlt_qwen3_14b.py
+eval/xlt_exploratory/gsm8k_xlt_qwen3_14b.py
+eval/xlt_exploratory/piqa_xlt_qwen3_14b.py
+eval/xlt_exploratory/run_xlt_strategyqa.sh
+eval/xlt_exploratory/strategyqa_xlt_qwen3_14b.py
+experiments.md
+logs/entityfirst12_54797.err
+logs/entityfirst12_54797.out
+logs/entityfirst12_54798.err
+logs/entityfirst12_54798.out
+logs/entityfirst12_54799.err
+logs/entityfirst12_54799.out
+logs/entityground12_v2_54800.err
+logs/entityground12_v2_54800.out
+outputs/boolq/alif_1.0_8b/boolq_cot_alif_1.0_8b.jsonl
+outputs/boolq/alif_1.0_8b/boolq_cot_p2_alif_test50.jsonl
+outputs/boolq/alif_1.0_8b/boolq_cot_p3_alif.jsonl
+outputs/boolq/alif_1.0_8b/boolq_cot_p3_alif_test50.jsonl
+outputs/boolq/deepseek_r1_distill_qwen_7b/boolq_cot_deepseek_r1_distill_qwen_7b.jsonl
+outputs/boolq/deepseek_r1_distill_qwen_7b/boolq_three_shot_deepseek_r1_distill_qwen_7b.jsonl
+outputs/boolq/deepseek_r1_distill_qwen_7b/boolq_zero_shot_deepseek_r1_distill_qwen_7b.jsonl
+outputs/boolq/gemma2_9b_it/boolq_cot_gemma2_9b_it.jsonl
+outputs/boolq/gemma2_9b_it/boolq_three_shot_gemma2_9b_it.jsonl
+outputs/boolq/gemma2_9b_it/boolq_zero_shot_gemma2_9b_it.jsonl
+outputs/boolq/llama3.1_70b_awq/boolq_cot_llama3.1_70b_awq.jsonl
+outputs/boolq/llama3.1_70b_awq/boolq_three_shot_llama3.1_70b_awq.jsonl
+outputs/boolq/llama3.1_70b_awq/boolq_zero_shot_llama3.1_70b_awq.jsonl
+outputs/boolq/meta_llama3.1_8b/boolq_cot_meta_llama3.1_8b.jsonl
+outputs/boolq/meta_llama3.1_8b/boolq_three_shot_meta_llama3.1_8b.jsonl
+outputs/boolq/meta_llama3.1_8b/boolq_zero_shot_meta_llama3.1_8b.jsonl
+outputs/boolq/qalb_1.0_8b/boolq_cot_p2_qalb_test50.jsonl
+outputs/boolq/qalb_1.0_8b/boolq_cot_p3_qalb.jsonl
+outputs/boolq/qalb_1.0_8b/boolq_cot_p3_qalb_test50.jsonl
+outputs/boolq/qalb_1.0_8b/boolq_cot_qalb_1.0_8b.jsonl
+outputs/boolq/qalb_1.0_8b/buggy_v1/boolq_cot_qalb_1.0_8b.jsonl
+outputs/boolq/qwen2.5_1.5b/boolq_cot_qwen2.5_1.5b.jsonl
+outputs/boolq/qwen2.5_1.5b/boolq_three_shot_qwen2.5_1.5b.jsonl
+outputs/boolq/qwen2.5_1.5b/boolq_zero_shot_qwen2.5_1.5b.jsonl
+outputs/boolq/qwen2.5_14b_awq/boolq_cot_qwen2.5_14b_awq.jsonl
+outputs/boolq/qwen2.5_14b_awq/boolq_three_shot_qwen2.5_14b_awq.jsonl
+outputs/boolq/qwen2.5_14b_awq/boolq_zero_shot_qwen2.5_14b_awq.jsonl
+outputs/boolq/qwen2.5_7b/boolq_cot_qwen2.5_7b.jsonl
+outputs/boolq/qwen2.5_7b/boolq_three_shot_qwen2.5_7b.jsonl
+outputs/boolq/qwen2.5_7b/boolq_zero_shot_qwen2.5_7b.jsonl
+outputs/boolq/qwen3_14b/boolq_cot_qwen3_14b.jsonl
+outputs/boolq/qwen3_14b/boolq_three_shot_qwen3_14b.jsonl
+outputs/boolq/qwen3_14b/boolq_zero_shot_qwen3_14b.jsonl
+outputs/boolq/qwen3_14b_p2/boolq_cot_p2_qwen3_14b.jsonl
+outputs/boolq/qwen3_14b_p2/boolq_three_shot_p2_qwen3_14b.jsonl
+outputs/boolq/qwen3_14b_p2/boolq_zero_shot_p2_qwen3_14b.jsonl
+outputs/boolq/qwen3_14b_p3/boolq_cot_p3_qwen3_14b.jsonl
+outputs/boolq/qwen3_14b_p3/boolq_three_shot_p3_qwen3_14b.jsonl
+outputs/boolq/qwen3_14b_p3/boolq_zero_shot_p3_qwen3_14b.jsonl
+outputs/boolq/qwen3_8b/boolq_cot_qwen3_8b.jsonl
+outputs/boolq/qwen3_8b/boolq_three_shot_qwen3_8b.jsonl
+outputs/boolq/qwen3_8b/boolq_zero_shot_qwen3_8b.jsonl
+outputs/csqa/alif_1.0_8b/csqa_cot_alif_1.0_8b.jsonl
+outputs/csqa/alif_1.0_8b/csqa_cot_p2_alif_test50.jsonl
+outputs/csqa/alif_1.0_8b/csqa_cot_p3_alif_test50.jsonl
+outputs/csqa/deepseek_r1_distill_qwen_7b/csqa_cot_deepseek_r1_distill_qwen_7b.jsonl
+outputs/csqa/deepseek_r1_distill_qwen_7b/csqa_three_shot_deepseek_r1_distill_qwen_7b.jsonl
+outputs/csqa/deepseek_r1_distill_qwen_7b/csqa_zero_shot_deepseek_r1_distill_qwen_7b.jsonl
+outputs/csqa/gemma2_9b_it/csqa_cot_gemma2_9b_it.jsonl
+outputs/csqa/gemma2_9b_it/csqa_three_shot_gemma2_9b_it.jsonl
+outputs/csqa/gemma2_9b_it/csqa_zero_shot_gemma2_9b_it.jsonl
+outputs/csqa/llama3.1_70b_awq/csqa_cot_llama3.1_70b_awq.jsonl
+outputs/csqa/llama3.1_70b_awq/csqa_three_shot_llama3.1_70b_awq.jsonl
+outputs/csqa/llama3.1_70b_awq/csqa_zero_shot_llama3.1_70b_awq.jsonl
+outputs/csqa/meta_llama3.1_8b/csqa_cot_meta_llama3.1_8b.jsonl
+outputs/csqa/meta_llama3.1_8b/csqa_three_shot_meta_llama3.1_8b.jsonl
+outputs/csqa/meta_llama3.1_8b/csqa_zero_shot_meta_llama3.1_8b.jsonl
+outputs/csqa/qalb_1.0_8b/buggy_v1/csqa_cot_qalb_1.0_8b.jsonl
+outputs/csqa/qalb_1.0_8b/csqa_cot_p2_qalb_1.0_8b_test50.jsonl
+outputs/csqa/qalb_1.0_8b/csqa_cot_p3_qalb.jsonl
+outputs/csqa/qalb_1.0_8b/csqa_cot_p3_qalb_1.0_8b_test50.jsonl
+outputs/csqa/qalb_1.0_8b/csqa_cot_qalb_1.0_8b.jsonl
+outputs/csqa/qalb_1.0_8b/csqa_cot_qalb_1.0_8b_v2.jsonl
+outputs/csqa/qwen2.5_1.5b/csqa_cot_qwen2.5_1.5b.jsonl
+outputs/csqa/qwen2.5_1.5b/csqa_three_shot_qwen2.5_1.5b.jsonl
+outputs/csqa/qwen2.5_1.5b/csqa_zero_shot_qwen2.5_1.5b.jsonl
+outputs/csqa/qwen2.5_14b_awq/csqa_cot_qwen2.5_14b_awq.jsonl
+outputs/csqa/qwen2.5_14b_awq/csqa_three_shot_qwen2.5_14b_awq.jsonl
+outputs/csqa/qwen2.5_14b_awq/csqa_zero_shot_qwen2.5_14b_awq.jsonl
+outputs/csqa/qwen2.5_7b/csqa_cot_qwen2.5_7b.jsonl
+outputs/csqa/qwen2.5_7b/csqa_three_shot_qwen2.5_7b.jsonl
+outputs/csqa/qwen2.5_7b/csqa_zero_shot_qwen2.5_7b.jsonl
+outputs/csqa/qwen3_14b/csqa_cot_qwen3_14b.jsonl
+outputs/csqa/qwen3_14b/csqa_three_shot_qwen3_14b.jsonl
+outputs/csqa/qwen3_14b/csqa_zero_shot_qwen3_14b.jsonl
+outputs/csqa/qwen3_14b_p2/csqa_cot_p2_qwen3_14b.jsonl
+outputs/csqa/qwen3_14b_p2/csqa_three_shot_p2_qwen3_14b.jsonl
+outputs/csqa/qwen3_14b_p2/csqa_zero_shot_p2_qwen3_14b.jsonl
+outputs/csqa/qwen3_14b_p3/csqa_cot_p3_qwen3_14b.jsonl
+outputs/csqa/qwen3_14b_p3/csqa_three_shot_p3_qwen3_14b.jsonl
+outputs/csqa/qwen3_14b_p3/csqa_zero_shot_p3_qwen3_14b.jsonl
+outputs/csqa/qwen3_8b/csqa_cot_qwen3_8b.jsonl
+outputs/csqa/qwen3_8b/csqa_three_shot_qwen3_8b.jsonl
+outputs/csqa/qwen3_8b/csqa_zero_shot_qwen3_8b.jsonl
+outputs/gsm8k/alif_1.0_8b/gsm8k_cot_alif_1.0_8b.jsonl
+outputs/gsm8k/alif_1.0_8b/gsm8k_cot_p2_alif_test50.jsonl
+outputs/gsm8k/alif_1.0_8b/gsm8k_cot_p3_alif_test50.jsonl
+outputs/gsm8k/deepseek_r1_distill_qwen_7b/gsm8k_cot_deepseek_r1_distill_qwen_7b.jsonl
+outputs/gsm8k/deepseek_r1_distill_qwen_7b/gsm8k_three_shot_deepseek_r1_distill_qwen_7b.jsonl
+outputs/gsm8k/deepseek_r1_distill_qwen_7b/gsm8k_zero_shot_deepseek_r1_distill_qwen_7b.jsonl
+outputs/gsm8k/gemma2_9b_it/gsm8k_cot_gemma2_9b_it.jsonl
+outputs/gsm8k/gemma2_9b_it/gsm8k_three_shot_gemma2_9b_it.jsonl
+outputs/gsm8k/gemma2_9b_it/gsm8k_zero_shot_gemma2_9b_it.jsonl
+outputs/gsm8k/llama3.1_70b_awq/gsm8k_cot_llama3.1_70b_awq.jsonl
+outputs/gsm8k/llama3.1_70b_awq/gsm8k_three_shot_llama3.1_70b_awq.jsonl
+outputs/gsm8k/llama3.1_70b_awq/gsm8k_zero_shot_llama3.1_70b_awq.jsonl
+outputs/gsm8k/meta_llama3.1_8b/gsm8k_cot_meta_llama3.1_8b.jsonl
+outputs/gsm8k/meta_llama3.1_8b/gsm8k_three_shot_meta_llama3.1_8b.jsonl
+outputs/gsm8k/meta_llama3.1_8b/gsm8k_zero_shot_meta_llama3.1_8b.jsonl
+outputs/gsm8k/qalb_1.0_8b/gsm8k_cot_p2_qalb.jsonl
+outputs/gsm8k/qalb_1.0_8b/gsm8k_cot_p2_qalb_test50.jsonl
+outputs/gsm8k/qalb_1.0_8b/gsm8k_cot_p3_qalb.jsonl
+outputs/gsm8k/qalb_1.0_8b/gsm8k_cot_p3_qalb_test50.jsonl
+outputs/gsm8k/qalb_1.0_8b/gsm8k_cot_qalb_1.0_8b.jsonl
+outputs/gsm8k/qwen2.5_1.5b/gsm8k_cot_qwen2.5_1.5b.jsonl
+outputs/gsm8k/qwen2.5_1.5b/gsm8k_three_shot_qwen2.5_1.5b.jsonl
+outputs/gsm8k/qwen2.5_1.5b/gsm8k_zero_shot_qwen2.5_1.5b.jsonl
+outputs/gsm8k/qwen2.5_14b_awq/gsm8k_cot_qwen2.5_14b_awq.jsonl
+outputs/gsm8k/qwen2.5_14b_awq/gsm8k_three_shot_qwen2.5_14b_awq.jsonl
+outputs/gsm8k/qwen2.5_14b_awq/gsm8k_zero_shot_qwen2.5_14b_awq.jsonl
+outputs/gsm8k/qwen2.5_7b/gsm8k_cot_qwen2.5_7b.jsonl
+outputs/gsm8k/qwen2.5_7b/gsm8k_three_shot_qwen2.5_7b.jsonl
+outputs/gsm8k/qwen2.5_7b/gsm8k_zero_shot_qwen2.5_7b.jsonl
+outputs/gsm8k/qwen3_14b/gsm8k_cot_qwen3_14b.jsonl
+outputs/gsm8k/qwen3_14b/gsm8k_three_shot_qwen3_14b.jsonl
+outputs/gsm8k/qwen3_14b/gsm8k_zero_shot_qwen3_14b.jsonl
+outputs/gsm8k/qwen3_14b_p2/gsm8k_cot_p2_qwen3_14b.jsonl
+outputs/gsm8k/qwen3_14b_p2/gsm8k_three_shot_p2_qwen3_14b.jsonl
+outputs/gsm8k/qwen3_14b_p2/gsm8k_zero_shot_p2_qwen3_14b.jsonl
+outputs/gsm8k/qwen3_14b_p3/gsm8k_cot_p3_qwen3_14b.jsonl
+outputs/gsm8k/qwen3_14b_p3/gsm8k_three_shot_p3_qwen3_14b.jsonl
+outputs/gsm8k/qwen3_14b_p3/gsm8k_zero_shot_p3_qwen3_14b.jsonl
+outputs/gsm8k/qwen3_8b/gsm8k_cot_qwen3_8b.jsonl
+outputs/gsm8k/qwen3_8b/gsm8k_three_shot_qwen3_8b.jsonl
+outputs/gsm8k/qwen3_8b/gsm8k_zero_shot_qwen3_8b.jsonl
+outputs/piqa/alif_1.0_8b/piqa_cot_alif_1.0_8b.jsonl
+outputs/piqa/alif_1.0_8b/piqa_cot_p2_alif_test50.jsonl
+outputs/piqa/alif_1.0_8b/piqa_cot_p3_alif_test50.jsonl
+outputs/piqa/deepseek_r1_distill_qwen_7b/piqa_cot_deepseek_r1_distill_qwen_7b.jsonl
+outputs/piqa/deepseek_r1_distill_qwen_7b/piqa_three_shot_deepseek_r1_distill_qwen_7b.jsonl
+outputs/piqa/deepseek_r1_distill_qwen_7b/piqa_zero_shot_deepseek_r1_distill_qwen_7b.jsonl
+outputs/piqa/gemma2_9b_it/piqa_cot_gemma2_9b_it.jsonl
+outputs/piqa/gemma2_9b_it/piqa_three_shot_gemma2_9b_it.jsonl
+outputs/piqa/gemma2_9b_it/piqa_zero_shot_gemma2_9b_it.jsonl
+outputs/piqa/llama3.1_70b_awq/piqa_cot_llama3.1_70b_awq.jsonl
+outputs/piqa/llama3.1_70b_awq/piqa_three_shot_llama3.1_70b_awq.jsonl
+outputs/piqa/llama3.1_70b_awq/piqa_zero_shot_llama3.1_70b_awq.jsonl
+outputs/piqa/meta_llama3.1_8b/piqa_cot_meta_llama3.1_8b.jsonl
+outputs/piqa/meta_llama3.1_8b/piqa_three_shot_meta_llama3.1_8b.jsonl
+outputs/piqa/meta_llama3.1_8b/piqa_zero_shot_meta_llama3.1_8b.jsonl
+outputs/piqa/qalb_1.0_8b/buggy_v1/piqa_cot_qalb_1.0_8b.jsonl
+outputs/piqa/qalb_1.0_8b/piqa_cot_p2_qalb_test50.jsonl
+outputs/piqa/qalb_1.0_8b/piqa_cot_p3_qalb_test50.jsonl
+outputs/piqa/qalb_1.0_8b/piqa_cot_qalb_1.0_8b.jsonl
+outputs/piqa/qwen2.5_1.5b/piqa_cot_qwen2.5_1.5b.jsonl
+outputs/piqa/qwen2.5_1.5b/piqa_three_shot_qwen2.5_1.5b.jsonl
+outputs/piqa/qwen2.5_1.5b/piqa_zero_shot_qwen2.5_1.5b.jsonl
+outputs/piqa/qwen2.5_14b_awq/piqa_cot_qwen2.5_14b_awq.jsonl
+outputs/piqa/qwen2.5_14b_awq/piqa_three_shot_qwen2.5_14b_awq.jsonl
+outputs/piqa/qwen2.5_14b_awq/piqa_zero_shot_qwen2.5_14b_awq.jsonl
+outputs/piqa/qwen2.5_7b/piqa_cot_qwen2.5_7b.jsonl
+outputs/piqa/qwen2.5_7b/piqa_three_shot_qwen2.5_7b.jsonl
+outputs/piqa/qwen2.5_7b/piqa_zero_shot_qwen2.5_7b.jsonl
+outputs/piqa/qwen3_14b/piqa_cot_qwen3_14b.jsonl
+outputs/piqa/qwen3_14b/piqa_three_shot_qwen3_14b.jsonl
+outputs/piqa/qwen3_14b/piqa_zero_shot_qwen3_14b.jsonl
+outputs/piqa/qwen3_14b_p2/piqa_cot_p2_qwen3_14b.jsonl
+outputs/piqa/qwen3_14b_p2/piqa_three_shot_p2_qwen3_14b.jsonl
+outputs/piqa/qwen3_14b_p2/piqa_zero_shot_p2_qwen3_14b.jsonl
+outputs/piqa/qwen3_14b_p3/piqa_cot_p3_qwen3_14b.jsonl
+outputs/piqa/qwen3_14b_p3/piqa_three_shot_p3_qwen3_14b.jsonl
+outputs/piqa/qwen3_14b_p3/piqa_zero_shot_p3_qwen3_14b.jsonl
+outputs/piqa/qwen3_8b/piqa_cot_qwen3_8b.jsonl
+outputs/piqa/qwen3_8b/piqa_three_shot_qwen3_8b.jsonl
+outputs/piqa/qwen3_8b/piqa_zero_shot_qwen3_8b.jsonl
+outputs/sdfr/control_both_right.md
+outputs/sdfr/cot_csqa_baseline_fair_qwen3_14b.jsonl
+outputs/sdfr/cot_gsm8k_baseline_fair_qwen3_14b.jsonl
+outputs/sdfr/cot_piqa_baseline_fair_qwen3_14b.jsonl
+outputs/sdfr/cot_strategyqa_nofacts_baseline_fair_qwen3_14b.jsonl
+outputs/sdfr/errors_csqa.md
+outputs/sdfr/errors_strategyqa.md
+outputs/sdfr/flip_cases.md
+outputs/sdfr/probe_genread_gate_test50.jsonl
+outputs/sdfr/probe_strategyqa_factretrieval_test50.jsonl
+outputs/sdfr/sdfr_boolq_alif_1.0_8b.jsonl
+outputs/sdfr/sdfr_boolq_alif_v2_1.0_8b.jsonl
+outputs/sdfr/sdfr_boolq_alif_v3_test50.jsonl
+outputs/sdfr/sdfr_boolq_large_passage_qwen3_14b.jsonl
+outputs/sdfr/sdfr_boolq_large_passage_test50_qwen3_14b.jsonl
+outputs/sdfr/sdfr_boolq_qalb_1.0_8b.jsonl
+outputs/sdfr/sdfr_boolq_qalb_v2_1.0_8b.jsonl
+outputs/sdfr/sdfr_boolq_qwen3_14b.jsonl
+outputs/sdfr/sdfr_csqa_large_clean_qwen3_14b.jsonl
+outputs/sdfr/sdfr_csqa_large_clean_qwen3_14b.jsonl.orig300
+outputs/sdfr/sdfr_csqa_thinking_qwen3_14b.jsonl
+outputs/sdfr/sdfr_gsm8k_alif_1.0_8b.jsonl
+outputs/sdfr/sdfr_gsm8k_alif_1.0_8b_test50.jsonl
+outputs/sdfr/sdfr_gsm8k_alif_v2_1.0_8b.jsonl
+outputs/sdfr/sdfr_gsm8k_fair_qwen3_14b.jsonl
+outputs/sdfr/sdfr_gsm8k_qalb_1.0_8b.jsonl
+outputs/sdfr/sdfr_gsm8k_qalb_test50.jsonl
+outputs/sdfr/sdfr_gsm8k_qalb_v2_1.0_8b.jsonl
+outputs/sdfr/sdfr_gsm8k_qalb_v2_test50.jsonl
+outputs/sdfr/sdfr_gsm8k_qwen3_14b.jsonl
+outputs/sdfr/sdfr_piqa_alif_1.0_8b.jsonl
+outputs/sdfr/sdfr_piqa_alif_v2_1.0_8b.jsonl
+outputs/sdfr/sdfr_piqa_alif_v2_test50.jsonl
+outputs/sdfr/sdfr_piqa_fair_qwen3_14b.jsonl
+outputs/sdfr/sdfr_piqa_qalb_1.0_8b.jsonl
+outputs/sdfr/sdfr_piqa_qalb_v2_1.0_8b.jsonl
+outputs/sdfr/sdfr_piqa_qwen3_14b.jsonl
+outputs/sdfr/sdfr_strategyqa_fair_qwen3_14b.jsonl
+outputs/sdfr/sdfr_strategyqa_qwen3_14b.jsonl
+outputs/sdfr/sdfr_strategyqa_qwen3_14b.jsonl.orig458
+outputs/sdfr/sdfr_strategyqa_urdu_demos_qwen3_14b.jsonl
+outputs/sdfr/sdfr_strategyqa_withfacts_qwen3_14b.jsonl
+outputs/strategyqa/alif_1.0_8b/strategyqa_cot_alif_1.0_8b.jsonl
+outputs/strategyqa/alif_1.0_8b/strategyqa_cot_alif_test50.jsonl
+outputs/strategyqa/alif_1.0_8b/strategyqa_cot_p2_alif_test50.jsonl
+outputs/strategyqa/alif_1.0_8b/strategyqa_cot_p3_alif_test50.jsonl
+outputs/strategyqa/alif_1.0_8b/strategyqa_ep_cot_alif_test50.jsonl
+outputs/strategyqa/deepseek_r1_distill_qwen_7b/strategyqa_cot_deepseek_r1_distill_qwen_7b.jsonl
+outputs/strategyqa/deepseek_r1_distill_qwen_7b/strategyqa_three_shot_deepseek_r1_distill_qwen_7b.jsonl
+outputs/strategyqa/deepseek_r1_distill_qwen_7b/strategyqa_zero_shot_deepseek_r1_distill_qwen_7b.jsonl
+outputs/strategyqa/gemma2_9b_it/strategyqa_cot_gemma2_9b_it.jsonl
+outputs/strategyqa/gemma2_9b_it/strategyqa_three_shot_gemma2_9b_it.jsonl
+outputs/strategyqa/gemma2_9b_it/strategyqa_zero_shot_gemma2_9b_it.jsonl
+outputs/strategyqa/llama3.1_70b_awq/strategyqa_cot_llama3.1_70b_awq.jsonl
+outputs/strategyqa/llama3.1_70b_awq/strategyqa_three_shot_llama3.1_70b_awq.jsonl
+outputs/strategyqa/llama3.1_70b_awq/strategyqa_zero_shot_llama3.1_70b_awq.jsonl
+outputs/strategyqa/meta_llama3.1_8b/strategyqa_cot_meta_llama3.1_8b.jsonl
+outputs/strategyqa/meta_llama3.1_8b/strategyqa_three_shot_meta_llama3.1_8b.jsonl
+outputs/strategyqa/meta_llama3.1_8b/strategyqa_zero_shot_meta_llama3.1_8b.jsonl
+outputs/strategyqa/qalb_1.0_8b/strategyqa_cot_p2_qalb_test50.jsonl
+outputs/strategyqa/qalb_1.0_8b/strategyqa_cot_p3_qalb_test50.jsonl
+outputs/strategyqa/qalb_1.0_8b/strategyqa_cot_qalb_1.0_8b.jsonl
+outputs/strategyqa/qalb_1.0_8b/strategyqa_ep_cot_qalb_test50.jsonl
+outputs/strategyqa/qalb_1.0_8b/test_runs/strategyqa_cot_qalb_test50.jsonl
+outputs/strategyqa/qwen2.5_1.5b/strategyqa_cot_qwen2.5_1.5b.jsonl
+outputs/strategyqa/qwen2.5_1.5b/strategyqa_three_shot_qwen2.5_1.5b.jsonl
+outputs/strategyqa/qwen2.5_1.5b/strategyqa_zero_shot_qwen2.5_1.5b.jsonl
+outputs/strategyqa/qwen2.5_14b_awq/strategyqa_cot_qwen2.5_14b_awq.jsonl
+outputs/strategyqa/qwen2.5_14b_awq/strategyqa_three_shot_qwen2.5_14b_awq.jsonl
+outputs/strategyqa/qwen2.5_14b_awq/strategyqa_zero_shot_qwen2.5_14b_awq.jsonl
+outputs/strategyqa/qwen2.5_7b/strategyqa_cot_qwen2.5_7b.jsonl
+outputs/strategyqa/qwen2.5_7b/strategyqa_three_shot_qwen2.5_7b.jsonl
+outputs/strategyqa/qwen2.5_7b/strategyqa_zero_shot_qwen2.5_7b.jsonl
+outputs/strategyqa/qwen3_14b/strategyqa_cot_qwen3_14b.jsonl
+outputs/strategyqa/qwen3_14b/strategyqa_three_shot_qwen3_14b.jsonl
+outputs/strategyqa/qwen3_14b/strategyqa_zero_shot_qwen3_14b.jsonl
+outputs/strategyqa/qwen3_14b/xlt_exploratory/strategyqa_xlt_qwen3_14b.jsonl
+outputs/strategyqa/qwen3_14b/xlt_exploratory/strategyqa_xlt_v2_qwen3_14b.jsonl
+outputs/strategyqa/qwen3_14b/xlt_exploratory/strategyqa_xlt_v3_test50_qwen3_14b.jsonl
+outputs/strategyqa/qwen3_14b_p2/strategyqa_cot_p2_qwen3_14b.jsonl
+outputs/strategyqa/qwen3_14b_p2/strategyqa_three_shot_p2_qwen3_14b.jsonl
+outputs/strategyqa/qwen3_14b_p2/strategyqa_zero_shot_p2_qwen3_14b.jsonl
+outputs/strategyqa/qwen3_14b_p3/strategyqa_cot_p3_qwen3_14b.jsonl
+outputs/strategyqa/qwen3_14b_p3/strategyqa_three_shot_p3_qwen3_14b.jsonl
+outputs/strategyqa/qwen3_14b_p3/strategyqa_zero_shot_p3_qwen3_14b.jsonl
+outputs/strategyqa/qwen3_8b/strategyqa_cot_qwen3_8b.jsonl
+outputs/strategyqa/qwen3_8b/strategyqa_three_shot_qwen3_8b.jsonl
+outputs/strategyqa/qwen3_8b/strategyqa_zero_shot_qwen3_8b.jsonl
 prompts/boolq/cot_p1.txt
 prompts/boolq/cot_p2.txt
 prompts/boolq/cot_p3.txt
@@ -247,63 +639,93 @@ prompts/xlt_exploratory/csqa_xlt1.txt
 prompts/xlt_exploratory/gsm8k_xlt1.txt
 prompts/xlt_exploratory/piqa_xlt1.txt
 prompts/xlt_exploratory/strategyqa_xlt1.txt
-
-=== DATA files (depth 2) ===
-data/archive/strategyQA_train_ur2_norm.jsonl
-data/boolq_raw/boolq_train_1550_en.jsonl
-data/boolq_raw/boolq_train_1550_ur_fixed.jsonl
-data/csqa_raw/csqa_train_1500_en.jsonl
-data/csqa_raw/csqa_train_1500_ur.jsonl
-data/gsm8k_raw/gsm8k_main_train_700.jsonl
-data/gsm8k_raw/gsm8k_main_train_700_ur.jsonl
-data/piqa_raw/piqa_train_750.jsonl
-data/piqa_raw/piqa_train_750_ur_fixed.jsonl
-data/retrieval_pools/boolq_train.parquet
-data/retrieval_pools/gsm8k_train_en.jsonl
-data/sdfr_indexes/boolq_embeddings.npy
-data/sdfr_indexes/boolq_faiss.index
-data/sdfr_indexes/boolq_large_passage_embeddings.npy
-data/sdfr_indexes/boolq_large_passage_faiss.index
-data/sdfr_indexes/csqa_embeddings.npy
-data/sdfr_indexes/csqa_faiss.index
-data/sdfr_indexes/csqa_large_clean_embeddings.npy
-data/sdfr_indexes/csqa_large_clean_faiss.index
-data/sdfr_indexes/gsm8k_embeddings.npy
-data/sdfr_indexes/gsm8k_faiss.index
-data/sdfr_indexes/piqa_embeddings.npy
-data/sdfr_indexes/piqa_faiss.index
-data/sdfr_indexes/strategyqa_embeddings.npy
-data/sdfr_indexes/strategyqa_faiss.index
-data/sdfr_splits/boolq_eval.jsonl
-data/sdfr_splits/boolq_pool.jsonl
-data/sdfr_splits/boolq_pool_large_clean.jsonl
-data/sdfr_splits/csqa_eval.jsonl
-data/sdfr_splits/csqa_pool.jsonl
-data/sdfr_splits/csqa_pool_large_clean.jsonl
-data/sdfr_splits/gsm8k_eval.jsonl
-data/sdfr_splits/gsm8k_pool.jsonl
-data/sdfr_splits/piqa_eval.jsonl
-data/sdfr_splits/piqa_pool.jsonl
-data/sdfr_splits/strategyqa_eval.jsonl
-data/sdfr_splits/strategyqa_pool.jsonl
-data/sdfr_splits/strategyqa_pool_urdu.jsonl
-data/strategyqa_raw/strategyQA_train.json
-data/strategyqa_raw/strategyQA_train_ur2_norm.jsonl
-
-=== rag/ (excl big index+chunks) ===
 rag/build_chunks.py
-rag/build_index_full.py
 rag/build_index.py
+rag/build_index_full.py
 rag/build_index_sample.py
 rag/build_sample_1m.py
+rag/chunks/filtered_chunks.jsonl
+rag/chunks/sample_1m.jsonl
+rag/chunks/wikipedia_chunks.jsonl
+rag/diag_query_formulation.py
 rag/eval_rag_final.py
 rag/filter_chunks.py
+rag/index/chunks.jsonl
+rag/index/sample_1m.index
+rag/index/sample_1m_meta.jsonl
+rag/index/shards/shard_0000.npy
+rag/index/shards/shard_0001.npy
+rag/index/shards/shard_0002.npy
+rag/index/shards/shard_0003.npy
+rag/index/shards/shard_0004.npy
+rag/index/shards/shard_0005.npy
+rag/index/shards/shard_0006.npy
+rag/index/shards/shard_0007.npy
+rag/index/shards/shard_0008.npy
+rag/index/shards/shard_0009.npy
+rag/index/shards/shard_0010.npy
+rag/index/shards/shard_0011.npy
+rag/index/shards/shard_0012.npy
+rag/index/shards/shard_0013.npy
+rag/index/shards/shard_0014.npy
+rag/index/shards/shard_0015.npy
+rag/index/shards/shard_0016.npy
+rag/index/shards/shard_0017.npy
+rag/index/shards/shard_0018.npy
+rag/index/shards/shard_0019.npy
+rag/index/shards/shard_0020.npy
+rag/index/shards/shard_0021.npy
+rag/index/shards/shard_0022.npy
+rag/index/shards/shard_0023.npy
+rag/index/shards/shard_0024.npy
+rag/index/shards/shard_0025.npy
+rag/index/shards/shard_0026.npy
+rag/index/shards/shard_0027.npy
+rag/index/shards/shard_0028.npy
+rag/index/shards/shard_0029.npy
+rag/index/shards/shard_0030.npy
+rag/index/shards/shard_0031.npy
+rag/index/shards/shard_0032.npy
+rag/index/shards/shard_0033.npy
+rag/index/shards/shard_0034.npy
+rag/index/shards/shard_0035.npy
+rag/index/shards/shard_0036.npy
+rag/index/shards/shard_0037.npy
+rag/index/shards/shard_0038.npy
+rag/index/shards/shard_0039.npy
+rag/index/shards/shard_0040.npy
+rag/index/shards/shard_0041.npy
+rag/index/shards/shard_0042.npy
+rag/index/shards/shard_0043.npy
+rag/index/shards/shard_0044.npy
+rag/index/shards/shard_0045.npy
+rag/index/shards/shard_0046.npy
+rag/index/shards/shard_0047.npy
+rag/index/wikipedia.index
+rag/index/wikipedia_full.index
+rag/index/wikipedia_full_meta.jsonl
+rag/index/wikipedia_full_meta.offsets.npy
 rag/merge_shards.py
 rag/outputs/rag_strategyqa_qwen3_14b_final.jsonl
+rag/retrieve.py
 rag/run_index_full.slurm
 rag/run_merge.slurm
 rag/test_retrieval.py
-
-=== index/chunks sizes only ===
-96G	rag/index
-26G	rag/chunks
+rag_failures_sample.txt
+requirements.txt
+scripts/export_boolq_1550.py
+scripts/export_csqa_1500.py
+scripts/export_gsm8k_main_700.py
+scripts/export_piqa_750_baber.py
+scripts/fix_ans.py
+scripts/normalize_digits.py
+scripts/repair_boolq_errors.py
+scripts/repair_piqa_errors.py
+scripts/run_eval.py
+scripts/translate_boolq_1550.py
+scripts/translate_csqa_1500.py
+scripts/translate_gsm8k_main_700.py
+scripts/translate_piqa_750_baber.py
+scripts/translation.py
+sqa_inspect.txt
+urbench_repo.zip
