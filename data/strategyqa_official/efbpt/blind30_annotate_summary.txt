@@ -1,0 +1,8 @@
+BLIND30 ANNOTATION — schema v2 (no gold; feeds human reviewer)
+============================================================
+rows annotated              : 30 / 30
+structural failures         : 0 (parse/missing/dup/unknown titles)
+title decisions emitted     : 94
+decisions marked true       : 46
+rows with extra_entities    : 2
+reason counts               : {'check': 150, 'extra_entities': 2}
