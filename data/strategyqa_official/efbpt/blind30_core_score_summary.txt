@@ -1,0 +1,31 @@
+STAGE 3 DEV SCORE — agreement routing vs gold (BLIND30 = dev data)
+==================================================================
+accepted coverage        : 10/30 = 33.3%
+accepted precision (rows): 7/10 = 70.0%
+FALSE ACCEPTS (primary)  : 3
+    16338eab: ['entities']
+    6b86b444: ['entities']
+    722dc38b: ['entities']
+true rejects             : 13
+FALSE REJECTS            : 7
+    4ba70839: reject reasons ['disagree_ref:step1']
+    52a5095c: reject reasons ['disagree_at:step1']
+    55ce9ac2: reject reasons ['disagree_at:step1']
+    63e55313: reject reasons ['disagree_span:archduke franz ferdinand of austria']
+    8cab175f: reject reasons ['disagree_span:dafne keen']
+    c6ca93e6: reject reasons ['orig_step_ids_mismatch']
+    e1463ddc: reject reasons ['disagree_entity_set']
+
+ACCEPTED-ROW FIELD ACCURACY vs gold:
+  entity set exact : 70.0% (n=10)
+  urdu_span        : 100.0% (n=17)
+  step type        : 100.0% (n=28)
+  entity_ref       : 100.0% (n=28)
+  answer type      : 100.0% (n=28)
+
+projection: accepted pool ~590 / 1770 (n=30, operational only)
+rejected rows are DROPPED (workload = 0), not manually repaired.
+
+NOTE: 100% universe recall guaranteed availability, not correctness.
+This is development data. Fresh-sample gate (frozen): coverage >=60%
+AND accepted core precision >=95% (+ per-field >=95%, no systematic error).

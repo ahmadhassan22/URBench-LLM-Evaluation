@@ -1,0 +1,257 @@
+BLIND30 GOLD-AUDIT PACKET (gold only; no pipeline output shown)
+==================================================================
+Policy reminder (frozen Schema-v2): a title is a question_entity if
+the question refers to the entity by its name, a different word-form,
+a descriptive phrase, or an Urdu word for it. Generic concepts
+(e.g. Monogamy, Sonnet, Hand) ARE entities under this rule. The term
+entity is (almost) always present. Each accepted entity needs an
+Urdu span that occurs verbatim in the Urdu question.
+
+CHECK EACH ROW:
+  [ ] Is the TERM entity present in gold? (usually yes)
+  [ ] Does the question name any OTHER entity (incl. generic concept)
+      that is missing from gold?
+  [ ] Is any listed gold entity NOT actually referred to? (over-include)
+  [ ] Empty gold entities: is that truly correct, or an omission?
+
+==================================================================
+
+ROW 01  00dc05718aedf2370213
+  EN   : Did either Kublai Khan or his grandfather practice monogamy?
+  UR   : کیا کبلائی خان یا اس کے دادا نے یک زوجیت اختیار کی؟
+  TERM : Monogamy
+  EVIDENCE PAGES : ['Kublai Khan', 'Genghis Khan']
+  CURRENT GOLD ENTITIES : ['Kublai Khan', 'Genghis Khan', 'Monogamy']
+  verdict (OK / ADD:<title> / REMOVE:<title>): Ok
+
+ROW 02  038d2f23ebc149069a74
+  EN   : Is Issac Newton often associated with a red fruit?
+  UR   : کیا آئزک نیوٹن کو اکثر ایک سرخ پھل کے ساتھ منسوب کیا جاتا ہے؟
+  TERM : Isaac Newton
+  EVIDENCE PAGES : ['Isaac Newton', 'Apple', 'Gala (apple)']
+  CURRENT GOLD ENTITIES : ['Isaac Newton', 'Apple']
+  verdict (OK / ADD:<title> / REMOVE:<title>): REMOVE:Apple
+
+ROW 03  1335c853d7f61866345a
+  EN   : Could Jamie Brewer have attended the United States Naval Academy?
+  UR   : کیا جیمی بریئر یونائیٹڈ اسٹیٹس نیول اکیڈمی میں داخلہ لے سکتی تھیں؟
+  TERM : United States Naval Academy
+  EVIDENCE PAGES : ['Jamie Brewer', 'New York Fashion Week', 'Basic Military Qualification', 'United States Naval Academy']
+  CURRENT GOLD ENTITIES : ['Jamie Brewer', 'United States Naval Academy']
+  verdict (OK / ADD:<title> / REMOVE:<title>): Ok
+
+ROW 04  16338eaba71f146a0c40
+  EN   : Does the central processing unit usually have a dedicated fan?
+  UR   : کیا مرکزی عمل کاری یونٹ کے پاس عام طور پر ایک مخصوص پنکھا ہوتا ہے؟
+  TERM : Central processing unit
+  EVIDENCE PAGES : ['CPU core voltage', 'Central processing unit', 'Computer cooling', 'Computer fan']
+  CURRENT GOLD ENTITIES : ['Central processing unit']
+  verdict (OK / ADD:<title> / REMOVE:<title>): ADD:Computer fan | span: پنکھا
+
+ROW 05  1a015715a9ffcfb67c8e
+  EN   : Are honey badgers and hyenas anatomically dissimilar? 
+  UR   : کیا شہد کے بچھڑے اور ہائینا کی جسمانی ساخت مختلف ہے؟
+  TERM : Honey badger
+  EVIDENCE PAGES : ['Honey badger', 'Hyena']
+  CURRENT GOLD ENTITIES : ['Honey badger', 'Hyena']
+  verdict (OK / ADD:<title> / REMOVE:<title>): Ok
+
+ROW 06  27b84ef72c557aa8fc14
+  EN   : Is watermelon safe for people with a tricarboxylic acid allergy?
+  UR   : کیا تربوز تین کاربوکسیلک ایسڈ کی الرجی والے افراد کے لیے محفوظ ہے؟
+  TERM : Watermelon
+  EVIDENCE PAGES : ['Tricarboxylic acid', 'Citric acid', 'Citrus', 'Watermelon']
+  CURRENT GOLD ENTITIES : ['Watermelon', 'Tricarboxylic acid']
+  verdict (OK / ADD:<title> / REMOVE:<title>): Ok
+
+ROW 07  29ee7da0020eb03888fb
+  EN   : Does coding rely on Boolean algebra characters?
+  UR   : کیا کوڈنگ بولین الجبرا کے حروف پر منحصر ہے؟
+  TERM : Boolean algebra
+  EVIDENCE PAGES : ['Boolean algebra', 'Binary code']
+  CURRENT GOLD ENTITIES : ['Boolean algebra']
+  verdict (OK / ADD:<title> / REMOVE:<title>): ADD:Computer programming | span: کوڈنگ
+
+ROW 08  2bfe7f37f939ee456600
+  EN   : Is it impossible for pigs to use pig latin?
+  UR   : کیا سوروں کے لیے پگ لاطینی استعمال کرنا ناممکن ہے؟
+  TERM : Pig Latin
+  EVIDENCE PAGES : ['Pig Latin', 'English language', 'Great ape language', 'Human', 'Language']
+  CURRENT GOLD ENTITIES : ['Pig Latin']
+  verdict (OK / ADD:<title> / REMOVE:<title>): ADD:Pig | span: سوروں
+
+ROW 09  3b5ee7309f79042c8c9e
+  EN   : Is metal a type of folk music?
+  UR   : کیا میٹل موسیقی لوک موسیقی کی قسم ہے؟
+  TERM : Folk music
+  EVIDENCE PAGES : ['Folk music', 'Heavy metal music']
+  CURRENT GOLD ENTITIES : ['Folk music', 'Heavy metal music']
+  verdict (OK / ADD:<title> / REMOVE:<title>): Ok
+
+ROW 10  46a30058a6a81a3b08df
+  EN   : Do citizens of Cheshire sing La Marseillaise?
+  UR   : کیا چیشائر کے شہری لا مارسیلیز گاتے ہیں؟
+  TERM : Cheshire
+  EVIDENCE PAGES : ['La Marseillaise', 'Cheshire']
+  CURRENT GOLD ENTITIES : ['Cheshire', 'La Marseillaise']
+  verdict (OK / ADD:<title> / REMOVE:<title>): Ok
+ROW 11  4ba70839df733c61f9a5
+  EN   : Do you need to worry about Zika virus in Antarctica? 
+  UR   : کیا آپ کو انٹارکٹیکا میں زیکا وائرس کی فکر کرنی چاہیے؟
+  TERM : Zika virus
+  EVIDENCE PAGES : ['Aedes', 'Zika fever', 'Zika virus', 'Antarctica', 'Mosquito']
+  CURRENT GOLD ENTITIES : ['Zika virus', 'Antarctica']
+  verdict (OK / ADD:<title> / REMOVE:<title>): Ok
+
+ROW 12  52a5095ce9ac6b3c7ae0
+  EN   : Can a software engineer work during a power outage?
+  UR   : کیا سافٹ ویئر انجینئر بجلی کے بند ہونے کے دوران کام کر سکتا ہے؟
+  TERM : Software engineer
+  EVIDENCE PAGES : ['Software engineer', 'Software engineering', 'Power outage', 'Computer']
+  CURRENT GOLD ENTITIES : ['Software engineer', 'Power outage']
+  verdict (OK / ADD:<title> / REMOVE:<title>): Ok
+
+ROW 13  52e1b2df624813a9d66b
+  EN   : Could someone in the Canary Islands fish for largemouth bass?
+  UR   : کیا کینری جزائر میں کوئی بڑا منہ باس مچھلی پکڑ سکتا ہے؟
+  TERM : Canary Islands
+  EVIDENCE PAGES : ['Largemouth bass', 'Canary Islands', 'Archipelago', 'Atlantic Ocean', 'Saline water']
+  CURRENT GOLD ENTITIES : ['Canary Islands', 'Largemouth bass']
+  verdict (OK / ADD:<title> / REMOVE:<title>): Ok
+
+ROW 14  55ce9ac27a4bd4e627dc
+  EN   : Can a New Yorker get their eyes checked by Rand Paul legally?
+  UR   : کیا کوئی نیو یارکر قانونی طور پر رینڈ پال سے اپنی آنکھوں کا معائنہ کروا سکتا ہے؟
+  TERM : Rand Paul
+  EVIDENCE PAGES : ['Ophthalmology', 'Rand Paul']
+  CURRENT GOLD ENTITIES : ['Rand Paul']
+  verdict (OK / ADD:<title> / REMOVE:<title>): Ok
+
+ROW 15  59542ff1d7782e4cbd89
+  EN   : Do Windows or Android smartphones run newer versions of Linux?
+  UR   : کیا ونڈوز یا اینڈرائیڈ اسمارٹ فونز لینکس کے نئے ورژنز چلاتے ہیں؟
+  TERM : Linux
+  EVIDENCE PAGES : ['Windows 10 Mobile', 'Windows Phone', 'Android (operating system)', 'Android 11', 'Linux']
+  CURRENT GOLD ENTITIES : ['Android (operating system)', 'Linux', 'Windows Phone']
+  verdict (OK / ADD:<title> / REMOVE:<title>): ADD:Smartphone | span: اسمارٹ فونز , FIXSPAN:Android (operating system)=اینڈرائیڈ
+
+ROW 16  6042b48035952d0e1a61
+  EN   : Would an astrologer focus on the densest terrestrial planet for a Friday horoscope?
+  UR   : کیا ایک ماہر نجوم جمعہ کے برج کے لیے سب سے زیادہ کثیف زمینی سیارے پر توجہ دے گا؟
+  TERM : Friday
+  EVIDENCE PAGES : ['Friday', 'Planetary hours', 'Outline of Venus', 'Venus']
+  CURRENT GOLD ENTITIES : ['Friday']
+  verdict (OK / ADD:<title> / REMOVE:<title>): ADD:Astrology | span: ماہر نجوم 
+  note: source dataset factually questionable — Earth (5.51 g/cm³) is denser than Venus (5.24 g/cm³), so "densest terrestrial planet"→Venus premise is wrong; entity audit unaffected
+
+ROW 17  63e55313ae5cbb20dc0c
+  EN   : Did Archduke Franz Ferdinand of Austria participate in the Pacific War?
+  UR   : کیا آسٹریا کے آرچڈیوک فرینز فرڈینینڈ نے پیسیفک جنگ میں حصہ لیا؟
+  TERM : Pacific War
+  EVIDENCE PAGES : ['Pacific War', 'Archduke Franz Ferdinand of Austria', 'Assassination of Archduke Franz Ferdinand']
+  CURRENT GOLD ENTITIES : ['Pacific War', 'Archduke Franz Ferdinand of Austria']
+  verdict (OK / ADD:<title> / REMOVE:<title>): Ok
+
+ROW 18  65557713351aed7519b8
+  EN   : Could someone have arrived at Wrestlemania X in a Toyota Prius?
+  UR   : کیا کوئی ٹویوٹا پریئس میں ریسل مینیا ایکس پر پہنچ سکتا تھا؟
+  TERM : Toyota Prius
+  EVIDENCE PAGES : ['WrestleMania X', 'Toyota Prius']
+  CURRENT GOLD ENTITIES : ['WrestleMania X', 'Toyota Prius']
+  verdict (OK / ADD:<title> / REMOVE:<title>): Ok
+
+ROW 19  6b86b4445e7fa97f52c6
+  EN   : Does a person need a college degree to become a bartender?
+  UR   : کیا بارٹینڈر بننے کے لیے کالج کی ڈگری ضروری ہے؟
+  TERM : Bartender
+  EVIDENCE PAGES : ['Bartender', 'Bartending school', 'Associate degree', "Bachelor's degree", 'Year']
+  CURRENT GOLD ENTITIES : ['Bartender']
+  verdict (OK / ADD:<title> / REMOVE:<title>): ADD:Academic degree | span: کالج کی ڈگری
+
+ROW 20  6f0b33d71d2e65d3b376
+  EN   : Did a Polish poet write sonnets about Islamic religion?
+  UR   : کیا کسی پولش شاعر نے اسلامی مذہب کے بارے میں سونٹ لکھے؟
+  TERM : Sonnet
+  EVIDENCE PAGES : ['The Crimean Sonnets', 'Adam Mickiewicz', 'Orientalism']
+  CURRENT GOLD ENTITIES : ['Sonnet']
+  verdict (OK / ADD:<title> / REMOVE:<title>): ADD:Poet | span: شاعر , ADD:Islam | span: اسلامی مذہب
+
+ROW 21  722dc38bd849d8b6ec0f
+  EN   : Are those incapable of reproduction incapable of parenthood?
+  UR   : کیا جو تولید مثل سے قاصر ہوتے ہیں وہ والدین بننے سے بھی قاصر ہوتے ہیں؟
+  TERM : Reproduction
+  EVIDENCE PAGES : ['Mother', 'Surrogacy', 'Adoption', 'Foster care']
+  CURRENT GOLD ENTITIES : []   <-- EMPTY
+  verdict (OK / ADD:<title> / REMOVE:<title>): ADD:Reproduction | span: تولید مثل , ADD:Parent | span: والدین بننے
+
+ROW 22  8cab175fdcffeba3ec52
+  EN   : Can actress Dafne Keen win the Eurovision Song Contest finals in 2020?
+  UR   : کیا اداکارہ ڈافنے کین 2020 میں یوروویژن گانا مقابلہ کے فائنلز جیت سکتی ہیں؟
+  TERM : Eurovision Song Contest
+  EVIDENCE PAGES : ['Eurovision Song Contest', 'Rules of the Eurovision Song Contest', 'Dafne Keen']
+  CURRENT GOLD ENTITIES : ['Eurovision Song Contest', 'Dafne Keen']
+  verdict (OK / ADD:<title> / REMOVE:<title>): Ok
+
+ROW 23  a44c3d9161f5e5c3f41d
+  EN   : Is immersion in virtual reality testable on cnidarians before humans?
+  UR   : کیا ورچوئل رئیلٹی میں غوطہ خوری کو انسانوں سے پہلے سی نیڈیریئنز پر آزمایا جا سکتا ہے؟
+  TERM : Immersion (virtual reality)
+  EVIDENCE PAGES : ['Immersion (virtual reality)', 'Motion sickness', 'Virtual reality', 'Cnidaria', 'Ctenophora']
+  CURRENT GOLD ENTITIES : ['Immersion (virtual reality)', 'Virtual reality', 'Cnidaria']
+  verdict (OK / ADD:<title> / REMOVE:<title>): ADD: Human | span: انسانوں
+
+ROW 24  af2d3c137bd3f5230012
+  EN   : Does the United States Department of Education oversee services benefiting undocumented migrants? 
+  UR   : کیا ریاستہائے متحدہ کا محکمہ تعلیم غیر دستاویزی تارکین وطن کو فائدہ پہنچانے والی خدمات کی نگرانی کرتا ہے؟
+  TERM : United States Department of Education
+  EVIDENCE PAGES : ['United States Department of Education', 'Office of Migrant Education']
+  CURRENT GOLD ENTITIES : ['United States Department of Education', 'Office of Migrant Education']
+  verdict (OK / ADD:<title> / REMOVE:<title>): REMOVE:Office of Migrant Education, ADD:Illegal immigration | span: غیر دستاویزی تارکین وطن
+
+ROW 25  c6ca93e6d29d85456bf3
+  EN   : Will Queen Elizabeth be buried in the Pantheon?
+  UR   : کیا ملکہ الزبتھ کو پینتھیون میں دفن کیا جائے گا؟
+  TERM : Panthéon
+  EVIDENCE PAGES : ['Panthéon', 'Elizabeth II']
+  CURRENT GOLD ENTITIES : ['Panthéon', 'Elizabeth II']
+  verdict (OK / ADD:<title> / REMOVE:<title>): Ok
+
+ROW 26  d7886984475ee7c616a2
+  EN   : Is Lines on the Antiquity of Microbes briefer than any haiku?
+  UR   : کیا لائنز آن دی اینٹیکوئٹی آف مائیکروبز کسی بھی ہائیکو سے مختصر ہے؟
+  TERM : Haiku
+  EVIDENCE PAGES : ['Haiku', 'Lines on the Antiquity of Microbes']
+  CURRENT GOLD ENTITIES : ['Haiku', 'Lines on the Antiquity of Microbes']
+  verdict (OK / ADD:<title> / REMOVE:<title>): Ok
+
+ROW 27  e1463ddc36ea8cfc9074
+  EN   : Did the iPhone usher in the scientific revolution?
+  UR   : کیا آئی فون نے سائنسی انقلاب کا آغاز کیا؟
+  TERM : Scientific Revolution
+  EVIDENCE PAGES : ['Scientific Revolution', 'IPhone']
+  CURRENT GOLD ENTITIES : ['Scientific Revolution', 'IPhone']
+  verdict (OK / ADD:<title> / REMOVE:<title>): Ok
+
+ROW 28  e175b012fc9b5db8da3f
+  EN   : Does the Boy Who Cried Wolf hypothetically have reason to pray to Pan?
+  UR   : کیا 'وہ لڑکا جس نے بھیڑیا ہونے کا جھوٹ بولا' فرضی طور پر پین سے دعا کرنے کا حق رکھتا ہے؟
+  TERM : Pan (god)
+  EVIDENCE PAGES : ['The Boy Who Cried Wolf', 'Pan (god)']
+  CURRENT GOLD ENTITIES : ['The Boy Who Cried Wolf', 'Pan (god)']
+  verdict (OK / ADD:<title> / REMOVE:<title>): Ok
+
+ROW 29  f1fec95172ebcbdf1fb8
+  EN   : Would Felicity Huffman vote for Mike DeWine?
+  UR   : کیا فیلیسٹی ہف مین مائیک ڈی وائن کے حق میں ووٹ دیں گی؟
+  TERM : Felicity Huffman
+  EVIDENCE PAGES : ['Mike DeWine', 'Felicity Huffman']
+  CURRENT GOLD ENTITIES : ['Felicity Huffman', 'Mike DeWine']
+  verdict (OK / ADD:<title> / REMOVE:<title>): Ok
+
+ROW 30  fc48b6524ca6fc402d9d
+  EN   : Could all People's Volunteer Army hypothetically be transported on Symphony of the Seas?
+  UR   : کیا تمام پیپلز والنٹیئر آرمی کو فرضی طور پر سمفنی آف دی سیز پر منتقل کیا جا سکتا ہے؟
+  TERM : People's Volunteer Army
+  EVIDENCE PAGES : ["People's Volunteer Army", 'Symphony of the Seas']
+  CURRENT GOLD ENTITIES : ["People's Volunteer Army", 'Symphony of the Seas']
+  verdict (OK / ADD:<title> / REMOVE:<title>): Ok

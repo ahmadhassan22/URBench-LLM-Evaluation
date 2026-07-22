@@ -1,0 +1,187 @@
+BLIND30 TARGET-SCHEMA ABLATION — POST-HOC (not blind validation)
+====================================================================
+CAVEAT: schemas selected AFTER seeing BLIND30. Any chosen schema must
+be re-validated on a fresh untouched sample before scaling.
+
+SCHEMA A_FULL  (fields: ['atype', 'entities', 'entity_ref', 'evidence_ref', 'gia', 'type', 'urdu_span'])
+  zero-correction rows : 0/30 = 0.0%
+  rows needing fix     : 30/30 = 100.0%   Wilson95: 88.6%–100.0%
+  projection /1770     : ~1770 (CI 1569–1770)  [operational estimate, n=30]
+  mechanism alignment  : yes (plus extras beyond the mechanism)
+  rows + causing fields:
+    00dc0571: ['atype', 'entities', 'entity_ref', 'evidence_ref', 'gia', 'urdu_span']
+    038d2f23: ['evidence_ref', 'gia', 'urdu_span']
+    1335c853: ['evidence_ref', 'gia']
+    16338eab: ['evidence_ref', 'gia']
+    1a015715: ['gia']
+    27b84ef7: ['entities', 'evidence_ref', 'gia']
+    29ee7da0: ['gia']
+    2bfe7f37: ['evidence_ref', 'gia']
+    3b5ee730: ['evidence_ref', 'gia']
+    46a30058: ['entities', 'evidence_ref', 'gia']
+    4ba70839: ['gia']
+    52a5095c: ['evidence_ref', 'gia']
+    52e1b2df: ['entities', 'gia']
+    55ce9ac2: ['evidence_ref', 'gia']
+    59542ff1: ['entities', 'entity_ref', 'gia']
+    6042b480: ['evidence_ref', 'urdu_span']
+    63e55313: ['gia']
+    65557713: ['gia']
+    6b86b444: ['evidence_ref', 'gia']
+    6f0b33d7: ['entities', 'gia']
+    722dc38b: ['gia']
+    8cab175f: ['evidence_ref', 'gia']
+    a44c3d91: ['evidence_ref', 'gia']
+    af2d3c13: ['entities', 'evidence_ref', 'gia']
+    c6ca93e6: ['evidence_ref', 'gia']
+    d7886984: ['gia']
+    e1463ddc: ['evidence_ref', 'gia']
+    e175b012: ['gia']
+    f1fec951: ['entities', 'gia', 'urdu_span']
+    fc48b652: ['gia']
+
+SCHEMA B_NO_GIA  (fields: ['atype', 'entities', 'entity_ref', 'evidence_ref', 'type', 'urdu_span'])
+  zero-correction rows : 9/30 = 30.0%
+  rows needing fix     : 21/30 = 70.0%   Wilson95: 52.1%–83.3%
+  projection /1770     : ~1239 (CI 923–1475)  [operational estimate, n=30]
+  mechanism alignment  : yes (plus evidence, beyond the mechanism)
+  rows + causing fields:
+    00dc0571: ['atype', 'entities', 'entity_ref', 'evidence_ref', 'urdu_span']
+    038d2f23: ['evidence_ref', 'urdu_span']
+    1335c853: ['evidence_ref']
+    16338eab: ['evidence_ref']
+    27b84ef7: ['entities', 'evidence_ref']
+    2bfe7f37: ['evidence_ref']
+    3b5ee730: ['evidence_ref']
+    46a30058: ['entities', 'evidence_ref']
+    52a5095c: ['evidence_ref']
+    52e1b2df: ['entities']
+    55ce9ac2: ['evidence_ref']
+    59542ff1: ['entities', 'entity_ref']
+    6042b480: ['evidence_ref', 'urdu_span']
+    6b86b444: ['evidence_ref']
+    6f0b33d7: ['entities']
+    8cab175f: ['evidence_ref']
+    a44c3d91: ['evidence_ref']
+    af2d3c13: ['entities', 'evidence_ref']
+    c6ca93e6: ['evidence_ref']
+    e1463ddc: ['evidence_ref']
+    f1fec951: ['entities', 'urdu_span']
+
+SCHEMA C_CORE_ENTITY_PLAN  (fields: ['atype', 'entities', 'entity_ref', 'type', 'urdu_span'])
+  zero-correction rows : 20/30 = 66.7%
+  rows needing fix     : 10/30 = 33.3%   Wilson95: 19.2%–51.2%
+  projection /1770     : ~590 (CI 340–907)  [operational estimate, n=30]
+  mechanism alignment  : YES — exactly the stated mechanism + plan typing
+  rows + causing fields:
+    00dc0571: ['atype', 'entities', 'entity_ref', 'urdu_span']
+    038d2f23: ['urdu_span']
+    27b84ef7: ['entities']
+    46a30058: ['entities']
+    52e1b2df: ['entities']
+    59542ff1: ['entities', 'entity_ref']
+    6042b480: ['urdu_span']
+    6f0b33d7: ['entities']
+    af2d3c13: ['entities']
+    f1fec951: ['entities', 'urdu_span']
+
+SCHEMA D_ENTITY_BRIDGE  (fields: ['entities', 'entity_ref', 'urdu_span'])
+  zero-correction rows : 20/30 = 66.7%
+  rows needing fix     : 10/30 = 33.3%   Wilson95: 19.2%–51.2%
+  projection /1770     : ~590 (CI 340–907)  [operational estimate, n=30]
+  mechanism alignment  : YES — minimal direct expression of the mechanism
+  rows + causing fields:
+    00dc0571: ['entities', 'entity_ref', 'urdu_span']
+    038d2f23: ['urdu_span']
+    27b84ef7: ['entities']
+    46a30058: ['entities']
+    52e1b2df: ['entities']
+    59542ff1: ['entities', 'entity_ref']
+    6042b480: ['urdu_span']
+    6f0b33d7: ['entities']
+    af2d3c13: ['entities']
+    f1fec951: ['entities', 'urdu_span']
+
+SCHEMA E_PLAN_SKELETON  (fields: ['atype', 'entity_ref', 'type'])
+  zero-correction rows : 28/30 = 93.3%
+  rows needing fix     : 2/30 = 6.7%   Wilson95: 1.8%–21.3%
+  projection /1770     : ~118 (CI 33–377)  [operational estimate, n=30]
+  mechanism alignment  : NO — drops urdu_span/entities; loses the bilingual alignment core
+  rows + causing fields:
+    00dc0571: ['atype', 'entity_ref']
+    59542ff1: ['entity_ref']
+
+ENTITY ERROR TAXONOMY
+  missing_only: 8  [('00dc0571', ['monogamy'], []), ('27b84ef7', ['tricarboxylic acid'], []), ('46a30058', ['la marseillaise'], []), ('52e1b2df', ['largemouth bass'], []), ('59542ff1', ['windows phone'], []), ('6f0b33d7', ['sonnet'], []), ('af2d3c13', ['office of migrant education'], []), ('f1fec951', ['mike dewine'], [])]
+  extra_only: 0  []
+  both: 0  []
+
+URDU-SPAN TAXONOMY (deterministic containment rules; else manual)
+  extra_words: 0  []
+  truncated: 2  [('00dc0571', 'genghis khan', 'دادا', 'اس کے دادا'), ('f1fec951', 'felicity huffman', 'فیلیسٹی ہف', 'فیلیسٹی ہف مین')]
+  incorrect: 1  [('6042b480', 'friday', 'جمعرات', 'جمعہ')]
+  manual: 1  [('038d2f23', 'apple', '', 'سرخ پھل')]
+
+ENTITY_REF ERRORS (all, in full)
+  ('00dc05718aedf2370213', 2, 'Genghis Khan', 'Kublai Khan', 'different_entity (manual: subject-vs-answer or wrong)')
+  ('59542ff1d7782e4cbd89', 1, 'Windows smartphone', 'Windows Phone', 'different_entity (manual: subject-vs-answer or wrong)')
+  ('59542ff1d7782e4cbd89', 2, 'Android smartphone', 'Android (operating system)', 'different_entity (manual: subject-vs-answer or wrong)')
+
+EVIDENCE TAXONOMY (per step)
+  over: 19  qids/steps: [('00dc0571', 1), ('00dc0571', 3), ('038d2f23', 1), ('038d2f23', 2), ('27b84ef7', 1), ('2bfe7f37', 2), ('3b5ee730', 2), ('46a30058', 1), ('46a30058', 2), ('46a30058', 3), ('52a5095c', 2), ('55ce9ac2', 1), ('55ce9ac2', 2), ('6042b480', 1), ('6042b480', 2), ('6b86b444', 1), ('a44c3d91', 1), ('af2d3c13', 1), ('e1463ddc', 1)]
+  under: 2  qids/steps: [('a44c3d91', 2), ('c6ca93e6', 2)]
+  mixed: 3  qids/steps: [('1335c853', 1), ('52a5095c', 1), ('8cab175f', 1)]
+  empty_disagree: 3  qids/steps: [('1335c853', 2), ('16338eab', 2), ('27b84ef7', 3)]
+
+GIA TAXONOMY
+  pred_null_gold_not: 29
+     e.g. ('00dc0571', 3, 'None', 'many wives')
+     e.g. ('038d2f23', 2, 'None', 'true')
+     e.g. ('1335c853', 2, 'None', 'false')
+     e.g. ('16338eab', 2, 'None', 'true')
+  pred_not_gold_null: 0
+  wrong_bool: 0
+  wrong_num_date: 2
+     e.g. ('8cab175f', 2, '2005', '15')
+     e.g. ('e1463ddc', 1, 'towards the end of the Renaissance period and continued thro', '1543')
+  gold_inside_pred: 8
+     e.g. ('2bfe7f37', 1, 'Pig Latin is a language game or argot in which words in Engl', 'language game or argot')
+     e.g. ('2bfe7f37', 2, 'Humans are the only extant members of the subtribe Hominina.', 'humans')
+     e.g. ('46a30058', 3, 'North West England', 'England')
+     e.g. ('52a5095c', 1, 'A software engineer is a person who applies the principles o', 'computer')
+  text_differs: 11
+     e.g. ('1a015715', 1, 'The honey badger possesses an anal pouch which, unusual amon', 'eversible, with a suffocating smell')
+     e.g. ('1a015715', 2, 'Hyenas have a large pouch of naked skin located at the anal ', 'large anal pouch with anal and sebaceous glands; strong-smel')
+     e.g. ('29ee7da0', 1, 'the variables are the truth values true and false, usually d', '1, 0, ∧, ∨, ¬')
+     e.g. ('29ee7da0', 2, "The two-symbol system used is often '0' and '1' from the bin", '0 and 1')
+
+CONSISTENCY FLAGS (final gold step vs official answer; nothing changed)
+  29ee7da0020eb03888fb: gold_final=False official=True
+     reading: candidate literal annotation error OR question-level disagreement — manual check
+  55ce9ac27a4bd4e627dc: gold_final=True official=False
+     reading: final step is not a REASON step -> plan may not target the official answer
+  59542ff1d7782e4cbd89: gold_final=True official=False
+     reading: candidate literal annotation error OR question-level disagreement — manual check
+  65557713351aed7519b8: gold_final=True official=False
+     reading: candidate literal annotation error OR question-level disagreement — manual check
+  6f0b33d71d2e65d3b376: gold_final=False official=True
+     reading: candidate literal annotation error OR question-level disagreement — manual check
+  a44c3d9161f5e5c3f41d: gold_final=True official=False
+     reading: final step is not a REASON step -> plan may not target the official answer
+  af2d3c137bd3f5230012: gold_final=False official=True
+     reading: candidate literal annotation error OR question-level disagreement — manual check
+  c6ca93e6d29d85456bf3: gold_final=None official=False
+     reading: final step GIA not boolean/absent -> likely 'final step not intended to reproduce official answer' OR annotation gap — manual check
+  e175b012fc9b5db8da3f: gold_final=False official=True
+     reading: candidate literal annotation error OR question-level disagreement — manual check
+
+PROVISIONAL RECOMMENDATION (computed; final decision is the human's)
+  A_FULL correction rate 100% -> exceeds 30% band: do not scale as-is.
+  C_CORE_ENTITY_PLAN: 33% -> redesign (>30%)
+  D_ENTITY_BRIDGE   : 33% -> redesign (>30%)
+  => computed pick: STOP EFBPT DATA CONSTRUCTION
+  Rationale factors: evidence_ref/GIA carry most workload and are NOT the
+  stated mechanism; dropping them keeps Urdu-span->entity alignment intact.
+  Sept-30 deadline favors the smallest schema that preserves the mechanism.
+  E_PLAN_SKELETON is excluded: it abandons the bilingual core.
+  Chosen schema requires a FRESH validation sample before any scaling.

@@ -1,0 +1,61 @@
+BLIND30 SCORE — correction-rate study (deterministic, no LLM judge)
+====================================================================
+CAVEAT: gold was created by EDITING predictions. Scores measure how
+often a human corrected the automatic annotation — NOT independent-
+annotator agreement. urdu_span is likely INFLATED (spans prefilled).
+
+file hashes (sha256/16): {"blind30_candidates.jsonl": "35ed181f71ab3e5c", "blind30_predictions.jsonl": "66b9c3f3be09b857", "blind30_gold.jsonl": "8d3d0dd9f612176f", "blind30_review.jsonl": "77b9693133785b91"}
+disjointness: AUDIT30/DEV50/eval458 overlap = 0/0/0 (asserted)
+structural failures: 0/30  []
+
+ACCURACY (pred vs human-corrected gold)
+  entity precision                  :  96.7% (n=30)
+  entity recall                     :  86.1% (n=30)
+  entity F1                         :  89.8% (n=30)
+  urdu_span (matched, prefilled!)   :  91.3% (n=46)
+  step type                         : 100.0% (n=89)
+  entity_ref STRICT                 :  96.6% (n=89)
+  entity_ref normalized             :  96.6% (n=89)
+  answer type                       :  98.9% (n=89)
+  evidence precision                :  83.3% (n=89)
+  evidence recall                   :  92.7% (n=89)
+  evidence F1                       :  86.1% (n=89)
+  GIA strict (PRIMARY)              :  43.8% (n=89)
+  GIA type-aware (SECONDARY)        :  43.8% (n=89)
+
+CORRECTION WORKLOAD
+  rows with ZERO corrections : 0/30 = 0.0%
+  rows with >=1 correction   : 30/30 = 100.0%
+  corrections by field       : {'entities': 8, 'urdu_span': 4, 'type': 0, 'entity_ref': 3, 'atype': 1, 'evidence_ref': 27, 'gia': 50}
+  corrections per row        : [7, 4, 3, 2, 3, 4, 3, 4, 4, 7, 1, 5, 2, 3, 4, 3, 1, 1, 2, 5, 1, 4, 4, 5, 2, 1, 3, 1, 3, 1]
+  Wilson 95% CI (rows needing correction): 88.6%–100.0%
+  projection to 1,770 rows   : ~1770 rows (CI 1569–1770)
+  WARNING: n=30 is small; projection is an operational estimate only.
+
+CONSISTENCY AUDIT (final gold step vs official answer; nothing modified)
+  29ee7da0020eb03888fb: CONTRADICTION gold_final=False official=True
+  55ce9ac27a4bd4e627dc: CONTRADICTION gold_final=True official=False
+  59542ff1d7782e4cbd89: CONTRADICTION gold_final=True official=False
+  65557713351aed7519b8: CONTRADICTION gold_final=True official=False
+  6f0b33d71d2e65d3b376: CONTRADICTION gold_final=False official=True
+  a44c3d9161f5e5c3f41d: CONTRADICTION gold_final=True official=False <-- inspect-list
+  af2d3c137bd3f5230012: CONTRADICTION gold_final=False official=True <-- inspect-list
+  c6ca93e6d29d85456bf3: UNCOMPARABLE gold_final='United Kingdom' official=False
+  e175b012fc9b5db8da3f: CONTRADICTION gold_final=False official=True <-- inspect-list
+  inspect-list rows always in diffs: ['a44c3d9161f5e5c3f41d', 'e175b012fc9b5db8da3f', 'af2d3c137bd3f5230012']
+
+ROUTING (descriptive; bands are OPERATIONAL PLANNING, not scientific thresholds)
+  field            score   errors  prefilled  corrupts-target?  recommendation
+  urdu_span         91.3% (n=46)   4      YES        YES (training span)   NEEDS AUTOMATIC VERIFICATION (prefill inflation)
+  step type        100.0% (n=89)   0      no         mild                  SAFE CANDIDATE FOR AUTO-ACCEPT
+  entities         F1  89.8% (n=30)  -       partly     YES (core target)     NEEDS HUMAN REVIEW
+  entity_ref        96.6% (n=89)   3      no         YES (core target)     NEEDS HUMAN REVIEW
+  answer type       98.9% (n=89)   1      no         mild                  NEEDS AUTOMATIC VERIFICATION
+  evidence_ref     F1  86.1% (n=89)  -       no         YES                   NEEDS HUMAN REVIEW
+  GIA               43.8% (n=89)   50      no         YES                   NEEDS HUMAN REVIEW
+
+PLANNING BANDS (post hoc, operational only): <=15% rows corrected =
+potentially scalable | 15-30% = improve verification / narrow subset |
+>30% = do NOT review 1,770 manually; redesign or simplify target.
+
+BLIND30 is now CONSUMED. Any redesign requires a fresh untouched sample.

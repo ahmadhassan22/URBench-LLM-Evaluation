@@ -1,0 +1,19 @@
+STAGE 3 CANDIDATE-UNIVERSE PREFLIGHT (development-only; gold used
+ONLY to test reachability; verifier never reads gold)
+==================================================================
+gold entities total       : 54
+reachable in universe     : 54
+candidate-universe recall : 100.0%
+
+PREVIOUSLY-MISSED 8 — reachability:
+  REACHABLE      la marseillaise
+  REACHABLE      largemouth bass
+  REACHABLE      mike dewine
+  REACHABLE      monogamy
+  REACHABLE      office of migrant education
+  REACHABLE      sonnet
+  REACHABLE      tricarboxylic acid
+  REACHABLE      windows phone
+
+VERDICT: recall = 100%. Every gold entity is reachable from the
+general universe. Safe to build and run the three Stage 3 scripts.

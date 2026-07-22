@@ -1,0 +1,33 @@
+STAGE 3 DEV SCORE — agreement routing vs gold (BLIND30 = dev data)
+==================================================================
+accepted coverage        : 10/30 = 33.3%
+accepted precision (rows): 9/10 = 90.0%
+FALSE ACCEPTS (primary)  : 1
+    722dc38b: ['entities']
+true rejects             : 9
+FALSE REJECTS            : 11
+    29ee7da0: reject reasons ['disagree_at:step1', 'disagree_at:step2', 'disagree_entity_set']
+    2bfe7f37: reject reasons ['disagree_ref:step2']
+    4ba70839: reject reasons ['disagree_ref:step1']
+    52a5095c: reject reasons ['disagree_at:step1']
+    55ce9ac2: reject reasons ['disagree_at:step1']
+    63e55313: reject reasons ['disagree_span:archduke franz ferdinand of austria']
+    6f0b33d7: reject reasons ['disagree_entity_set']
+    8cab175f: reject reasons ['disagree_span:dafne keen']
+    a44c3d91: reject reasons ['orig_step_ids_mismatch']
+    c6ca93e6: reject reasons ['orig_step_ids_mismatch']
+    e1463ddc: reject reasons ['disagree_entity_set']
+
+ACCEPTED-ROW FIELD ACCURACY vs gold:
+  entity set exact : 90.0% (n=10)
+  urdu_span        : 100.0% (n=16)
+  step type        : 100.0% (n=28)
+  entity_ref       : 100.0% (n=28)
+  answer type      : 100.0% (n=28)
+
+projection: accepted pool ~590 / 1770 (n=30, operational only)
+rejected rows are DROPPED (workload = 0), not manually repaired.
+
+NOTE: 100% universe recall guaranteed availability, not correctness.
+This is development data. Fresh-sample gate (frozen): coverage >=60%
+AND accepted core precision >=95% (+ per-field >=95%, no systematic error).

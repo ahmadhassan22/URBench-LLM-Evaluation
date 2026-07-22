@@ -1,0 +1,27 @@
+STAGE 3 CORE VERIFIER — agreement routing on BLIND30 (dev data)
+==============================================================
+ACCEPTED : 10/30 = 33.3%
+REJECTED : 20/30
+reject/failure reason counts: {'disagree_span': 3, 'disagree_ref': 3, 'orig_empty_span': 1, 'verif_ref_not_in_universe': 1, 'disagree_entity_set': 6, 'disagree_at': 7, 'orig_span_not_substring': 2, 'verif_span_not_substring': 3, 'orig_step_ids_mismatch': 2}
+
+REJECTED ROWS:
+  00dc0571: disagree_ref:step2, disagree_span:genghis khan
+  038d2f23: orig_empty_span:apple
+  27b84ef7: verif_ref_not_in_universe:step2
+  29ee7da0: disagree_at:step1, disagree_at:step2, disagree_entity_set
+  2bfe7f37: disagree_ref:step2
+  46a30058: disagree_entity_set
+  4ba70839: disagree_ref:step1
+  52a5095c: disagree_at:step1
+  52e1b2df: disagree_entity_set
+  55ce9ac2: disagree_at:step1
+  59542ff1: orig_span_not_substring:android (operating system), verif_span_not_substring:android (operating system), verif_span_not_substring:windows smartphone
+  6042b480: orig_span_not_substring:friday, verif_span_not_substring:friday
+  63e55313: disagree_span:archduke franz ferdinand of austria
+  6f0b33d7: disagree_entity_set
+  8cab175f: disagree_span:dafne keen
+  a44c3d91: orig_step_ids_mismatch
+  af2d3c13: disagree_at:step1, disagree_at:step2
+  c6ca93e6: orig_step_ids_mismatch
+  e1463ddc: disagree_entity_set
+  f1fec951: disagree_at:step1, disagree_entity_set
