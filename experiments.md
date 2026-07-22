@@ -3410,3 +3410,94 @@ parser-enforced completeness (missing/duplicate title → review). Fresh 30-row
 blind sample disjoint from AUDIT30/DEV50/eval458 — validation only, NO tuning
 on it. No 1,770 processing, no hard negatives, no validation split until blind
 check passes.
+
+## EFBPT BLIND30 — Target-Schema Ablation (2026-07-21)
+
+Tested whether a smaller target schema reaches the same correction rate as
+Stage 2's full schema, on a fresh 30-row blind sample (seed 20260720,
+disjoint from AUDIT30/DEV50/eval458).
+
+Schema              Fields                                              Rows needing fix
+FULL (Stage 2)      entities, span, step type, entity_ref, answer type,
+                     evidence_ref, GIA                                    30/30 (100%)
+C: CORE_ENTITY_PLAN  entities, span, step type, entity_ref, answer type   10/30 (33.3%)
+D: ENTITY_BRIDGE     alternate core-only schema                          10/30 (33.3%)
+
+[DECISION] Adopt Schema C. evidence_ref (27 corrections) + GIA (50
+corrections) = 77/93 of all FULL-schema corrections and are not part of the
+EFBPT training signal (bilingual entity/relation alignment) — dropping them
+removes noise, not signal, at 1/3 the annotation cost of Schema D for the
+same core-entity correction rate. BLIND30 is now development data only.
+
+## EFBPT Stage 3 — Automated Core Verifier — REJECTED (2026-07-21)
+
+**Goal:** scale past manual repair. Auto-draft a Schema-C entity plan,
+independently re-decide every entity with a second (verifier) pass — same
+model — and auto-accept only rows where both passes agree exactly (entity
+set, spans, type, entity_ref, answer type). Gold file never touched by the
+verifier (isolation enforced in code).
+
+Preflight: 54/54 gold entities reachable via candidate universe (term +
+evidence_pages + title_decisions + extra_entities + orig entity_ref).
+
+Two bugs found and fixed before scoring:
+1. SHORT_TEXT normalization — answer-type set compared un-normalized
+   ("short_text" vs "short text"), always failing. One-line fix.
+2. extra_entities silently dropped before the agreement check, causing a
+   false accept (row 6f0b33d7). Fixed: fold extras into original core before
+   comparing; disagreement now correctly triggers reject.
+
+**Manual gold audit, all 30 rows** (not a spot check): entity valid only if
+the question names it AND a verbatim Urdu span exists AND the Wikipedia page
+is confirmed correct. Errata: 12 ADD, 2 REMOVE, 1 FIXSPAN across 11/30 rows.
+Backup: blind30_gold_backup_2026-07-21.jsonl. Log:
+blind30_gold_errata_log.jsonl.
+
+**Post-errata score — FAILED predeclared fresh-sample gate:**
+
+Metric                        Result          Gate    Pass?
+Accepted coverage             33.3% (10/30)   >=60%   NO
+Accepted-row precision        70.0% (7/10)    >=95%   NO
+False accepts                 3 (16338eab, 6b86b444, 722dc38b — all
+                               entity-set misses)
+Entity set exact (30 rows)    70%
+Span/type/ref/atype (30 rows) 100%
+
+> Note: reject breakdown (true vs. false rejects) in
+> blind30_core_score_summary.txt has an internal count mismatch (labeled 13
+> true / 7 false, but 8 QIDs are listed as false rejects) — recount from the
+> raw file before citing this split anywhere further.
+
+**Root cause (from diffs, not summary numbers):** all 3 false accepts share
+one failure shape — both the annotation pass and the verifier pass (same
+base model) independently miss the same rare secondary entity (a fan, an
+academic degree, reproduction) and agree on an incomplete set. Agreement
+routing can't catch a *shared* error. This is a structural ceiling, not a
+routing threshold — more rule-tuning will not fix it.
+
+[DECISION] Fully-automated agreement-based verification is REJECTED as the
+EFBPT data-construction method. No further routing-rule tuning on BLIND30
+(overfit guard — it is spent as development data).
+
+## STRATEGIC DECISION: Plan A′ — Model-Drafted, Human-Verified Staged Data (2026-07-21)
+
+Every training row will be model-drafted, then checked by hand — no
+auto-accept step. Staged, nested sample sizes (N=100 -> 250 -> 500), so the
+100->250 trend is checked before committing to a full build. BLIND30 stays
+permanently out of training data.
+
+Framing evidence:
+- Task-specific curated data (even ~1k rows) beats generic instruction data
+  on multi-hop QA, 36% vs 21% ("Revisiting Superficial Alignment
+  Hypothesis," arXiv:2410.03717).
+- Fine-tuning on how a model organizes facts it already knows is safe;
+  fine-tuning on new facts risks hallucination (Gekhman et al., EMNLP
+  2024). EFBPT is framed as entity-faithful use of existing knowledge, not
+  new Urdu fact-teaching.
+
+Time estimate: ~250 rows = 33-50 human-hours, feasible in ~3 weeks.
+
+**Next (not yet started):** stratified sampler for first 100 rows from the
+1,770-row Stage-1-retained pool (excludes BLIND30/AUDIT30/DEV50/eval458),
+stratified by hop count / entity count / label / reasoning pattern, fixed
+seed.
