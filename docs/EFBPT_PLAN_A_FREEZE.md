@@ -118,7 +118,7 @@ These five sets are off-limits for training, for all of C1/C2/C3, forever.
 | `AUDIT30` | 30 | `data/strategyqa_official/efbpt/audit30_qids.txt` | spent — development only |
 | `BLIND30` | 30 | `data/strategyqa_official/efbpt/blind30_qids.txt` | spent — development only |
 | `DEV50` | 50 | `data/strategyqa_official/dev50_seed42_qids.txt` | c-probe mechanism scoring |
-| `DEV200` | 200 | to be built | accuracy evaluation during development |
+| `DEV200` | 200 | `data/strategyqa_official/dev200_seed4242_qids.txt` | accuracy evaluation during development |
 | `eval458` | 458 | `data/sdfr_splits/strategyqa_eval.jsonl` | final evaluation — opened ONCE |
 
 Pool structure (verified 2026-07-24):
@@ -149,6 +149,10 @@ DEV200 construction rule (frozen):
   targets. eval458 stays the unfiltered honest final metric.
 - Verified 2026-07-24: all 50 DEV50 rows satisfy RULE_LEN2, so DEV200 is
   uniform in scope. No filtering mismatch exists.
+- Built and verified 2026-07-24. Free pool 1,712 -> 150 sampled. All 18
+  checks passed, including DEV50 subset and zero overlap with eval458,
+  AUDIT30, BLIND30. Reproducibility confirmed by identical re-run.
+  Script: `eval/error_analysis_tests/efbpt/efbpt_build_dev200.py`
 
 ---
 
@@ -425,7 +429,7 @@ it is. Weak and honest beats silent.
 
 - [x] §1.5 valid step types — paste from code
 - [x] §1.6 valid `atype` values — paste from code
-- [ ] §3 build `DEV200`, save qid list
+- [x] §3 build `DEV200`, save qid list
 - [x] §8.3 decoding settings — max_tokens, thinking, temperature
 - [x] §10 LoRA hyperparameters and the 3 seed values
 - [x] §12 seed for the eval458 50-item mechanism subset
