@@ -160,7 +160,10 @@ DEV200 construction rule (frozen):
 
 - Sample from the 1,770 rows retained by the Stage 1 pre-filter.
 - Exclude all protected sets from §3.
-- Stratify by: hop count, entity count, yes/no label, reasoning pattern.
+- Stratify by: answer label (yes/no) x hop count (len of
+  official_decomposition). See AMENDMENT 1 — entity count and reasoning
+  pattern were removed.
+- Sampling seed for the manifest chain: 8888
 - Fixed seed. Save the qid list to a file.
 
 **Nesting is mandatory:** 100 ⊂ 250 ⊂ 500.
@@ -441,4 +444,42 @@ begins.
 
 ## AMENDMENTS
 
-(none yet — append below with date and reason, do not edit above)
+### AMENDMENT 1 — 2026-07-24 — stratification fields reduced
+
+Original §4 said: stratify by hop count, entity count, yes/no label,
+reasoning pattern.
+
+Changed to: stratify by answer label x hop count only.
+
+Reason:
+
+1. Entity count does not exist before annotation. Entities are the
+   output of the human annotation step, so they cannot be an input to
+   sampling.
+2. Reasoning pattern was never defined. No category list exists in this
+   project or in the source dataset.
+3. A proxy for entity count was considered and REJECTED. The proposed
+   proxy was the number of distinct Wikipedia pages in
+   `evidence_paragraph_ids`. It fails construct validity: in the mapped
+   dataset, the Genghis Khan / Julius Caesar row names 2 entities but
+   lists 7 distinct evidence pages. Per Geva et al., TACL 2021, evidence
+   is matched to each decomposition by 3 independent workers, so this
+   field is a union of three annotators' retrieval choices. It measures
+   evidence breadth, not entity count.
+4. A proxy for reasoning pattern using `#N` back-references was also
+   REJECTED. `#N` only marks that a step reuses an earlier answer. It
+   does not identify comparison, causality, temporal reasoning,
+   conjunction, or negation, and its count largely tracks hop count,
+   which is already a stratification field.
+
+Decision rule applied: a mislabeled control is worse than a stated
+limitation. A broken proxy would bias the sample toward evidence density
+while the writeup claimed it controlled entity complexity, and that
+error would be undiscoverable later.
+
+Remaining limitation (must be reported): entity-complexity balance in
+the training manifests is NOT guaranteed. Mitigation: after the first
+100 rows are annotated, measure and report the true entity-count
+distribution from the annotations. If it is badly skewed, a further
+dated amendment may change how the +150 rows are drawn — decided then,
+with real numbers.
