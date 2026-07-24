@@ -111,25 +111,44 @@ Extra rules, already learned the hard way:
 
 ## 3. Protected data — never used for training
 
-These four sets are off-limits for training, for all of C1/C2/C3, forever.
+These five sets are off-limits for training, for all of C1/C2/C3, forever.
 
-| Set | Use |
-|---|---|
-| `AUDIT30` | spent — development only |
-| `BLIND30` | spent — development only |
-| `DEV50` | c-probe mechanism scoring |
-| `DEV200` | accuracy evaluation during development |
-| `eval458` | final evaluation — opened ONCE at the end |
+| Set | Count | File | Use |
+|---|---|---|---|
+| `AUDIT30` | 30 | `data/strategyqa_official/efbpt/audit30_qids.txt` | spent — development only |
+| `BLIND30` | 30 | `data/strategyqa_official/efbpt/blind30_qids.txt` | spent — development only |
+| `DEV50` | 50 | `data/strategyqa_official/dev50_seed42_qids.txt` | c-probe mechanism scoring |
+| `DEV200` | 200 | to be built | accuracy evaluation during development |
+| `eval458` | 458 | `data/sdfr_splits/strategyqa_eval.jsonl` | final evaluation — opened ONCE |
+
+Pool structure (verified 2026-07-24):
+
+- 2,290 mapped rows total = 458 eval458 + 1,832 non-eval
+- DEV50 was drawn from the 1,832 non-eval rows with seed 42, before
+  Stage 1 ran
+- Stage 1 pre-filter ran on the remaining 1,782 rows: 1,770 retained,
+  12 excluded by RULE_LEN2
+- Free pool after removing DEV50, eval458, AUDIT30, BLIND30: 1,712 rows
+
+Verified overlaps: DEV50 vs Stage-1-retained = 0. eval458 vs
+Stage-1-retained = 0. AUDIT30 overlaps by 28 (2 of its rows were among
+the 12 excluded by RULE_LEN2). BLIND30 overlaps by 30.
 
 Boundary rules:
 
-- `DEV50 ⊂ DEV200`
+- `DEV50` is a strict subset of `DEV200`
 - `DEV200` is disjoint from the 100 / 250 / 500 training manifests
-- `eval458` is disjoint from everything and stays untouched until §9
+- `eval458` is disjoint from everything and stays untouched until §12
 
-> **TO BUILD:** `DEV200` does not exist yet. It must be built from the unused
-> pool, with a fixed seed, and its qid list saved to a file, before any
-> training run.
+DEV200 construction rule (frozen):
+
+- DEV200 = the 50 existing DEV50 rows + 150 new rows
+- The 150 are drawn from the 1,712 free Stage-1-retained rows
+- Plain random draw, seed 4242, not stratified
+- Reason: DEV200 measures whether the method worked on the questions it
+  targets. eval458 stays the unfiltered honest final metric.
+- Verified 2026-07-24: all 50 DEV50 rows satisfy RULE_LEN2, so DEV200 is
+  uniform in scope. No filtering mismatch exists.
 
 ---
 
