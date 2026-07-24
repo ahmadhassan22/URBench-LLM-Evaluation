@@ -178,6 +178,32 @@ Files:
 - `data/strategyqa_official/efbpt/plan_a_qids_250.txt`
 - `data/strategyqa_official/efbpt/plan_a_qids_500.txt`
 
+Built and verified 2026-07-24. Script:
+`eval/error_analysis_tests/efbpt/efbpt_build_manifests.py`
+
+Free pool: 1,562 rows (Stage-1 RETAINED minus DEV50, DEV200, eval458,
+AUDIT30, BLIND30). Strata: 8 (answer label x hop bucket 2/3/4/5+).
+Proportional quotas, largest-remainder. Nesting is guaranteed by
+construction: each stratum is shuffled once with seed 8888 and the three
+manifests take prefixes of the same order.
+
+| Manifest | Rows | MD5 |
+|---|---|---|
+| `plan_a_qids_100.txt` | 100 | `c6bc963ce67850affc0ecb3d75f02b36` |
+| `plan_a_qids_250.txt` | 250 | `76d96cfcb87dc0ec6515981b99f1d5ef` |
+| `plan_a_qids_500.txt` | 500 | `3989ae7f9c47c619295492738d8626f0` |
+
+Independently verified by reading the written files (not the generating
+script): no duplicates, 100 fully inside 250, 250 fully inside 500, and
+zero overlap with DEV50, DEV200, AUDIT30, BLIND30.
+
+Composition of the 100-row manifest: 47 yes / 53 no; hops 2=28, 3=53,
+4=15, 5+=4. This mirrors the pool proportions and is not forced to 50/50.
+
+Known limitation: deep chains are rare in the pool (~4%). The n=100
+manifest contains only 4 rows with 5+ hops. No claim about EFBPT's
+effect on long reasoning chains may be made at the n=100 stage.
+
 ---
 
 ## 5. How rows are built
