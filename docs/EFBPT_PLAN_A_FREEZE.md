@@ -509,3 +509,65 @@ the training manifests is NOT guaranteed. Mitigation: after the first
 distribution from the annotations. If it is badly skewed, a further
 dated amendment may change how the +150 rows are drawn — decided then,
 with real numbers.
+
+## AMENDMENT 2 — 2026-07-25
+
+Three items closed before the first draft row is generated.
+
+### (a) Answer value mapping
+
+The mapped file field `answer` is boolean `true` / `false`. Schema C `answer`
+is `"yes"` / `"no"`. The mapping is fixed:
+
+- `true`  -> `"yes"`
+- `false` -> `"no"`
+
+The generator asserts that no other value exists. Verified on the 100-row
+manifest: 47 true, 53 false, 0 other.
+
+### (b) Step text language — ENGLISH
+
+`steps[].text` is copied verbatim from `official_decomposition` in
+`strategyqa_official_mapped_urbench_qid.jsonl`. No translation, no rewriting,
+no model generation of step text.
+
+Reasons:
+1. The decomposition is human-written gold (Geva et al., TACL 2021).
+2. Translating it with Qwen3-14B would inject the exact entity corruption
+   EFBPT targets into the training labels.
+3. The frozen bilingual signal is: Urdu span -> English Wikipedia title ->
+   typed plan. Urdu step text was never part of that signal.
+4. C2 and C3 share identical step text, so the comparison still isolates
+   explicit entity binding.
+
+Stated limitation for the write-up: the plan is written in English while the
+question and the entity spans are Urdu. The claim is "bilingual plan
+supervision improves reasoning on Urdu questions", NOT "the model reasons
+entirely in Urdu".
+
+### (c) entity_ref on bridge steps — overrides section 1.3
+
+Section 1.3 as written requires every `retrieve` step's `entity_ref` to match
+a `canonical_title` in `entities`. But `entities` contains only entities named
+in the question, so a step such as "When did #1 develop?" has no legal value.
+That rule is replaced by:
+
+- `retrieve`, direct: `entity_ref` = a `canonical_title` present in `entities`.
+- `retrieve`, bridge (the step text refers to `#N`): `entity_ref` = the
+  canonical_title of the entity that step N's answer resolved to. It need not
+  appear in `entities`.
+- `reason`: `entity_ref` = JSON `null`.
+
+Validation: a `retrieve` step's `entity_ref` is legal if it matches a
+`canonical_title` in `entities` OR a title in that row's permitted candidate
+universe (evidence page titles plus the row `term`). This matches the universe
+check already implemented in `efbpt_stage3_core_verify.py`.
+
+Justification: BLIND30 `entity_ref` accuracy was 96.6% with only 3
+corrections, so this convention is cheap to annotate. `evidence_ref` and
+`gold_intermediate_answer` caused 77 of 93 corrections and remain dropped.
+
+Measurement on the 100-row manifest: 295 steps total, 133 contain `#`, and all
+100 rows contain at least one. Not all are bridge retrievals — some are
+`reason` steps, and some use `#N` as the object while the subject is a
+question entity.
