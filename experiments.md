@@ -3501,3 +3501,105 @@ Time estimate: ~250 rows = 33-50 human-hours, feasible in ~3 weeks.
 1,770-row Stage-1-retained pool (excludes BLIND30/AUDIT30/DEV50/eval458),
 stratified by hop count / entity count / label / reasoning pattern, fixed
 seed.
+
+---
+
+## 2026-07-25 — EFBPT Plan A: Schema C draft generation (100 rows)
+
+**Status:** drafting stage COMPLETE. Human review not yet started.
+
+### What ran
+- `eval/error_analysis_tests/efbpt/efbpt_build_plan_a_candidates.py` (CPU) —
+  built `plan_a_candidates_100.jsonl` from the frozen 100-qid manifest.
+- `eval/error_analysis_tests/efbpt/efbpt_plan_a_draft.py` (GPU, job 57898) —
+  produced `plan_a_drafts_100.jsonl`.
+- Qwen3-14B, vLLM, thinking OFF, temperature 0, max_tokens 1024 (frozen).
+
+### Design
+The model decides only four things: which candidate titles are named in the
+question, any entity missing from the candidate list, and per step the
+type / entity_ref / atype. Everything else is assembled mechanically:
+qid, question_ur, answer, and step text copied verbatim from
+`official_decomposition` (AMENDMENT 2b). The model never writes step text.
+
+Candidate titles are HINTS ONLY, built from evidence page titles plus the gold
+`term`. An entity is kept only if the model marks it as named in the question
+AND supplies an Urdu span. Model-proposed entities are always flagged.
+
+### Results
+- 100 rows, **0 JSON parse failures**, **0 truncation** — max_tokens 1024 is
+  sufficient for Schema C. No amendment needed.
+- 229 entities kept, **2.29 per row**. The earlier one-entity recall collapse
+  (Stage 2 pilot: 25/30 rows output exactly one entity) did NOT recur.
+- Entity spread: 0 rows with none, 5 with one, 65 with two, 26 with three,
+  4 with four. The five single-entity rows are correct — those questions name
+  one thing and had one candidate title.
+- 295 steps: 197 retrieve, 98 reason. Of the retrieve steps, **35 contain "#"**
+  (true bridge steps). Note: the earlier figure of 133 "#" steps counted
+  reason steps too and overstated the bridge problem by roughly 3x.
+- Flag counts: extra_entities 55, ref_marked_not_named 19,
+  extra_duplicates_candidate 11, shared_span 10, extra_duplicates_entity 8,
+  span_not_in_question 8, empty_span 2, list_page 1, ref_outside_universe 1.
+- Flags per row: 39 rows zero, 28 one, 18 two, 10 three, 5 four or more.
+
+### Finding 1 — entity drift inside our own annotation pipeline
+The prompt instructs the model to copy Urdu spans character-for-character from
+the question. In 8 cases it did not. Confirmed corruptions:
+
+| in question | model wrote | change |
+|---|---|---|
+| کیمبل (Campbell) | کینبل | م -> ن |
+| روزمیری (Rosemary) | روزماری | ی -> ا |
+| الفریڈ (Alfred) | الفрیڈ | possible Cyrillic "р" inside an Urdu word |
+
+Same failure class as `Lil Wayne -> Lil_Weane` in the Stage 2 pilot. This is
+copy, not generation — the correct string was in the prompt — and it still
+drifted. Direct evidence that the target failure mode is stubborn under
+instruction. (Codepoint check on the Alfred case pending.)
+
+### Finding 2 — structural validation cannot catch semantic errors
+In TEST-5, the only row with ZERO flags was `027a7b964c31a0540f9c`
+(Alexander the Great). Its step 2, "When did #1 develop?", should reference
+Christianity (the resolved answer of step 1, and present in the candidate
+list); the model wrote Baptism. Structurally perfect, semantically wrong.
+This independently confirms the Stage 3 auto-verification rejection and
+justifies the Plan A' cost of human review on every row.
+"Zero flags" means structurally clean, NOT correct.
+
+### Finding 3 — cost of title seeding
+Seeding candidate titles raised recall, but on `2bd29e26063a43572a19`
+("Can some DIY projects be potentially deadly?" — a question naming no
+specific entity) the model took `Deep frying` and `Roofing` from the hint list
+and manufactured Urdu spans for both. The span-substring check caught it.
+Net effect of seeding is positive, but it does induce hallucinated spans on
+entity-free questions.
+
+### Finding 4 — ref_marked_not_named catches two distinct errors
+Designed to catch self-contradiction (a title marked "not named" then used as a
+step subject). In practice the 19 hits split into:
+(a) missed entities — Weather, Tennis, Sonnet, Hotel, Internet,
+    Seven deadly sins. These are recall failures, mechanically detectable.
+(b) answer-as-reference — Carlos Ghosn, Pinus longaeva,
+    Never Again (Kelly Clarkson song). The entity_ref is what the step
+    RETURNS, not what it asks ABOUT. Same class as the Hephaestus error.
+An explicit prompt rule against (b) was added between TEST-5 run 1 and run 2
+and did NOT change model behaviour. Detection improved; prevention did not.
+
+### Finding 5 — title_space_cache.txt is unreliable, do not use for validation
+Checked 13 draft titles against the 6,407,814-line cache. Only 7 matched.
+It reports Hades, Weather, Hephaestus, Minor League Baseball and
+Mary, Queen of Scots as NOT EXISTING — all real English Wikipedia pages.
+Pattern resembles the earlier partial-shard download that left the Wikipedia
+index ~33% incomplete. Provenance unverified. A planned mechanical
+"is this a real page" check was abandoned because of this.
+
+### Pre-declared gate honoured
+One prompt revision, one TEST-5 rerun, then the full 100 regardless of the
+rerun result. No further prompt iterations were made.
+
+### Next
+1. Build the reviewer tool.
+2. Human review of all 100 rows to create gold. Review checklist must include
+   the two checks no script can perform: (a) is the Wikipedia page the RIGHT
+   SENSE (e.g. Hades the Greek god vs the Disney portrayal), and
+   (b) is a bridge entity_ref the correct resolved entity.
