@@ -3550,7 +3550,7 @@ the question. In 8 cases it did not. Confirmed corruptions:
 |---|---|---|
 | کیمبل (Campbell) | کینبل | م -> ن |
 | روزمیری (Rosemary) | روزماری | ی -> ا |
-| الفریڈ (Alfred) | الفрیڈ | possible Cyrillic "р" inside an Urdu word |
+| الفریڈ (Alfred) | الفрیڈ | CONFIRMED Cyrillic "р" (U+0440) replacing Arabic "ر" (U+0631) |
 
 Same failure class as `Lil Wayne -> Lil_Weane` in the Stage 2 pilot. This is
 copy, not generation — the correct string was in the prompt — and it still
