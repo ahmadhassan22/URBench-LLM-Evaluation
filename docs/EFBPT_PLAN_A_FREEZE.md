@@ -111,6 +111,7 @@ Extra rules, already learned the hard way:
 
 ## 3. Protected data — never used for training
 
+
 These five sets are off-limits for training, for all of C1/C2/C3, forever.
 
 | Set | Count | File | Use |
@@ -642,3 +643,64 @@ Order of evaluation:
   results at 100 rows are a directional signal, not proof.
 * Format B: secondary diagnostic only (JSON validity, valid entity_ref,
   binding correctness). Never gates expansion — it structurally favors C3.
+
+## AMENDMENT 4 — Fixed prompt (frozen 2026-07-28)
+
+AMENDMENT 3 Section A required "one fixed system message + one fixed short
+instruction," but never recorded the actual strings. This amendment fixes them.
+Frozen before any training data exists.
+
+### A. Fixed system message (English)
+
+    You are a helpful assistant. Answer the user's question.
+
+### B. Fixed instruction (Urdu)
+
+Stored as a file, NOT as a hardcoded literal:
+`prompts/efbpt/plan_a_instruction_ur.txt`
+
+- UTF-8, no BOM, no trailing newline
+- 20 characters, 36 bytes
+- MD5 (raw bytes): `f3b58d766fe3ec2573ff4f24761cf0c9`
+- Codepoints in stored order:
+  0627 0633 0020 0633 0648 0627 0644 0020 06A9 0627 0020 062C 0648 0627
+  0628 0020 062F 06CC 06BA 06D4
+- English gloss (not used in any prompt): "Answer this question."
+
+The file was generated from the codepoint list above, not typed or pasted, to
+eliminate copy-paste substitution risk. Every script MUST read this file at
+runtime and MUST verify the MD5. No script may hardcode the string.
+
+### C. User message assembly (frozen)
+
+    <instruction><LF><LF><question_ur>
+
+Nothing else. No schema, no facts, no candidate titles, no format constraint,
+no qid.
+
+### D. Scope
+
+Identical for C0, C1, C2 and C3, at BOTH training time and DEV200 evaluation
+time. No condition-specific prompt text exists anywhere in the pipeline.
+
+### E. Rationale (recorded so it is not relitigated)
+
+1. Existing StrategyQA prompts under `prompts/strategyqa/` could NOT be reused
+   verbatim, for two independent reasons: every one contains a `{facts}`
+   placeholder (EFBPT supplies no facts, so the wording would promise evidence
+   that never arrives), and every one forces single-word output (which
+   contradicts free-form Format A under AMENDMENT 3B and contradicts the JSON
+   step targets of C2 and C3).
+2. The instruction is Urdu, matching URBench/StrategyQA evaluation practice,
+   to avoid pushing output language toward English. AMENDMENT 2b freezes plan
+   STEP TEXT in English only; it does not govern the user instruction.
+3. The system message stays English because it is identical across all four
+   conditions and therefore cannot confound the C1/C2/C3 comparison. It may
+   influence output language, which is a reported non-gating metric only.
+4. The instruction carries no output-format constraint, so it does not favour
+   any condition's target shape.
+
+### F. Correction to prior handoff notes
+
+`prompts/strategyqa/cot.txt` does not exist. The real StrategyQA CoT templates
+are `cot_p1.txt`, `cot_p2.txt`, `cot_p3.txt` under `prompts/strategyqa/`.
