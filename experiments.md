@@ -3603,3 +3603,138 @@ rerun result. No further prompt iterations were made.
    the two checks no script can perform: (a) is the Wikipedia page the RIGHT
    SENSE (e.g. Hades the Greek god vs the Disney portrayal), and
    (b) is a bridge entity_ref the correct resolved entity.
+
+   ---
+
+## 2026-07-27 — EFBPT Plan A′: human review of 100 rows COMPLETE
+
+**Status:** gold file built and validated. Training set construction not yet started.
+
+### Output
+- `data/strategyqa_official/efbpt/plan_a_gold_100.jsonl` — 100 rows, frozen Schema C only.
+- `data/strategyqa_official/efbpt/plan_a_review_audit.jsonl` — notes, per-field diffs,
+  confirmed warnings, previous versions of reopened rows.
+- Tool: `eval/error_analysis_tests/efbpt/efbpt_plan_a_review.py`
+
+### Validation of the gold file (independent re-check after review)
+- 100 rows; 0 duplicate qids.
+- qid set matches the 100-row manifest exactly (0 missing, 0 extra).
+- 0 structural errors across all rows (immutable fields, verbatim spans,
+  enums, reason→null, retrieve-needs-ref).
+- 3 warnings, all EXTERNAL bridge references under AMENDMENT 2c, each
+  web-verified as a real and correct English Wikipedia page:
+  `Pantheon` (disambiguation page — correct target for "what other concepts
+  are named Pantheon"), `Seoul` (LG Electronics HQ), and
+  `List of Hey Arnold! characters` (no standalone "Stoop Kid" article exists).
+
+### Reviewer–draft correction counts
+NOT model accuracy. Accuracy requires a defined denominator and an
+entity-matching rule; neither is defined yet.
+
+| Field | Corrections |
+|---|---|
+| entity_ref | 37 (≈33 net, see caveat) |
+| deleted (entity removed) | 27 |
+| added (entity added) | 23 |
+| canonical_title | 17 |
+| urdu_span | 15 |
+| atype | 7 |
+
+- Rows accepted with zero edits: 36 / 100.
+- Caveat 1: `entity_ref: 37` includes 4 changes on `c2f573c79ceab25e8fcd`
+  that were an incorrect instruction plus its reverts; net real corrections
+  on that row were 0.
+- Caveat 2: `--stats` keeps only the latest action per qid. Row
+  `9b205f7f5667ab195540` was reopened, so its original review changes are not
+  counted in these totals.
+- "36 rows with zero edits" is not "36% correct". Zero-edit rows still
+  required sense checks, chain tracing, and fact verification; zero edits
+  means nothing needed changing, not that nothing was checked.
+
+### Finding 1 — entity_ref was the largest correction category and had
+### near-zero automatic detection
+
+`entity_ref` required the most corrections (≈33) while the structural
+validator flagged almost none of them. The dominant failure was the model
+using what a step RETURNS instead of what the step is ABOUT, or repeating the
+previous step's subject instead of following the `#N` chain to the resolved
+entity. Confirmed instances include:
+
+| qid | step | draft ref | corrected to |
+|---|---|---|---|
+| 027a7b964c31a0540f9c | "When did #1 develop?" | Baptism | Christianity |
+| 721d168ff5cc0b18c31b | "What animals are #1 found in?" | Tonsillitis | Tonsil |
+| 9f43aedfec93ab7c6cc7 | "What did #1 believe…?" | Shivambu | Urine therapy |
+| aa5d9115cc83aa120b7a | "What environment does #1 work in?" | Mayflower | Ship |
+| c2c6e32ccdd81e5df7f6 | "medical definition of #1?" | Jimmy Vee | Dwarfism |
+| c28b918d3baf499d1191 | "What religion was #1?" | Chick-fil-A | S. Truett Cathy |
+| b651b1d70b88ae98bc25 | "mix ammonia and #1" | Ammonia | Sodium hypochlorite |
+| 8116aa0a9157b809ac9b | "which substance caused controversy" | Sodium | Campbell Soup Company |
+| ec6b6fdf9c72f77dac67 | two chained steps | Goofy / Roy O. Disney | Pinto Colvig / Walt Disney |
+
+`027a7b964c31a0540f9c` had ZERO automatic flags. This is the same row
+identified in the TEST-5 analysis and confirms, on the full set, that
+structural validation cannot detect semantic errors. It is the empirical
+basis for the Plan A′ human-review cost.
+
+### Finding 2 — entity spans drift at the character level even when copying
+
+The prompt instructs character-for-character copying from the question.
+Confirmed corruptions in the gold review:
+
+| qid | in question | model wrote | change |
+|---|---|---|---|
+| 8116aa0a9157b809ac9b | کیمبل | کینبل | م → ن |
+| baf402d780174b669286 | روزمیری | روزماری | ی → ا |
+| 2c774c2108bfaef1032c | الفریڈ | الفрیڈ | Arabic ر (U+0631) → Cyrillic р (U+0440), verified by codepoint |
+
+The Cyrillic substitution is confirmed by direct codepoint inspection of the
+saved draft. Same failure class as `Lil Wayne → Lil_Weane` in the Stage 2
+pilot. This is a copy task with the correct string present in the prompt.
+
+### Finding 3 — 27 entity deletions, mostly non-entities and wrong-sense duplicates
+
+Two recurring patterns:
+- **Description, not a name**: `Human mind`, `Judge's attire`, `Operating
+  System`, `United States Army` (span = امریکی, "American" only),
+  `سرکاری پرندہ` (an Urdu phrase used as a canonical_title).
+- **Two titles on one span, one wrong sense**: `Vulcan`/`Vulcan (mythology)`,
+  `Subway`/`Subway (restaurant)`, `Hobbit`/`The Hobbit`,
+  `Samsung Galaxy`/`Samsung Galaxy (original)`, `Euphoria`/`Ecstasy (emotion)`.
+
+The `shared_span` flag added after TEST-5 detected the second pattern
+mechanically; the first pattern was human-only.
+
+### Finding 4 — 17 canonical_title corrections were real-page / wrong-sense errors
+
+Non-existent or wrong-sense titles corrected against Wikipedia:
+`Solar cycle`→`Tropical year`, `Heladeria`→`Ice cream parlor`,
+`Worm`→`Parasitic worm`, `Oppa`→`Korean honorifics`, `Sickness`→`Disease`,
+`Cruise`→`Cruise ship`, `Silverware`→`Cutlery`, `Nice`→`Nice!`,
+`Freemasonry`→`Excommunication`, `Chief Justice of the United States`→
+`Chief Justice`, `Stoop Kid`→`List of Hey Arnold! characters`.
+
+Several are disambiguation pages being used as if they were articles
+(`Worm`, `Sickness`, `Cruise`). This class is invisible to any check that
+does not query Wikipedia.
+
+### Finding 5 — corrections stayed inside the grounded candidate universe
+
+Of all corrected `entity_ref` values, only 3 across 100 rows were freely
+typed titles outside both the entity list and the row's candidate titles.
+Every other correction drew from the row's own candidate list. Retrieval
+grounding for the correction step was therefore high.
+
+### Process note
+Two incorrect instructions were caught during review by cross-checking rather
+than by the tool: one wrong `entity_ref` direction (`c2f573c79ceab25e8fcd`,
+reverted in-session) and one non-existent Wikipedia title (`Solar year`,
+corrected later via `--reopen`). Both were found by verifying claims against
+Wikipedia rather than accepting them. Web verification of every entity title,
+sense, and factual claim was adopted as a standing rule mid-review and applied
+to all subsequent rows.
+
+### Next
+1. Build C0 / C1 / C2 / C3 training sets from the gold file.
+2. QLoRA fine-tune (seeds 13 / 42 / 2026); evaluate on frozen DEV200.
+3. Gate: C3 > C2 AND C3 > C1.
