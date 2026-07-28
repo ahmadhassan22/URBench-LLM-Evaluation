@@ -571,3 +571,74 @@ Measurement on the 100-row manifest: 295 steps total, 133 contain `#`, and all
 100 rows contain at least one. Not all are bridge retrievals — some are
 `reason` steps, and some use `#N` as the object while the subject is a
 question entity.
+
+## AMENDMENT 3 — Training serialization, 100→250 gate, and entity-faithfulness
+
+## protocol (frozen 2026-07-28, before any training data was generated)
+
+### A. Training serialization (C0–C3)
+
+* Input: identical for all conditions. One fixed system message + one fixed
+  short instruction + question_ur. No condition-specific text. No schema in
+  the prompt. qid is metadata only, never model input.
+* Targets, deterministic JSON, frozen key order, no whitespace variation:
+
+  * C1: {"answer":"yes|no"}
+  * C2: {"steps":[{"step_id","text","type","atype"}],"answer":...}
+  * C3: {"entities":[{"canonical_title","urdu_span"}],
+    "steps":[{"step_id","text","type","atype","entity_ref"}],"answer":...}
+* C2 and C3 step text MUST be byte-identical (isolates entity binding).
+* Candidate titles, audit data, reviewer notes: never in any target.
+* C0 = untrained base, same input format at eval.
+
+### B. Format A amended (extractor-based)
+
+Format A output is free-form; the final answer is recovered by ONE frozen
+extractor applied identically to C0–C3. Rationale: targets do not contain
+reasoning_ur; requiring it would contradict AMENDMENT 2b (English step text).
+Primary gate metric = final-answer accuracy on DEV200 via this extractor.
+Urdu-reasoning presence and JSON validity: reported separately, never gating.
+
+### C. 100→250 expansion gate (pre-declared; no auto-expansion)
+
+Order of evaluation:
+
+1. Accuracy first. C3-100 mean DEV200 accuracy must beat BOTH C1-100 and
+   C2-100, and beat each in ≥2 of 3 paired seeds (13/42/2026).
+   If this fails: stop, log, do not run the faithfulness probe.
+2. Entity-faithfulness probe (only if step 1 passes): on DEV50,
+   C3 mean corruption < C2 mean corruption, in ≥2 of 3 paired seeds, AND
+   C3 mean omission ≤ C2 mean omission + 2pp.
+   No ≥3pt margin required at 100 (that threshold belongs to 250→500).
+   A C3−C2 difference of ≤2 judgments total = inconclusive, not a pass.
+   No condition may be redefined after any number is seen.
+
+### D. Entity-faithfulness probe (frozen instrument)
+
+* Gold list: evaluation-only annotation of testable entities for DEV50
+  (exact Urdu span + canonical identity + accepted spelling variants).
+  "Testable" reuses the frozen transliteration-drift-risk rule from the
+  original (c)-probe — NOT a new rule — so rates remain comparable to the
+  ~39% corruption baseline. Never enters any model prompt.
+* Probe prompt: one frozen prompt requesting brief Urdu reasoning + yes/no.
+  Identical for C2 and C3, all seeds. thinking OFF, temp 0, max_tokens 1024.
+* Normalization: strip JSON/schema structure, keep reasoning text + answer;
+  shuffle across conditions and seeds; mapping key stored separately and
+  never shown to the judge. Blinding acknowledged as imperfect (C3 style
+  may leak); recorded as a limitation.
+* Judge: LLM judge (Claude, fixed model + fixed prompt), one output per
+  call, no batching. Per gold entity, exactly one label:
+  faithful | corrupted | omitted, each with a verbatim supporting quote and
+  a one-line reason. All raw judgments saved.
+* Metrics: corruption = corrupted/required instances;
+  omission = omitted/required instances. Same denominator. Per-seed + mean.
+* Human audit: pre-declared balanced sample of 60–100 judgments, balanced
+  across conditions, seeds, and LABELS (oversampling corrupted/omitted).
+  Acceptance: ≥90% human–judge agreement AND no systematic disagreement
+  direction against one condition. Below 90%: inspect disagreements and
+  expand the audit before using any judgment.
+* Limitations recorded in advance: single-LLM judge (vs 3 human readers in
+  the original probe), imperfect blinding, no minimum corruption margin —
+  results at 100 rows are a directional signal, not proof.
+* Format B: secondary diagnostic only (JSON validity, valid entity_ref,
+  binding correctness). Never gates expansion — it structurally favors C3.
