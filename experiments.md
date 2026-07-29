@@ -3788,3 +3788,64 @@ Checks that passed on all 100 rows:
    behaviour, but it gives C3 a hallucination channel C2 does not have
    (cf. Gekhman et al., EMNLP 2024). Logged in advance so it cannot look like
    a post-hoc excuse if C3 loses.
+
+## EFBPT Plan A' — QLoRA pipeline TEST (job 58468, 2026-07-29)
+
+Script: `eval/error_analysis_tests/efbpt/efbpt_train_qlora.py`
+Batch:  `eval/error_analysis_tests/efbpt/plan_a_train_TEST.sbatch`
+Run: C3, seed 13, 6 steps only. **Not a result. Nothing banked.**
+
+### Purpose
+Prove the pipeline loads the model in 4-bit, masks the prompt, trains, saves a
+LoRA adapter, and that the adapter reloads and generates.
+
+### Outcome: PASS
+- training file MD5 verified before load (adb0515f...)
+- token lengths: min 157 / median 228 / max 334; truncated 0/100 at
+  max_seq_len 1024 — large headroom, no target clipping possible
+- prompt masking confirmed: example 0 = 193 tokens, 112 supervised, 81 masked
+- trainable params 64,225,280 / 14,832,532,480 = 0.4330%
+- loss 2.17 -> 1.03 over 6 steps, all finite; grad_norm 0.59-1.59 (no blow-up)
+- adapter saved, 256,976,504 bytes
+- adapter reloaded: 560 LoRA tensors = 40 layers x 7 modules x 2 (A,B) — exact
+- wall clock 12m19s (cold shard load ~8m of that); MaxRSS 5.3 GB
+
+### Config NOT specified in the freeze doc — fixed here, identical for all 9 runs
+| Setting | Value |
+|---|---|
+| per_device_train_batch_size | 1 |
+| gradient_accumulation_steps | 8 |
+| effective batch | 8 |
+| lr_scheduler_type | cosine |
+| warmup_ratio | 0.03 |
+| max_grad_norm | 1.0 |
+| optim | paged_adamw_8bit |
+| max_seq_len | 1024 |
+| attn_implementation | sdpa (flash_attn not installed) |
+| quantization | nf4, double quant, bf16 compute |
+| chat template | enable_thinking=False (matches eval regime) |
+
+`trl` deliberately NOT installed. Loss masking is written explicitly with
+plain `transformers.Trainer` so it is auditable, rather than hidden behind a
+library flag whose behaviour varies by version.
+
+Adapter config written by PEFT 0.19.1 confirms r=16, alpha=32, dropout=0.05,
+bias=none, 7 target modules, use_rslora=false, use_dora=false.
+
+### Consequence to watch
+100 rows / effective batch 8 x 3 epochs = **~37 optimizer steps per run**.
+That is few updates. If all three conditions land within noise of each other,
+"too few updates to learn the behaviour" is a live explanation and must be
+tested (more epochs or more rows) before concluding the method does not work.
+
+### Incidental observation (illustrative only, n=1, NOT evidence)
+The 6-step adapter, given row 001f5aedc57159e1fd99 ("Does Hades appear in a
+Disney Channel musical movie?"), answered in fluent Urdu that Hades is a
+Ukrainian singer who competed at Eurovision 2016 with the song "1944".
+That describes Jamala (Susana Jamaladinova), verified. Hades is a Greek god.
+The model substituted the entity and then reasoned confidently and correctly
+*about the wrong entity* — the same pattern as the (c)-probe corruptions
+(Roewe 550 -> rowing boat, ZRK Kumanovo -> Zara Larsson song).
+A 6-step adapter is effectively untrained, so this is near-C0 behaviour and
+carries no evidential weight. Kept only as a quotable illustration of the
+target failure mode, and must be labelled as such.
