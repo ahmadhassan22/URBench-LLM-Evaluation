@@ -3738,3 +3738,53 @@ to all subsequent rows.
 1. Build C0 / C1 / C2 / C3 training sets from the gold file.
 2. QLoRA fine-tune (seeds 13 / 42 / 2026); evaluate on frozen DEV200.
 3. Gate: C3 > C2 AND C3 > C1.
+
+## EFBPT Plan A' — training sets built (2026-07-28)
+
+Script: `eval/error_analysis_tests/efbpt/efbpt_build_training_sets.py`
+Contract: FREEZE doc AMENDMENT 3 (serialization) + AMENDMENT 4 (fixed prompt).
+
+Input gold: `data/strategyqa_official/efbpt/plan_a_gold_100.jsonl`
+  MD5 c71356b4a98b4fb718a29cc7f5b98216
+
+Outputs (100 rows each), in `data/strategyqa_official/efbpt/train/`:
+| Condition | File | MD5 |
+|---|---|---|
+| C1 | plan_a_train_c1_100.jsonl | 7fa4472b4c98489c8d888c0abc9119b1 |
+| C2 | plan_a_train_c2_100.jsonl | fac4178ccc6b1a76ef14897bd5b718fc |
+| C3 | plan_a_train_c3_100.jsonl | adb0515fa08742529faf345c1a43791c |
+
+Checks that passed on all 100 rows:
+- instruction file MD5 verified before build (f3b58d766fe3ec2573ff4f24761cf0c9)
+- answer in {yes,no}; step_id 1..N no gaps; type/atype inside frozen enums
+- retrieve -> entity_ref present; reason -> entity_ref empty (0 violations each)
+- every urdu_span appears verbatim in question_ur
+- **C2 and C3 step text byte-identical on all 100 rows** (isolates entity
+  binding as the only variable)
+
+### entity_ref universe (AMENDMENT 2)
+- 42 bridge refs across 34 rows name an entity NOT in that row's own
+  `entities` list. This is permitted: `entities` is span-anchored to the
+  question, while bridge targets are discovered by the `#N` chain.
+- Of those, exactly 3 fall outside `entities` + `candidate_titles`:
+  `Pantheon`, `Seoul`, `List of Hey Arnold! characters` — all web-verified
+  during human review. The build script hard-codes this allow-list and ABORTS
+  if a fourth ever appears.
+
+### Limitations recorded BEFORE any result is seen
+1. **C1 is a weaker control than C2.** C1's target is ~6 tokens; C3's is ~110.
+   With identical epochs and optimizer steps, supervision signal per row
+   differs greatly, so part of any C3 > C1 gap is target length, not entity
+   binding. The properly controlled comparison is **C3 vs C2**. C3 > C1 must
+   not be reported with the same evidential weight.
+2. **Power is thin at this scale.** DEV200 is binary; one run's standard error
+   is roughly 3.5pp. The 100->250 gate sets no minimum accuracy margin, so a
+   ~1pp mean gap could pass the gate and still be noise. Decision taken before
+   seeing numbers: keep the gate as frozen (it is a "worth continuing" filter,
+   not proof) and report the margin with per-seed paired spread, never as a
+   bare mean.
+3. **C3 is trained to emit world knowledge on 42 steps.** Those bridge refs
+   name pages absent from the question. This is the intended entity-binding
+   behaviour, but it gives C3 a hallucination channel C2 does not have
+   (cf. Gekhman et al., EMNLP 2024). Logged in advance so it cannot look like
+   a post-hoc excuse if C3 loses.
