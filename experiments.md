@@ -3849,3 +3849,64 @@ The model substituted the entity and then reasoned confidently and correctly
 A 6-step adapter is effectively untrained, so this is near-C0 behaviour and
 carries no evidential weight. Kept only as a quotable illustration of the
 target failure mode, and must be labelled as such.
+
+## EFBPT Plan A' — 9 QLoRA adapters trained (job 58505, 2026-07-29)
+
+Launcher: `eval/error_analysis_tests/efbpt/plan_a_train_ALL9.sbatch`
+Script:   `eval/error_analysis_tests/efbpt/efbpt_train_qlora.py`
+3 conditions x 3 seeds. C0 is the untouched base model and needs no training.
+Node L20006, single L20. Wall clock 16:53 -> 17:28 = ~35 min for all 9.
+`set -e` in the launcher never fired: no run failed.
+Config exactly as frozen in the TEST entry above (job 58468).
+
+### Final training loss
+
+| Condition | seed 13 | seed 42 | seed 2026 | seed spread |
+|---|---|---|---|---|
+| C3 | 0.5383 | 0.5377 | 0.5414 | 0.004 |
+| C2 | 0.6962 | 0.7036 | 0.7052 | 0.009 |
+| C1 | 0.7122 | 0.7450 | 0.7625 | 0.050 |
+
+### Adapter fingerprints (`adapter_model.safetensors`, 256,976,504 bytes each)
+
+| Adapter | MD5 |
+|---|---|
+| C3_seed13   | 6d2e7e8d1fb87ae3531456034e0a6fd2 |
+| C3_seed42   | 169169e544f8b23e3aa543676f97562b |
+| C3_seed2026 | 09d2f31122bdba645a4db34d89ae3ada |
+| C2_seed13   | 1836a9d02b12ae5257f26cd8db6d344c |
+| C2_seed42   | 4f47e703e55cb047fbf3636828f9740c |
+| C2_seed2026 | 3c1dcd6f07d6e9fc76f50dc605139726 |
+| C1_seed13   | 9acb3f08f29eb38631d87a272a12d0d0 |
+| C1_seed42   | a79725f80a0da7038b6a6c50782c1b8b |
+| C1_seed2026 | 584544896a9bdd71d3118d0f117a466a |
+
+All 9 distinct (9 unique / 9 total), confirming the seed genuinely varied each
+run. Identical hashes across seeds would have meant the paired-seed design was
+an illusion. All 9 directories contain both adapter_config.json and
+adapter_model.safetensors. Token lengths: 0/100 truncated in every run.
+
+### Reading of these numbers — what they DO and DO NOT show
+
+1. **Training is stable.** Within C3 and C2 the three seeds land almost on top
+   of each other (spread 0.004 and 0.009). The outcome is driven by the data,
+   not by lucky initialisation.
+2. **Cross-condition loss is NOT comparable and is not evidence of quality.**
+   Each condition has a different target, so the losses measure different
+   tasks. C3's lower loss is partly because its target repeats the entity
+   block, much of which is copied near-verbatim from the question — cheap
+   tokens to predict. Only DEV200 accuracy can rank the conditions.
+3. **C1's seed spread (0.050) is ~12x wider than C3's (0.004).** This is
+   independent evidence from the training side for the caveat recorded BEFORE
+   any run: C1 supervises only ~6 target tokens per row, so it receives very
+   little signal and drifts more between seeds. Expect C1's DEV200 accuracy to
+   be the noisiest of the three, and continue to treat **C3 vs C2 as the
+   controlled comparison** and C3 vs C1 as weaker evidence.
+4. **Low training loss does not mean the method works.** At 100 rows and ~39
+   optimizer steps, low loss is equally consistent with memorising 100 targets.
+   Nothing about generalisation is known until DEV200 is scored.
+
+### Status
+Zero results so far. Nine trained artifacts and no accuracy number.
+README.md deliberately NOT updated: there is nothing to report yet.
+Next: DEV200 evaluation of C0/C1/C2/C3 with the frozen answer extractor.
