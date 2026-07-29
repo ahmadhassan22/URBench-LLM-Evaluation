@@ -704,3 +704,101 @@ time. No condition-specific prompt text exists anywhere in the pipeline.
 
 `prompts/strategyqa/cot.txt` does not exist. The real StrategyQA CoT templates
 are `cot_p1.txt`, `cot_p2.txt`, `cot_p3.txt` under `prompts/strategyqa/`.
+
+## AMENDMENT 5 — Frozen answer extractor for DEV200 (frozen 2026-07-29)
+
+AMENDMENT 3B requires "ONE frozen extractor applied identically to C0-C3" but
+never defined it. This amendment defines it. Frozen BEFORE any DEV200 output
+has been generated.
+
+### A. Why the existing StrategyQA extractor cannot be reused as-is
+
+`eval/error_analysis_tests/sdfr_strategyqa_fair.py` (and its siblings) search
+for Urdu ہاں / نہیں first, and fall back to English only via a bare substring
+test (`"no" in text.lower()`).
+
+C1/C2/C3 are trained to emit English JSON such as `{"answer":"no"}` and contain
+no Urdu at all, so the Urdu branch finds nothing. The English fallback then
+matches "no" inside ordinary words — not, nothing, north, Nobel — and C3's
+targets carry English entity titles and step text, so both "yes" and "no"
+substrings frequently co-occur, returning "" (unparsed).
+
+C0 is untrained, answers in Urdu prose, and parses normally.
+
+Reusing that function unchanged would have systematically failed the trained
+conditions and handed C0 an artificial advantage. Recorded here because the
+defect was found by inspection before any number existed, not after.
+
+### B. The frozen extractor
+
+Applied identically to C0, C1, C2 and C3, all seeds. Ordered; first rule that
+matches wins; no later rule may override an earlier one.
+
+1. JSON answer field.
+   Regex `"answer"\s*:\s*"(yes|no)"`, case-insensitive.
+   Take the LAST match in the output. Return "yes" or "no".
+2. Urdu.
+   If the marker حتمی جواب occurs, discard everything before its LAST
+   occurrence. In the remaining text take rfind of ہاں and rfind of نہیں;
+   whichever index is greater wins. Return "yes" for ہاں, "no" for نہیں.
+3. English, word-bounded.
+   Regex `\b(yes|no)\b`, case-insensitive. Take the LAST match.
+   The word boundary is required; it is what fixes the not/Nobel defect in A.
+4. Otherwise return None (unparsed).
+
+Rule 1 exists because C1-C3 are trained to emit JSON and C0 is not. An
+extractor reading only Urdu would measure output-format compliance, not
+reasoning.
+
+Rule 2 keeps the rfind "last mention wins" behaviour of the existing
+StrategyQA extractors so EFBPT numbers stay comparable to the project's
+earlier StrategyQA results. The "first 20 characters" variant used in the
+English-pivot scripts is deliberately NOT used: it assumes the answer
+immediately follows the marker, which that prompt enforces and the EFBPT
+prompt does not.
+
+### C. Scoring rules
+
+- Gold mapping (AMENDMENT 2): DEV200 `answer: true` -> "yes", `false` -> "no".
+- Unparsed (None) is scored INCORRECT. It is not excluded from the
+  denominator. Excluding it would reward a model for staying silent on
+  questions it cannot answer, and would give conditions different
+  denominators, making accuracies non-comparable.
+- Accuracy denominator is always 200 for every condition and seed.
+
+### D. Mandatory reporting — per condition, per seed
+
+Reported alongside every accuracy number, without exception:
+
+1. unparsed rate
+2. truncation rate (output reached max_tokens = 1024)
+3. predicted-yes rate
+
+DEV200 label balance is 87 yes / 113 no. **A constant "no" scores 56.5%.**
+Any condition near 56.5% has learned a label prior, not reasoning, and must be
+reported as such.
+
+**Validity condition on the 100->250 gate:** if the unparsed rate differs
+materially between conditions, the accuracy comparison is not valid and the
+gate is void regardless of the accuracy ordering. Diagnose the parsing gap
+first. Mismatched truncation has already produced sign-flipped results twice
+in this project; unparsed rate is the same class of defect.
+
+### E. Known limitation, accepted deliberately
+
+Rule 2's "last mention wins" misreads negated phrasing: "the answer is not
+ہاں" scores yes. This defect is already present in every existing StrategyQA
+baseline in this repo. It is retained so that the error is IDENTICAL across
+C0-C3 and comparable with prior results. Fixing it now would break
+comparability with numbers already logged in experiments.md. Logged as a
+limitation, not fixed.
+
+### F. Correction to prior notes
+
+The DEV200 file is `data/strategyqa_official/dev200_seed4242.jsonl`.
+It is NOT under `data/strategyqa_official/efbpt/`. Every row has
+`is_eval: false`; that field is inherited from the source dataset and carries
+no meaning for this evaluation.
+
+Contamination check performed 2026-07-29: 0 of 200 DEV200 `urbench_qid`
+values appear as a `qid` in `plan_a_train_c3_100.jsonl`. No overlap.
