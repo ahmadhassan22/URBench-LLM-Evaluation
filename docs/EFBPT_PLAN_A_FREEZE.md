@@ -802,3 +802,110 @@ no meaning for this evaluation.
 
 Contamination check performed 2026-07-29: 0 of 200 DEV200 `urbench_qid`
 values appear as a `qid` in `plan_a_train_c3_100.jsonl`. No overlap.
+
+## DIAGNOSTIC D1 — Knowledge vs language bottleneck (frozen 2026-07-30)
+
+This is NOT part of Plan A'. Plan A' is closed: the 100->250 gate failed and
+the counterfactual experiment established why (entity labels are read but
+knowledge-inert). D1 is a separate diagnostic, frozen before it is run, to
+decide what the next method should attack.
+
+### A. Question
+
+Plan A' tested STRUCTURE (plans, entity blocks, entity binding). None of it
+raised accuracy above ~65%. The untested question is whether the ceiling comes
+from missing KNOWLEDGE or from inability to REASON IN URDU.
+
+### B. Confound that forces four arms
+
+`urbench_facts` in DEV200 is 100% English: 532 fact strings, 0 Arabic-block
+characters, 28,343 ASCII letters. `question_ur` is 195/200 pure Arabic script.
+So the dataset pairs an Urdu question with English evidence.
+
+Adding English facts alone cannot distinguish three explanations for any gain:
+(1) the model lacked knowledge, (2) the model reasons better in English,
+(3) English facts leak the answer via lexical overlap with the English source
+question. Four arms are therefore required.
+
+### C. The four arms
+
+All on the same 200 DEV200 rows. Base Qwen3-14B, NO adapters.
+
+| arm | question | facts supplied | isolates |
+|---|---|---|---|
+| A | Urdu | none | baseline |
+| B | Urdu | gold, English (verbatim `urbench_facts`) | knowledge + language |
+| C | Urdu | English facts from a DIFFERENT row | whether facts are read at all |
+| D | Urdu | gold facts machine-translated to Urdu | knowledge, language fixed |
+
+**B vs D is the primary comparison.** Same knowledge content, different
+language. B >> D implies the bottleneck is Urdu reasoning. B ~= D implies the
+bottleneck is knowledge and translation is a viable route.
+
+Arm C donor assignment: fixed deterministic shift, same scheme as the
+counterfactual experiment (shift 97 over the row list), and the script MUST
+report the count of rows whose fact set actually changed.
+
+### D. Frozen decoding — identical to the EFBPT regime, NOT the old baselines
+
+- transformers + 4-bit nf4 (double quant, bf16 compute), attn = sdpa
+- thinking OFF, temperature 0 (greedy), max_new_tokens 1024
+- prompt = fixed system message + Urdu instruction file
+  (`prompts/efbpt/plan_a_instruction_ur.txt`, MD5 verified at runtime)
+  + facts block (arms B/C/D) + `question_ur`
+- answer extractor: IMPORTED from `efbpt_eval_dev200.py`, the frozen
+  AMENDMENT 5 extractor. Never re-implemented.
+- gold mapping: `answer: true` -> "yes", `false` -> "no" (AMENDMENT 2)
+- unparsed scored INCORRECT; denominator always 200 (AMENDMENT 5C)
+
+Deliberately NOT reusing `cot_strategyqa_nofacts_baseline_fair.py`: it runs
+thinking ON, max_tokens 2048, vLLM bf16, on the `data/sdfr_splits` eval set.
+Numbers from that regime cannot be compared to C0-C3. Token cost is not a
+concern here: facts + question is max 141 tokens, p95 116, so 0/200 rows
+approach any limit.
+
+### E. Built-in validity control
+
+**Arm A MUST reproduce C0 (57.50% on DEV200).** Arm A uses the identical
+prompt, model, quantization and decoding as C0. A deviation greater than
+~2pp means the setup differs from the main evaluation in some unintended way,
+and NO arm may be interpreted until that is explained. This is a hard
+precondition, not a soft check.
+
+### F. Mandatory reporting, per arm
+
+accuracy, unparsed rate, truncation rate, predicted-yes rate, and the
+always-"no" floor (56.50%). Under AMENDMENT 5D, if the unparsed-rate spread
+across arms exceeds 5pp the accuracy comparison is VOID and the parsing gap
+must be diagnosed first. Any subgroup claim must include a matched control on
+the SAME qid set (two analysis errors in the Plan A' read-out came from
+comparing groups against their own floor instead of a matched control).
+
+### G. Pre-declared readings — fixed before any number is seen
+
+1. If C ~= B, the model is not reading the facts and no arm is interpretable.
+   This check comes FIRST; nothing else is read until it passes.
+2. If B and D both reach >= 80%, knowledge is the bottleneck. The next method
+   should target getting Urdu entity knowledge to the model, not structuring
+   plans. Span extraction at 97.89% is an existing asset for that.
+3. If B >= 80% but D <= 70%, the bottleneck is Urdu reasoning, not knowledge.
+   Supplying Urdu knowledge would not be sufficient and that route is closed.
+4. If B and D are both <= 70%, neither knowledge nor language is sufficient:
+   the model cannot combine given facts in this task at all. This closes a
+   whole family of retrieval-style approaches and is itself a reportable
+   finding.
+5. Any gain in B must be checked against answer leakage: report how often the
+   gold answer is lexically inferable from the English facts alone.
+
+### H. Translation for arm D
+
+Facts are translated by Qwen3-14B itself in a separate pass (same model, no
+new dependency), greedy, thinking OFF. The translated file is written once,
+MD5-recorded, and reused unchanged by the evaluation. Translation quality is
+a limitation and is recorded as such: a poor translation would depress arm D
+and could masquerade as evidence for reading 3. To bound this, a sample of
+translations must be human-checked before arm D is interpreted, and the
+sample size and outcome recorded here.
+
+### I. Status
+Declared before execution. No arm has been run. No numbers exist.
