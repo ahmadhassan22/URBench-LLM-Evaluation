@@ -3910,3 +3910,125 @@ adapter_model.safetensors. Token lengths: 0/100 truncated in every run.
 Zero results so far. Nine trained artifacts and no accuracy number.
 README.md deliberately NOT updated: there is nothing to report yet.
 Next: DEV200 evaluation of C0/C1/C2/C3 with the frozen answer extractor.
+
+## EFBPT Plan A' — DEV200 results, gate FAIL, and causal diagnosis (2026-07-29/30)
+
+### 1. Main evaluation (job 58510)
+Script `eval/error_analysis_tests/efbpt/efbpt_eval_dev200.py`.
+transformers + 4-bit nf4 (identical to training; vLLM bf16 OOMed and would
+have introduced a train/eval numerical mismatch). 10 configs x 200 rows.
+DEV200 = `data/strategyqa_official/dev200_seed4242.jsonl`, 87 yes / 113 no,
+always-"no" floor = 56.50%. Contamination check: 0/200 overlap with training.
+
+| config | acc% | unparsed% | trunc% | predYes% |
+|---|---|---|---|---|
+| C0 (base) | 57.50 | 4.00 | 4.50 | 38.50 |
+| C1 mean | 62.50 | 0.00 | 0.00 | — |
+| C2 mean | 64.83 | 2.00 | 2.00 | — |
+| C3 mean | 63.33 | 1.50 | 1.33 | — |
+
+C1 seeds 59.0 / 64.5 / 64.0 ; C2 64.0 / 65.5 / 65.0 ; C3 61.5 / 63.0 / 65.5.
+
+**GATE STEP 1 (AMENDMENT 3C): FAIL.** C3 beat C2 in 1/3 paired seeds and
+C3 mean < C2 mean. Faithfulness probe NOT run, per the frozen rule.
+Unparsed spread 4.00pp (< 5pp), so the comparison was VALID under
+AMENDMENT 5D. The gate was not voided; C3 simply did not win.
+
+C2 vs C3 pooled discordant pairs 77 vs 68, McNemar p ~ 0.45 — a dead heat,
+not a defeat. Correct statement: no detectable benefit from entity binding.
+
+### 2. Confirmed pre-registered prediction
+Before any accuracy was seen, C1 was predicted to be the noisiest condition
+because it supervises only ~6 target tokens per row (seed spread of final
+training loss 0.050 vs 0.004 for C3). Confirmed: C1 accuracy seed spread
+5.5pp vs C2 1.5pp.
+
+### 3. Component-level diagnosis (read-only analysis of saved generations)
+| component | measurement |
+|---|---|
+| Urdu span extraction | 418/427 spans verbatim in question_ur = **97.89%** |
+| span -> canonical identity | gold `term` present in C3 entities: 54.2 / 56.3 / 54.7% exact (68% relaxed) |
+| identity stability across seeds | identical title set on only 85/192 qids = **44%** |
+| JSON validity | C1 200/200; C2 195-197/200; C3 197-198/200 |
+
+Span extraction works. Identity resolution does not. Format is not the problem.
+
+HIT/MISS split (gold `term` present vs absent in C3's entity block), pooled,
+accuracy above each group's own floor: C3 +9.97 on HIT vs +5.16 on MISS;
+C2 +7.48 vs +9.22; C0 flat (+0.63 vs +1.47, so HIT rows are NOT easier).
+Paired C2-vs-C3 discordance: HIT 34 vs 42 (C3 ahead), MISS 37 vs 26 (C2
+ahead). Directional, interaction ~+6.5pp, p ~ 0.11 — NOT significant.
+On MISS rows C3 performs exactly at C1 level (+5.16 vs +5.16), i.e. a
+mis-bound plan contributes nothing over having no plan at all.
+
+### 4. Counterfactual entity-forcing experiment (job 58611) — THE DECISIVE TEST
+Script `eval/error_analysis_tests/efbpt/efbpt_counterfactual_entities.py`.
+Arm B = force-decode C3's OWN entity block, then generate. Arm C = same Urdu
+spans, canonical titles stolen from a different question (fixed shift 97;
+197 rows is prime so no row is its own donor; 100% of rows verified changed).
+Extractor imported from the main eval script so it cannot drift.
+
+Control passed: arm B reproduced free-running C3 almost exactly
+(seed2026 B 65.15% vs free 65.50%), so forcing itself is not distorting.
+
+| | seed13 | seed42 | seed2026 | mean |
+|---|---|---|---|---|
+| B acc | 59.90 | 64.97 | 65.15 | 63.34 |
+| C acc | 54.82 | 60.91 | 56.06 | 57.26 |
+| B trunc% | 0.00 | 1.52 | 2.02 | 1.18 |
+| C trunc% | 7.11 | 4.57 | 12.12 | 7.94 |
+
+Raw paired: B_only=97, C_only=61 (B ahead in all 3 seeds), p ~ 0.004.
+**This raw result is CONFOUNDED and must not be reported as an accuracy
+effect.** Unparsed spread 6.75pp > 5pp voids it under AMENDMENT 5D.
+
+Deconfounded — restricted to qids where BOTH arms parsed (n=538 pooled):
+| | B | C |
+|---|---|---|
+| accuracy | 63.01% | 62.27% |
+paired both_correct=278, B_only=61, C_only=57, both_wrong=142.
+McNemar **p ~ 0.71 — NO DIFFERENCE.** On seed 13, corrupted C beat B
+(59.02% vs 57.92%).
+
+Mechanism established:
+- Every unparsed row was a truncated row; zero non-truncated rows unparsed.
+  The entire raw accuracy drop is derailment, not wrong reasoning.
+- Truncation: B 7/592 (1.2%) vs C 47/592 (7.9%) = 6.7x.
+- In truncated rows `"step_id"` occurs 19-37 times (normal plan = 2-3 steps)
+  while `"canonical_title"` stays at 2-5. The model loops on STEPS, unable to
+  build a coherent plan from entities that do not fit the question.
+- Answers flipped on 118/538 rows (21.9%), asymmetrically: 82 yes->no vs
+  36 no->yes. Corruption pushes the model toward "no".
+
+### 5. Conclusion
+The entity block IS causally read (22% answer flips, 6.7x truncation), so it
+is not decorative. But its influence is on **coherence and answer polarity,
+not on knowledge**. A corrupted identity confuses and derails the model; a
+correct identity does not make it reason better.
+
+Root cause of the null result: EFBPT supplies correct entity **labels** but
+never entity **knowledge**. Forcing the string "SnapCap" does not tell the
+model that SnapCap is a small-business lender. Labels without knowledge are
+inert, so improving binding quality could not have produced an accuracy win.
+This is a structural limitation of the design, established causally rather
+than inferred.
+
+What works: Urdu span extraction (97.9%) and answer-format calibration
+(C0 57.50% -> C1 62.50%, +5.0pp, from a target containing no reasoning at
+all — so two thirds of the total gain is formatting, not reasoning).
+What is broken: span -> identity resolution (~55%, 44% stable).
+What was never attempted: identity -> knowledge.
+
+Base Qwen3-14B is at chance on Urdu multi-hop reasoning without facts
+(57.50% vs 56.50% floor). No structural intervention exceeded ~65%.
+
+### 6. Process notes
+- Two analysis errors were made and corrected during this session, both from
+  comparing groups against the wrong baseline (own-group floor instead of a
+  matched control). Both were caught by demanding a control condition on the
+  SAME qid sets. Any future subgroup claim must include such a control.
+- `dev200_C0_TEST.jsonl` was truncated to 0 bytes after the TEST job ended,
+  during an inspection window. A "READ-ONLY" instruction to a terminal agent
+  is not enforced: shell redirection can still destroy files. All later
+  read-only prompts explicitly forbid `>`, `>>`, `tee`, `sort -o`, and the
+  eval script now fsyncs and asserts the on-disk line count after writing.
