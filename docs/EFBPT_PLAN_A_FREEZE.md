@@ -1037,3 +1037,102 @@ stands as an Urdu-NLP finding in its own right.
 
 ### F. Status
 Amended before execution. No D1 arm has been scored. No D1 numbers exist.
+
+## DIAGNOSTIC D1 — AMENDMENT 2 (2026-07-31): Devanagari script drift
+
+Declared BEFORE the full D1 run. The only D1 execution so far is the TEST pass
+(job 58880, 20 rows), whose purpose is exactly this kind of check. No D1 result
+has been scored.
+
+### A. Observation
+
+In the TEST pass the model produced answers in DEVANAGARI (Hindi script)
+instead of Perso-Arabic (Urdu script), but only in certain arms:
+
+| arm | question | unparsed in TEST |
+|---|---|---|
+| A | Urdu script | 0% |
+| B | Urdu script | 0% |
+| C | Urdu script | 0% |
+| E | English | 10% |
+| F | English | 15% |
+| G | none | 10% |
+
+Urdu and Hindi are the same spoken language (Hindustani) in two scripts, and
+the affirmative/negative words are the same words: Urdu ہاں / نہیں correspond
+to Devanagari हां / नहीं. The model therefore answered in the correct LANGUAGE
+but the wrong SCRIPT.
+
+The pattern is systematic, not random. When the question is in Urdu script the
+model stays in Urdu script. When the instruction is Urdu but the question is
+English or absent, there is no script anchor in the input and the model falls
+into Devanagari, the dominant script for Hindustani in web-scale training data.
+
+A second, distinct cause of unparsed output also appears in arm F: fluent
+English answers that discuss the question at length without ever stating a
+yes/no verdict (e.g. the Apollo 15 row). That is not script drift and is not
+addressed by this amendment; it is a genuine failure to commit to an answer
+and is scored incorrect under AMENDMENT 5C.
+
+### B. Why this threatens D1
+
+The frozen AMENDMENT 5 extractor matches Perso-Arabic ہاں / نہیں and
+word-bounded English yes / no. Devanagari matches nothing, so a correct answer
+is scored unparsed and therefore incorrect.
+
+TEST unparsed spread across arms is 15pp. AMENDMENT 5D voids the accuracy
+comparison above 5pp. Without this amendment the full run would produce a
+result the protocol correctly refuses to interpret.
+
+### C. Decision: dual scoring, primary extractor UNCHANGED
+
+The AMENDMENT 5 extractor is NOT modified. It remains the primary scorer, so
+D1 numbers stay comparable with C0-C3 and with every StrategyQA number already
+in experiments.md.
+
+A SECONDARY score is computed OFFLINE from the saved generations (every
+generation is stored in full, so no re-run is needed). The secondary scorer is
+the AMENDMENT 5 extractor with one additional rule inserted between its Rule 2
+(Urdu) and Rule 3 (English):
+
+  Rule 2b — Devanagari. In the same text segment used by Rule 2, take rfind of
+  each of these strings; the greatest index wins:
+    yes: U+0939 U+093E U+0902   (हां)
+    yes: U+0939 U+093E U+0901   (हाँ)
+    no : U+0928 U+0939 U+0940 U+0902   (नहीं)
+  Return "yes" or "no" accordingly. Codepoints are listed explicitly and the
+  scorer MUST build these strings from codepoints, never from typed text.
+
+Both scores are reported for every arm, always together, never one alone.
+
+### D. How the two scores are read
+
+1. If the PRIMARY score has an unparsed spread <= 5pp across arms, the primary
+   score is the result. The secondary is reported as a robustness check only.
+2. If the PRIMARY score's unparsed spread exceeds 5pp AND the secondary score's
+   spread is <= 5pp, the primary comparison is VOID under AMENDMENT 5D and the
+   SECONDARY score becomes the interpretable analysis. This substitution is
+   permitted ONLY because it is declared here, before any full-run number
+   exists.
+3. If BOTH scores show a spread > 5pp, neither comparison is valid. Report the
+   numbers, diagnose the remaining parsing gap, and draw no conclusion about
+   the knowledge-vs-language question.
+4. The DIFFERENCE between primary and secondary, per arm, is itself a reported
+   measurement: it is the Devanagari script-drift rate.
+
+### E. This is a finding, not only a nuisance
+
+The script-drift rate per arm is reported as an Urdu-NLP result in its own
+right: Qwen3-14B, given an Urdu instruction, holds Urdu script when the
+question is in Urdu script, but drifts to Devanagari when the question is
+English or absent. This means Urdu prompting is script-fragile in a way that
+English prompting is not, and any Urdu evaluation whose answer extractor
+assumes Perso-Arabic will silently under-score such outputs. Existing Urdu
+extractors in this repository, including the one frozen in AMENDMENT 5, have
+this blind spot.
+
+Limitation recorded: the drift was observed on a 20-row TEST pass, so the
+rates above are indicative only. The full run supplies the real numbers.
+
+### F. Status
+Declared before the full D1 run. No D1 arm has been scored at 200 rows.
