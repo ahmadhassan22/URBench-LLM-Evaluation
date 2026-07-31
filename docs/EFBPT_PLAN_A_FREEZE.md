@@ -909,3 +909,131 @@ sample size and outcome recorded here.
 
 ### I. Status
 Declared before execution. No arm has been run. No numbers exist.
+
+## DIAGNOSTIC D1 — AMENDMENT 1 (2026-07-31): arm D withdrawn, arms E and F added
+
+Amended BEFORE any D1 arm was scored. No D1 numbers exist. The only D1 work
+executed so far is the translation TEST pass (job 58857, 12 facts), whose sole
+purpose was to check translation quality before committing to arm D.
+
+### A. Why arm D is withdrawn
+
+Arm D required machine-translating the English DEV200 facts into Urdu with
+Qwen3-14B. A 12-item TEST pass was human-reviewed by a native Urdu speaker
+(the author) and independently inspected. The translations are not usable.
+
+Meaning-changing errors, verbatim from `outputs/efbpt/d1/`:
+
+1. NEGATION DELETED. "A Toyota Supra does NOT have consciousness to recount
+   any experiences" was rendered as an affirmative statement. Polarity flipped.
+   On a yes/no task this alone flips the gold-supported answer.
+2. ENTITY REPLACED. "A goat is a mammal" -> the Urdu word used means "bat".
+3. "US Navy plane" -> the Urdu word used means "piano".
+4. "baker's dozen" -> rendered as "gator's dozen".
+5. "toads / snails" -> rendered as "pills" and unrelated animals.
+6. "rodent" -> a non-word.
+7. "CPU circuit chip" -> Latin letters spliced inside an Urdu word
+   ("سirkvit"), a broken mixed-script token.
+8. "unlucky number" -> a phrase meaning "without pleasure"; wrong sense.
+
+Approximately 8-9 of 12 carried real errors; 2 of 12 carried errors that would
+change the answer. Only 1 of 12 (the "blacklist" fact) was clean.
+
+The failure mode is note-worthy in itself: the translator commits EXACTLY the
+disease this thesis studies — entity corruption during Urdu generation
+(plane->piano, mammal->bat, baker->gator), the same pattern as the (c)-probe
+corruptions (Roewe 550 -> rowing boat, Hades -> Ukrainian singer). This is
+independent confirmation of the core finding at the FACT level rather than the
+reasoning level.
+
+Consequence: a low arm-D score would mean "the translator corrupted the facts"
+but would READ as "the model cannot reason in Urdu" — pre-declared Reading 3
+of Section G. That is an uninterpretable arm and it is withdrawn rather than
+run. Section H already warned of exactly this risk; the warning fired.
+
+No alternative translator is available. The project's entire baseline suite is
+Qwen3-14B; substituting a different model for translation only would break
+comparability with every number already logged in experiments.md, and would
+introduce a second, unmeasured system into the causal chain.
+
+### B. The replacement: a 2x2 using gold human data only
+
+DEV200 already contains `question_en`, the original human-written English
+StrategyQA question, alongside `question_ur` (URBench's Urdu version) and the
+English `urbench_facts`. Language can therefore be varied using human-written
+text on BOTH sides, with no machine translation anywhere in the pipeline.
+
+| arm | question | facts supplied | isolates |
+|---|---|---|---|
+| A | Urdu (`question_ur`) | none | baseline; must reproduce C0 |
+| B | Urdu | gold English `urbench_facts` | knowledge, Urdu question |
+| C | Urdu | English facts from a DIFFERENT row | are facts read at all |
+| E | English (`question_en`) | gold English `urbench_facts` | full-English ceiling |
+| F | English (`question_en`) | none | question language alone |
+
+This is a clean 2x2 of question language x facts present, plus control arm C.
+
+Contrasts, declared now:
+- F - A : cost of the Urdu question by itself, with no facts involved.
+- B - A : value of supplying knowledge, Urdu question held fixed.
+- E - B : cost of the Urdu question WHEN knowledge is already given.
+- E     : the model's ceiling on this task under ideal conditions.
+
+Arm C remains the first thing read: if C is close to B, facts are not being
+used and no other arm is interpretable.
+
+### C. Revised pre-declared readings (replaces Section G readings 2-4)
+
+1. (unchanged) If C ~= B, the model is not reading the facts. Stop; nothing
+   else is interpretable.
+2. If E and B are both high (>= 80%) and E - B is small (<= 5pp): knowledge is
+   the bottleneck and question language costs little. The next method should
+   target getting knowledge to the model. Span extraction at 97.89% is an
+   existing asset for that.
+3. If E is high (>= 80%) but B is much lower (E - B >= 15pp): the Urdu QUESTION
+   is the bottleneck even when knowledge is given. Supplying Urdu knowledge
+   would not be sufficient; the method must attack Urdu comprehension.
+4. If E is also low (<= 70%): neither knowledge nor English phrasing is
+   sufficient. The model cannot combine given facts on this task at all. This
+   closes retrieval-style approaches as a family and is itself reportable.
+5. F - A is reported regardless of the above. It quantifies how much accuracy
+   URBench's own Urdu question translation costs relative to the original
+   English, which is a standalone Urdu-NLP result.
+6. (unchanged) Any gain in B or E must be checked for answer leakage: report
+   how often the gold answer is lexically inferable from the facts alone.
+
+### D. Unchanged from the original D1 freeze
+
+Sections D (decoding: 4-bit nf4, thinking OFF, temperature 0,
+max_new_tokens 1024, frozen AMENDMENT 5 extractor imported, unparsed scored
+incorrect, denominator 200), E (arm A MUST reproduce C0 = 57.50% within ~2pp
+or nothing is interpreted), and F (mandatory reporting; >5pp unparsed spread
+voids the comparison; subgroup claims require a matched control on the same
+qid set) all carry over unchanged and apply to arms A, B, C, E and F.
+
+Arm C donor assignment: fixed deterministic shift of 97 over the row list;
+the script must report how many rows' fact sets actually changed.
+
+Note for arms E and F: the fixed Urdu instruction from AMENDMENT 4 is designed
+for an Urdu question. For an English question the instruction language becomes
+a confound. Decision, frozen here: arms E and F use the SAME Urdu instruction
+and the same system message as arms A/B/C, so that the ONLY thing varying
+across the 2x2 is the language of the question and the presence of facts. The
+instruction is a fixed constant across all five arms and therefore cannot
+explain any difference between them. This is recorded as a limitation: a
+model may respond differently to an Urdu instruction paired with an English
+question, and that interaction is not measured here.
+
+### E. Salvage: the translation failure becomes a measured result
+
+The TEST-pass translations are not discarded. A human-labelled sample of the
+machine-translated facts (target: 50 items, labelled clean / awkward but
+correct / entity corrupted / meaning flipped) will be recorded, giving a
+quantified statement of the form: "Qwen3-14B translation of factual English
+sentences into Urdu corrupts X% of statements, including Y% that invert
+polarity." Sample size, labeller, and per-category counts to be recorded in
+experiments.md. This documents on the record why arm D was withdrawn, and
+stands as an Urdu-NLP finding in its own right.
+
+### F. Status
+Amended before execution. No D1 arm has been scored. No D1 numbers exist.
