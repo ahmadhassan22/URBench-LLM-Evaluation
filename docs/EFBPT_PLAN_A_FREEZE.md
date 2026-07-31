@@ -1136,3 +1136,149 @@ rates above are indicative only. The full run supplies the real numbers.
 
 ### F. Status
 Declared before the full D1 run. No D1 arm has been scored at 200 rows.
+
+## DIAGNOSTIC D2 — Retrieval re-test on the full index (frozen 2026-07-31)
+
+Declared before execution. No D2 number exists.
+
+### A. Why the earlier RAG result must be set aside
+
+The RAG section of experiments.md reports "RAG reduced StrategyQA accuracy by
+27.65 percentage points (83.89% -> 56.24%)". Two defects invalidate that
+comparison. Both are established from the repository itself, not inferred.
+
+**Defect 1 — the baseline was given gold facts.**
+The RAG section's own Setup states: "Prompt: Same zero-shot Urdu prompt
+structure as baseline, with retrieved passages replacing gold facts."
+The note added 2026-07-07 at experiments.md:1211 confirms the regime for that
+number: "thinking ON, facts included in-prompt via `{facts}`/`{question}`
+template". So 83.89% is a GOLD-FACTS score, and the label "(no RAG)" meant
+"no retrieval", not "no facts". The -27.65pp therefore compares gold facts
+against retrieved passages, which cannot answer whether retrieval helps.
+
+Against a true no-facts baseline the picture reverses:
+
+| setting | accuracy |
+|---|---|
+| gold facts, thinking ON, 2290 q | 83.89% |
+| gold facts, thinking OFF, DEV200 (D1 arm B) | 78.00% |
+| retrieved passages (old RAG) | 56.24% |
+| NO facts, thinking OFF, DEV200 (D1 arm A) | 57.50% |
+
+Retrieval was worth about -1.3pp, i.e. nothing — not a 27.65pp collapse.
+Caveat recorded: the old runs used 2290 questions with thinking ON and the D1
+arms used 200 with thinking OFF, so this is indicative, not a head-to-head.
+D2 exists to produce the head-to-head.
+
+**Defect 2 — the index was tiny.**
+`rag/eval_rag_final.py` loads `rag/index/wikipedia.index`. That file is
+81,893,421 bytes. 53,316 chunks x 384 dims x 4 bytes = 81,893,376 bytes, a
+45-byte header difference: it is the ENTITY-FILTERED index of 53,316 chunks
+over 2,152 unique article titles, as stated in the RAG section's own Corpus
+Construction block.
+
+The full index `rag/index/wikipedia_full.index` is 36,808,659,501 bytes;
+23,963,971 x 384 x 4 = 36,808,659,456, again a 45-byte header difference. It
+was built 2026-07-08/09 and HAS NEVER BEEN USED for any answer-accuracy
+experiment. The Phase R dual-view branch was rejected on 2026-07-11 at the
+plan-generation stage, explicitly "before loading the 35 GB Wikipedia FAISS
+index", so it never tested retrieval either.
+
+Consequently the recorded failure mode "Coverage Gap — Grey seal absent" is a
+property of a 2,152-page index, not of Wikipedia or of retrieval as a method.
+
+### B. What D2 asks
+
+Given that D1 established knowledge is worth +20.5pp (arm B 78.00% vs arm A
+57.50%, with wrong facts at 57.00% and no leakage), and that structure was
+worth approximately zero across the whole EFBPT programme, the open question
+is whether RETRIEVAL can deliver that knowledge.
+
+D2 asks two things at once:
+1. Does plain retrieval on the FULL index beat a fair no-facts baseline?
+2. When it fails, is the failure in RETRIEVAL (wrong passages fetched) or in
+   USE (right passages fetched, model still wrong)?
+
+Question 2 is the one the earlier experiment could not answer, because it
+never measured retrieval quality against gold evidence.
+
+### C. Arms
+
+Same 200 DEV200 rows. Base Qwen3-14B, no adapters.
+
+| arm | facts supplied |
+|---|---|
+| R1 | top-3 chunks retrieved from the FULL index |
+| R2 | top-10 chunks retrieved from the FULL index |
+
+Reference lines are REUSED from D1, not re-run, because the prompt, model,
+quantization and decoding are identical:
+- no-facts floor for retrieval: D1 arm A = 57.50%
+- gold-facts ceiling for retrieval: D1 arm B = 78.00%
+- majority-class floor: 56.50%
+
+Retrieval query is `question_en`, one query per question, matching the earlier
+setup so the only changed variable is the index. Embedding model unchanged:
+paraphrase-multilingual-MiniLM-L12-v2. Retrieved chunks are formatted into the
+same facts block used by D1 arms B/C.
+
+### D. The new instrument: gold-evidence recall
+
+DEV200 rows carry `evidence_paragraph_ids` such as "LendingTree-1", "Retail-6".
+The part before the final hyphen is the Wikipedia article title. Define, per
+question, the set of REQUIRED TITLES as the distinct titles appearing in
+`evidence_paragraph_ids`.
+
+Reported per arm:
+- title recall@k = fraction of required titles present among retrieved chunks
+- fully-covered rate = share of questions where ALL required titles retrieved
+- accuracy on the fully-covered subset vs the not-fully-covered subset
+
+This separates retrieval failure from use failure, which the earlier
+experiment could not do.
+
+### E. Decoding, scoring, validity
+
+Identical to D1: 4-bit nf4, thinking OFF, temperature 0, max_new_tokens 1024,
+AMENDMENT 5 extractor imported unchanged, dual scoring with the Devanagari
+rule per D1 AMENDMENT 2, unparsed scored incorrect, denominator 200.
+AMENDMENT 5D applies: an unparsed spread above 5pp across R1/R2 and the reused
+D1 arms A/B voids the accuracy comparison. Any subgroup claim requires a
+matched control on the same qid set.
+
+### F. Pre-declared readings, fixed before any number is seen
+
+1. If R1 or R2 reaches within 5pp of arm B (78.00%): retrieval on the full
+   index substantially delivers the knowledge. Coverage was the whole story
+   and the method is retrieval engineering, not entity work.
+2. If R1/R2 land near arm A (57.50%) AND title recall is LOW: the bottleneck
+   is retrieval quality. Entity-grounded retrieval is then justified by
+   evidence — retrieve per entity rather than once per question, and ground
+   the entity to a canonical title rather than generating it freely. The two
+   failure modes recorded in the old error analysis (entity disambiguation,
+   "The Police" -> law enforcement; and partial retrieval, three Genghis Khan
+   chunks and zero Julius Caesar) are both single-query artifacts and both
+   are structurally addressed by per-entity retrieval.
+3. If R1/R2 land near arm A AND title recall is HIGH: retrieval works but the
+   model cannot use retrieved passages, even though D1 arm B proves it CAN
+   use clean facts. The bottleneck is then passage form — length, noise,
+   or position — not retrieval or knowledge. Entity grounding would NOT help
+   and must not be pursued on this evidence.
+4. If accuracy on the fully-covered subset approaches arm B while the
+   not-covered subset sits at arm A, recall is the entire story and maximising
+   recall is the method.
+5. R2 - R1 measures whether more context helps or dilutes. Report regardless.
+
+### G. Recorded limitations
+
+- Retrieval uses the English question. The index is English Wikipedia. This
+  is realistic for the corpus but means D2 does not test Urdu-side retrieval.
+- `evidence_paragraph_ids` come from official StrategyQA and are a
+  sufficient, not exhaustive, evidence set; recall against them is a lower
+  bound on usable retrieval.
+- The old 56.24% figure is NOT a D2 arm and is not comparable to D2 numbers
+  (different split size, thinking ON, different index). It is quoted in
+  Section A only to explain why D2 is necessary.
+
+### H. Status
+Declared before execution. No D2 arm has been run.
