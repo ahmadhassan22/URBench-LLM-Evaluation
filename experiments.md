@@ -4032,3 +4032,213 @@ Base Qwen3-14B is at chance on Urdu multi-hop reasoning without facts
   is not enforced: shell redirection can still destroy files. All later
   read-only prompts explicitly forbid `>`, `>>`, `tee`, `sort -o`, and the
   eval script now fsyncs and asserts the on-disk line count after writing.
+
+## DIAGNOSTICS D1-D3 + corrections to earlier records (2026-07-31 / 2026-08-01)
+
+EFBPT Plan A' is closed (gate FAIL, logged above). D1-D4 are diagnostics run to
+find which bottleneck a working method must attack. All were frozen in
+`docs/EFBPT_PLAN_A_FREEZE.md` before execution.
+
+### D1 — knowledge vs language (job 58510 arms; base Qwen3-14B, no adapters)
+DEV200, floor 56.50%. Script `d1_eval_arms.py`, scorer `d1_score_dual.py`.
+
+| arm | question | facts | acc% | unparsed% | SEC acc% |
+|---|---|---|---|---|---|
+| A | Urdu | none | 57.50 | 4.00 | 57.50 |
+| B | Urdu | gold English | 78.00 | 0.50 | 78.00 |
+| C | Urdu | English, wrong row | 57.00 | 6.00 | 57.00 |
+| E | English | gold English | 76.50 | 10.00 | 82.50 |
+| F | English | none | 55.50 | 16.50 | 59.00 |
+| G | none | gold English | 42.00 | 33.50 | 42.00 |
+
+Arm A reproduced C0 (57.50%) EXACTLY — the validity control passed.
+
+**Formally the comparison is VOID**: unparsed spread 33.00pp on both the
+primary and the Devanagari-secondary score, far above the AMENDMENT 5D limit.
+Cause: arms E/F/G often produce no yes/no verdict, and arm G has no question
+to answer at all.
+
+What survives the void, because it is far larger than any parsing artifact:
+- **B - A = +20.50pp.** Knowledge is worth ~3x more than every structural
+  intervention in the whole EFBPT programme combined (0-7pp).
+- **C = 57.00%**, at the floor. The gain requires the RIGHT facts; facts alone
+  do not create confidence.
+- **G = 42.00%**, BELOW the floor. No answer leakage from the facts.
+- **F - A = -2.00pp (primary) / +1.50pp (secondary).** The Urdu question costs
+  little. Language is not the bottleneck.
+- Even bounding every unparsed row in arm A as correct (61.5%), B still leads
+  by +16.5pp.
+
+**Devanagari script drift (D1 AMENDMENT 2).** With an Urdu instruction and an
+English or absent question, the model answers in Hindi script (हां / नہیں)
+instead of Urdu (ہاں / نہیں) — same language, wrong script. Recovered by the
+secondary scorer: +7.50pp in arm E, +4.00pp in arm F, 0 in arms with an Urdu
+question. Reported as an Urdu-NLP finding: Urdu prompting is script-fragile in
+a way English prompting is not, and any extractor assuming Perso-Arabic will
+silently under-score such outputs — including the one frozen in AMENDMENT 5.
+
+**Arm D withdrawn (D1 AMENDMENT 1).** Machine-translating the English facts to
+Urdu with Qwen3-14B was tested on 12 items (job 58857) and human-reviewed by a
+native speaker. Unusable: ~8-9/12 carried real errors, 2/12 changed meaning.
+"A Toyota Supra does NOT have consciousness" was rendered affirmative
+(polarity flipped); "A goat is a mammal" used the Urdu word for BAT; "US Navy
+plane" became "piano"; "baker's dozen" became "gator's dozen"; "CPU circuit"
+produced a mixed-script non-word. Only 1/12 was clean. The translator commits
+the same entity-corruption disease this thesis studies, at the fact level.
+Replaced by arms E/F using the gold human-written `question_en`, so no machine
+translation enters the pipeline.
+
+### D2 — retrieval on the FULL index (jobs 58971, 59016, 58977)
+Scripts `d2_retrieve_and_recall.py`, `d2_title_coverage.py`, `d2_recall_split.py`.
+Query = `question_en`, one per question, embedder unchanged
+(paraphrase-multilingual-MiniLM-L12-v2). Only the index changed.
+
+Title recall against gold `evidence_paragraph_ids`, 200 questions, 636 required
+title instances:
+
+| k | macro recall | micro recall | recall among pages present | fully covered |
+|---|---|---|---|---|
+| 1 | 6.8% | 5.97% | 8.54% | 3 (1.5%) |
+| 3 | 11.5% | 10.06% | 14.38% | 4 (2.0%) |
+| 5 | 13.3% | 11.64% | 16.63% | 4 (2.0%) |
+| 10 | 18.4% | 16.19% | 23.15% | 8 (4.0%) |
+
+(macro = mean of per-question recall; micro = total found / total required.)
+533 of 636 required titles (83.8%) missed at k=10.
+Crowding is NOT the main failure: mean 2.73 of 10 hits from one article, only
+4/200 questions with >=8 from one article.
+
+**Corpus coverage (definitive scan of the 25.8GB metadata file, 65s):**
+23,963,971 lines, 6,402,346 unique titles. Of 613 unique gold evidence titles,
+432 present and **181 absent — coverage 70.47%**.
+Questions where ALL gold pages exist: **71/200 (35.5%)**. Where none exist: 16.
+
+**The corpus is broken in CONTENT, not only in titles.** Case-sensitive text
+search over all 23,963,971 chunks:
+- "Felis catus" -> 203 chunks under 160 titles, **none titled Cat**
+  (Catus, Cat bite, Cats in ancient Egypt all survive)
+- "Douglas Noel Adams" -> **0 chunks in the entire corpus**
+- "Porsche AG" -> 128 chunks / 88 titles, none titled Porsche
+- "Camelus" -> 102 / 67, none titled Camel
+- "Alexander Hamilton was" -> 62 / 47, none titled Alexander Hamilton
+The central article of a topic is missing while peripheral ones survive.
+
+Re-downloading will NOT fix it. Source is `AI-ModelScope/wikipedia`,
+`20231101.en`, and all 41/41 shards are present: 6,407,814 rows, 6,407,814
+unique page ids, min id 12 (Anarchism), max 75,200,227. The mirror is
+internally complete yet lacks these articles. A different corpus is required.
+
+**Implication:** even a flawless retriever is capped at 35.5% of questions
+fully covered on this corpus.
+
+### D3 — oracle retrieval (job 59052)
+Script `d3_oracle_retrieval.py`. The 71 questions where all gold pages exist.
+Retrieval bypassed: pages fetched by EXACT TITLE. Arms A and B reused from D1
+on the same qids. Subset floor 57.75% (30 yes / 41 no). Unparsed spread
+4.23pp — **VALID under AMENDMENT 5D**.
+
+| arm | facts | acc% |
+|---|---|---|
+| A | none | 59.15 |
+| O1 | 1 correct wiki chunk per gold title | 69.01 |
+| O2 | 3 correct wiki chunks per gold title | 67.61 |
+| B | clean gold facts | 83.10 |
+
+Paired McNemar (two-sided binomial on discordant pairs):
+
+| comparison | wins | losses | p |
+|---|---|---|---|
+| B vs A | 23 | 6 | **0.0023** |
+| B vs O1 | 17 | 7 | 0.0639 |
+| O1 vs A | 16 | 9 | **0.2295 (n.s.)** |
+| O2 vs A | 16 | 10 | 0.3269 (n.s.) |
+| O1 vs O2 | 8 | 7 | — |
+
+**Clean facts are significant. Correct PAGES are not.** O2 - O1 = -1.40pp:
+three times as much correct context slightly HURTS. B - O2 = +15.49pp is the
+article-to-fact gap.
+
+CORRECTION TO THE FIRST READ-OUT OF D3: the phrase "41% of the gold-facts gain
+recovered" was stated before the paired test and overstates the result. At
+n=71 the oracle-page gain is not statistically distinguishable from zero.
+
+Chained with D2: 35.5% of questions coverable x a non-significant +9.86pp gives
+an expected full-DEV200 gain of roughly +3.5pp for a page-retrieval pipeline
+even with perfect entity linking. Compare +20.50pp for clean facts.
+**Page retrieval is not the method.**
+
+### GenRead probe — recovered and logged (2026-07-08, previously unlogged)
+`eval/error_analysis_tests/probe_strategyqa_genread_gate_test50.py` was run on
+2026-07-08 and its result never recorded anywhere. Recomputed read-only from
+`outputs/sdfr/probe_genread_gate_test50.jsonl` (50 rows, thinking ON):
+
+| condition | accuracy |
+|---|---|
+| no facts (floor) | 35/50 = 70.0% |
+| gold facts (ceiling) | 41/50 = 82.0% |
+| **genread (model writes its own facts)** | **35/50 = 70.0%** |
+| gated (confidence-routed) | 35/50 = 70.0% (gate fired 10/50) |
+
+Zero gain, identical to no-facts. The model cannot generate the knowledge it
+lacks. Note the probe generated facts in URDU, so the D1 translation finding is
+a partial confound, but D3 shows the same behaviour with English input: given
+the correct LendingTree article the model still asserted SnapCap is a retail
+business. Knowledge must come from outside the model.
+
+### CORRECTION — the earlier RAG comparison is invalid
+The RAG section above reports "RAG reduced StrategyQA accuracy by 27.65
+percentage points (83.89% -> 56.24%)". That comparison must not be used.
+
+1. **The baseline had gold facts.** The RAG section's own Setup says:
+   "Prompt: Same zero-shot Urdu prompt structure as baseline, with retrieved
+   passages replacing gold facts." The note at experiments.md:1211 confirms the
+   regime: "thinking ON, facts included in-prompt via `{facts}`/`{question}`
+   template". So 83.89% is a GOLD-FACTS score; "(no RAG)" meant "no retrieval",
+   not "no facts". Against a true no-facts baseline (D1 arm A, 57.50%),
+   retrieval was worth about -1.3pp — nothing, not a collapse.
+2. **The index was tiny.** `rag/eval_rag_final.py` loads
+   `rag/index/wikipedia.index`, 81,893,421 bytes = 53,316 chunks x 384 dims x
+   4 bytes + 45-byte header: the entity-FILTERED index over 2,152 unique
+   article titles. The full index (`wikipedia_full.index`, 36,808,659,501 bytes
+   = 23,963,971 x 384 x 4 + 45) was built 2026-07-08/09 and had never been used
+   for any answer-accuracy experiment before D2.
+
+The recorded "Coverage Gap — Grey seal absent" was therefore a property of a
+2,152-page index, not of Wikipedia. The genuine coverage problem is the
+separate 70.47% corpus defect documented under D2.
+
+### FILE-PATH CORRECTIONS (verified 2026-07-28 to 2026-08-01)
+- `prompts/strategyqa/cot.txt` **does not exist**. The real templates are
+  `cot_p1.txt`, `cot_p2.txt`, `cot_p3.txt` under `prompts/strategyqa/`.
+  Earlier handoffs cite the non-existent path.
+- DEV200 lives at `data/strategyqa_official/dev200_seed4242.jsonl`, NOT under
+  `data/strategyqa_official/efbpt/`.
+- Every DEV200 row has `is_eval: false`; that field is inherited from the
+  source dataset and is meaningless here.
+- `urbench_facts` and `official_facts` are identical on all 200 rows, and are
+  100% English (532 fact strings, 0 Arabic-block characters).
+- Contamination check: 0/200 DEV200 qids appear in `plan_a_train_c3_100.jsonl`.
+
+### METHODOLOGY CORRECTIONS made during these diagnostics
+- Two subgroup analyses were initially misread by comparing each group against
+  its OWN floor instead of a matched control on the same qids. Both reversed on
+  correction. **Any subgroup claim must include a matched control.**
+- The missed-title probe inside `d2_retrieve_and_recall.py` is UNRELIABLE and
+  its present/absent output must not be cited: it queries the index with a bare
+  title at k=5 and contradicts the corpus scan (it calls Apple, Animal, Ancient
+  Egypt and American football absent when the scan finds them present). Only
+  `d2_title_coverage.json` is authoritative for presence.
+- `dev200_C0_TEST.jsonl` was truncated to 0 bytes AFTER its job ended, during
+  an inspection window. A "READ-ONLY" instruction to a terminal agent is not
+  enforced; shell redirection can still destroy files. All later read-only
+  prompts forbid `>`, `>>`, `tee`, `sort -o`, and every eval script now fsyncs
+  and asserts the on-disk line count after writing.
+
+### WHERE THIS LEAVES THE METHOD
+Proven to work: clean English facts + Urdu question (p=0.0023); Urdu span
+extraction (97.89%); exact title -> article lookup (deterministic).
+Proven not to work: plan/entity structure (0pp, causal counterfactual);
+embedding retrieval (23% recall of available pages); raw pages as facts
+(p=0.23); model self-generating facts (0pp); the current corpus (70.47%).
+Open and being tested as D4: extracting atomic English facts FROM a correct
+article, which is the 15.49pp gap between O2 and B.
