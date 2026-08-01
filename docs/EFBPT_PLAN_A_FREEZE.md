@@ -1282,3 +1282,89 @@ matched control on the same qid set.
 
 ### H. Status
 Declared before execution. No D2 arm has been run.
+
+## DIAGNOSTIC D3 — Oracle retrieval (frozen 2026-08-01)
+
+Declared before execution. No D3 number exists.
+
+### A. The untested wall
+
+D1 established that CLEAN one-line gold facts are worth +20.5pp
+(arm A 57.50% -> arm B 78.00%, wrong facts 57.00%, no leakage).
+D2 established that retrieval delivers almost none of that knowledge:
+title recall 16.19% raw at k=10, 23.15% among pages that exist in the corpus,
+and only 8/200 questions fully covered.
+
+Neither tested whether the model can use RAW WIKIPEDIA PARAGRAPHS at all.
+Gold facts are one clean sentence each. Wikipedia chunks are 200 words of
+mostly irrelevant prose. If the model cannot use paragraphs even when they are
+the CORRECT paragraphs, then no amount of retrieval or corpus work can help,
+and that must be known before spending a day rebuilding a corpus.
+
+### B. Design
+
+Restricted to the 71/200 DEV200 questions where EVERY required gold evidence
+title exists in the corpus (from `d2_title_coverage.json`). On those questions
+retrieval is bypassed entirely: pages are fetched by EXACT TITLE match from
+`rag/index/wikipedia_full_meta.jsonl`. This simulates perfect entity linking
+and perfect retrieval — the ceiling of any entity-grounded method.
+
+| arm | facts supplied | source |
+|---|---|---|
+| O1 | 1 chunk per gold title (lead section) | new run |
+| O2 | 3 chunks per gold title | new run |
+| A  | none | REUSED from D1 arm A, same 71 qids |
+| B  | clean gold facts | REUSED from D1 arm B, same 71 qids |
+
+Arms A and B are NOT re-run. Their saved generations are re-scored on the 71
+qid subset. Prompt, model, quantization and decoding are identical, so the
+comparison is matched by construction.
+
+Chunk order note: `build_chunks.py` writes an article's chunks consecutively
+in order, so chunk 1 is the article lead. O1 takes the lead only; O2 takes the
+first three. O2 - O1 measures whether more context helps or adds noise.
+
+### C. Decoding, scoring, validity
+
+Identical to D1: 4-bit nf4, thinking OFF, temperature 0, max_new_tokens 1024,
+AMENDMENT 5 extractor imported unchanged, dual scoring with the Devanagari
+rule per D1 AMENDMENT 2, unparsed scored incorrect.
+Denominator is the 71-question subset for every arm including the reused ones.
+AMENDMENT 5D applies: unparsed spread above 5pp across the four arms voids the
+accuracy comparison.
+
+The facts block format and prompt assembly are IMPORTED from `d1_eval_arms.py`,
+not re-implemented, so O arms are byte-identical in structure to D1 arms B/C.
+
+### D. Pre-declared readings, fixed before any number is seen
+
+1. If O1 or O2 lands within 5pp of arm B: correct Wikipedia paragraphs work
+   nearly as well as clean gold facts. The bottleneck is then entity linking
+   and corpus coverage, both of which are addressable. Retrieval is a viable
+   method and the pathway is confirmed.
+2. If O1 and O2 land within 5pp of arm A: the model cannot use raw paragraphs
+   even when they are the correct ones. Fetching PAGES is a dead end
+   regardless of coverage or linking quality. The method must instead EXTRACT
+   facts from pages rather than pass pages to the model.
+3. If O1/O2 sit between A and B: paragraphs partially work. Report the exact
+   fraction of the gold-facts gain recovered, and treat fact extraction as an
+   improvement to a working pipeline rather than a replacement for it.
+4. O2 - O1 is reported regardless. A negative value means additional correct
+   context HURTS, which is itself a finding about context noise.
+
+### E. Recorded limitations
+
+- 71 questions is a small sample. A 5pp difference is roughly one standard
+  error; only large effects are interpretable. This is a direction-finding
+  diagnostic, not a headline result.
+- The 71 subset is not random: it is the subset whose gold pages survived in
+  the corpus, which may correlate with entity popularity. Arms A and B are
+  reused on the SAME subset, so the comparison is internally matched, but the
+  subset's absolute accuracy must not be compared to full-DEV200 numbers.
+- Chunks are 200-word windows and are not aligned to the original StrategyQA
+  evidence paragraph ids, so O arms supply the right ARTICLE, not necessarily
+  the right paragraph. This makes D3 an upper bound on article-level retrieval
+  and a lower bound on paragraph-perfect retrieval.
+
+### F. Status
+Declared before execution. No D3 arm has been run.
