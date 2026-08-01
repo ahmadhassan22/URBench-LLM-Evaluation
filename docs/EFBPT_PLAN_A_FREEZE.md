@@ -1368,3 +1368,98 @@ not re-implemented, so O arms are byte-identical in structure to D1 arms B/C.
 
 ### F. Status
 Declared before execution. No D3 arm has been run.
+
+## DIAGNOSTIC D4 — Fact extraction from correct articles (frozen 2026-08-01)
+
+Declared before execution. No D4 number exists.
+
+### A. Position established by D1-D3, with statistics
+
+| finding | evidence |
+|---|---|
+| clean English facts work | 83.10% vs 59.15% on the 71 subset, McNemar p=0.0023 |
+| correct PAGES do not measurably work | O1 +9.86pp, p=0.2295 — not significant |
+| more correct context hurts slightly | O2 - O1 = -1.40pp |
+| embedding retrieval fails | 23.15% recall among pages that exist |
+| corpus is broken | 70.47% title coverage; central articles (Cat, Porsche, Douglas Adams) absent in BOTH title and text — "Felis catus" appears under 160 titles, none of them Cat; "Douglas Noel Adams" appears 0 times in 24M chunks |
+| model cannot generate its own facts | genread probe (2026-07-08, unlogged): 70.0% = no-facts 70.0%, zero gain |
+
+The correction to the D3 read-out is recorded here: the earlier phrase "41% of
+the gold-facts gain recovered" overstated the oracle result. The paired test
+shows the O1 gain is not statistically distinguishable from zero at n=71.
+
+### B. The untested step
+
+D3 handed the model whole articles (up to ~4,200 tokens) and it failed to find
+the needed sentence inside them. Arm B handed it single clean sentences and it
+succeeded. The step in between has never been tested: a SEPARATE extraction
+pass that reads the correct article and writes short atomic English facts,
+which are then fed to the answering pass in exactly the arm-B format.
+
+Reading (extraction, English->English) is a different capability from knowing
+(generation, which genread proved fails) and from finding (retrieval, which
+D2 proved fails). Whether Qwen3-14B can do targeted extraction is unknown.
+
+### C. Design
+
+Same 71-question subset as D3 (all gold titles present in corpus), so D3 arms
+A, O1, O2, B are reused as matched references on identical qids.
+
+Two-pass pipeline, both passes base Qwen3-14B, no adapters:
+
+PASS 1 — EXTRACTION (English -> English, per question):
+  input: the English question (question_en) + the same chunks used by D3 O2
+         (up to 3 per gold title, fetched by exact title)
+  instruction: extract the facts from these passages that are needed to answer
+         the question; output ONLY short English factual sentences, one per
+         line; if a needed fact is not in the passages, do not invent it
+  decoding: greedy, temperature 0, max_new_tokens 512
+
+PASS 2 — ANSWERING (identical to D1 arm B in every respect):
+  input: fixed system message + frozen Urdu instruction + facts block built
+         from PASS 1's lines + question_ur
+  decoding and scoring: identical to D1/D3 (AMENDMENT 5 extractor primary,
+  Devanagari secondary, unparsed = incorrect, denominator 71)
+
+Arms:
+| arm | facts supplied to pass 2 |
+|---|---|
+| X1 | facts extracted by pass 1 |
+| A, O1, O2, B | reused from D3 outputs, same 71 qids |
+
+The extraction uses question_en, not question_ur, so pass 1 is entirely
+English-side. This is deliberate: it isolates the extraction capability from
+the Urdu-generation weakness documented in D1 AMENDMENT 1.
+
+### D. Pre-declared readings
+
+Let gap = B - A = 23.95pp on this subset.
+1. X1 recovers >= 60% of gap AND X1 vs A is significant (McNemar p < 0.05):
+   extraction works. The five-step method is validated end-to-end at the
+   oracle-linking level. Remaining research: entity linking (step 2) and a
+   corpus replacement. This is the "method found" outcome.
+2. X1 vs A not significant: extraction from articles does not work either.
+   Since facts work but neither pages, self-generation, nor extraction can
+   produce them, the fact SOURCE itself must change (e.g. a structured
+   knowledge base instead of Wikipedia prose). Page-derived pipelines close.
+3. In between: report the recovered fraction with its p-value; decide
+   continuation with the supervisor, not unilaterally.
+4. Report alongside: extraction failure modes on 10 hand-checked rows —
+   did pass 1 invent facts not present in the passages (the genread disease
+   re-entering through the back door)? Any invented fact found is quoted in
+   the write-up regardless of the accuracy outcome.
+
+### E. Limitations recorded now
+
+- n=71; only large effects are detectable (a 60% recovery of the gap is ~14pp
+  and would reach significance at roughly b>=2c in discordant pairs).
+- Two passes double the inference cost per question. Acceptable for a
+  diagnostic; an efficiency claim is out of scope.
+- The subset over-represents surviving (popular) entities, as recorded in D3.
+- Extraction quality is bounded by chunk relevance: if the needed sentence is
+  not in the first 3 chunks of any gold article, extraction cannot find it.
+  This bound is shared with O2, so X1 vs O2 is a clean comparison of FORM
+  (extracted facts vs raw pages) at equal information access.
+
+### F. Status
+Declared before execution. No D4 arm has been run.
