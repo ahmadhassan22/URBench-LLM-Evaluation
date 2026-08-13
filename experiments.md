@@ -4242,3 +4242,135 @@ embedding retrieval (23% recall of available pages); raw pages as facts
 (p=0.23); model self-generating facts (0pp); the current corpus (70.47%).
 Open and being tested as D4: extracting atomic English facts FROM a correct
 article, which is the 15.49pp gap between O2 and B.
+
+---
+
+## DIAGNOSTIC D4 — can the model EXTRACT atomic English facts from a correct article?
+Run 2026-08-01, SLURM job 59085 (`d4_extract_FULL.sbatch`), 20 min.
+Verification run 2026-08-13, SLURM job 62521 (`d4_verify_facts.sbatch`).
+Declared in `docs/EFBPT_PLAN_A_FREEZE.md` -> DIAGNOSTIC D4 before execution.
+All readings below were frozen in writing BEFORE any number existed.
+
+### QUESTION
+D3 established a 15.49pp gap between raw correct Wikipedia pages (O2, 67.61%)
+and clean gold facts (B, 83.10%). D4 tests whether that gap can be closed
+automatically: a two-pass design where pass 1 reads the correct article and
+writes short atomic English facts, and pass 2 answers the Urdu question from
+those facts alone.
+
+### SETUP
+- Same matched 71-question subset as D3, so all arms are paired on identical
+  questions. Yes/no floor 57.75%.
+- Model Qwen3-14B, thinking ON, temperature 0, greedy. Pass 1 max 2048 tokens,
+  pass 2 max 1024 tokens.
+- Pass 1 is English-only (instruction, article, and output all English),
+  avoiding the Urdu-generation weakness documented in D1.
+- Pass 2 uses the identical frozen Urdu prompt as arm B, so the only variable
+  is where the facts came from.
+- `CHUNKS_PER_TITLE = 3`, equal information access to D3 arm O2.
+- Pass 1 instruction is MD5-checked in the script so it cannot drift silently.
+- Scoring: frozen extractor, dual primary/Devanagari (AMENDMENT 5).
+  Unparsed counts as INCORRECT, so the denominator never shrinks.
+
+### RESULT
+| Arm | Facts supplied | Acc | Unparsed | Truncation |
+|-----|----------------|-----|----------|------------|
+| A  | none (baseline)                       | 59.15% (42/71) | 4.23% | 4.23% |
+| O1 | 1 correct Wikipedia chunk per title   | 69.01% (49/71) | 1.41% | 5.63% |
+| O2 | 3 correct Wikipedia chunks per title  | 67.61% (48/71) | 2.82% | 12.68% |
+| X1 | facts EXTRACTED from those same chunks| 76.06% (54/71) | 0.00% | 1.41% |
+| B  | clean gold facts (upper reference)    | 83.10% (59/71) | 0.00% | 1.41% |
+
+Unparsed spread 4.23pp, under the frozen 5pp validity threshold.
+Secondary Devanagari scores are IDENTICAL to primary on every arm; no answer
+was recovered by the secondary rule on this subset.
+
+### PRE-DECLARED READING APPLIED
+- gap (B - A) = +23.95pp; X1 - A = +16.91pp; fraction recovered = 71%.
+- Paired McNemar X1 vs A: b=19, c=7, exact two-sided p=0.0290.
+- 71% >= 60% and p < 0.05, so **Reading 1 fires: EXTRACTION WORKS.**
+  The method is validated end-to-end at the ORACLE-LINKING level.
+  Remaining research: entity linking (step 2) and a corpus replacement.
+
+### PAIRED TESTS, ALL ARMS
+| Comparison | b | c | p | Reading |
+|---|---|---|---|---|
+| X1 vs A  | 19 | 7  | 0.0290 | significant |
+| X1 vs O2 | 12 | 6  | 0.2379 | NOT significant |
+| X1 vs B  | 7  | 12 | 0.3593 | NOT significant |
+
+### LIMITATIONS — recorded, not hidden
+1. **Significance is fragile.** Dropping arm A's 3 unparsed rows instead of
+   scoring them incorrect gives n=68, b=16, c=7, p=0.0931 — not significant.
+   The effect size survives (+13.24pp; X1 75.00% vs A 61.76%) but the p-value
+   does not. The frozen rule (unparsed = incorrect) was declared before the
+   run, so p=0.0290 stands as the declared result, but BOTH p-values must
+   appear in any write-up. The two arms genuinely differ in truncation rate
+   (A 4.23% vs X1 1.41%), so the unparsed rows are part of the effect, not an
+   artifact of scoring.
+2. **X1 vs O2 alone is not significant** (p=0.2379). The +8.45pp advantage of
+   extracted facts over raw pages at identical information access is a point
+   estimate only. What CAN be stated: O2 truncates 12.68% of the time and X1
+   1.41%, so long raw context pushes the model past its token budget while
+   short facts do not.
+3. **n=71.** Only large effects are detectable. X1 vs B not significant means
+   "no detectable difference", NOT "equivalent".
+4. **Oracle linking.** X1 was handed the correct article titles. Step 2 of the
+   pipeline is unsolved, so this is not yet an end-to-end result.
+
+### SECTION D ITEM 4 — MANDATORY INVENTED-FACT CHECK: PASS
+Required by the freeze before any D4 number may be quoted. Job 62521 re-fetched
+the exact chunks pass 1 saw (`fetch_chunks` caps at 3 per title in file order,
+so requesting only these titles returns the identical chunks) and checked the
+FIRST 10 rows in file order — no selection freedom.
+
+- 30 titles requested, 30 found, 0 with zero chunks.
+- 60 facts checked. For each fact: longest contiguous word run matched against
+  the concatenated source passages, plus the set of content words appearing in
+  the fact but nowhere in the passages.
+- **54 of 60 facts had ZERO content words absent from the source.** The six
+  exceptions were `industry`, `part`, `lasted`, `actors`, `introduced`
+  (connective words added while paraphrasing) and `10` (a tokenisation artifact
+  — the source writes "V10", the checker splits "V-10").
+- Every named entity, number and date produced by pass 1 was present in the
+  source text supplied to it.
+- Low longest-run scores (6 rows flagged at < 5 words) are PARAPHRASE, not
+  fabrication, confirmed by reading the passages.
+- **Verdict: no invented facts. The D4 result is fully quotable.**
+
+### NEW OBSERVATION FROM THE VERIFICATION RUN — extraction is entity-imbalanced
+Not a declared test; recorded as a hypothesis for a future experiment, not as
+a finding. Pass 1 has a 6-fact budget and spends it disproportionately on the
+FIRST title:
+
+| Row | Titles | Fact split | X1 correct? |
+|---|---|---|---|
+| 064d8faa | Apollo 15 / Unicycle       | 6 / 0 | NO |
+| 00e13b8d | LendingTree / Payday loan / Retail | 5+1 / 0 / 0 | yes |
+| 15885efe | Audi R8 (x3) / Sound barrier / Speed of sound | 6 / 0 / 0 | yes |
+| 01430717 | Spinal cord / The Home Depot | 5 / 1 | yes |
+| 0d225269 | Fairy / Fairyland / Valkyrie | 3 / 0 / 3 | yes |
+
+On multi-entity questions pass 1 often extracts ZERO facts about the second
+entity — the entity the bridge step needs. The single wrong answer among these
+10 rows is the most extreme case (6-0 on a two-entity question, with the
+Unicycle article supplied and unused).
+
+**This is a hypothesis, not a claim.** n=1 error is an anecdote. Imbalance
+itself is real and visible in 5 of 10 rows, but "imbalance causes errors"
+requires a pre-declared test with a matched control. Candidate intervention:
+per-title fact quotas instead of a single free budget. This is a prompt-and-
+budget change inside a step already validated, not a new research problem.
+
+### WHERE THIS LEAVES THE METHOD (supersedes the D3-era summary above)
+Five-step pipeline, no embedding retrieval, all facts in English:
+1. Urdu question -> Urdu entity spans — PROVEN, 97.89% verbatim (418/427)
+2. spans -> canonical English titles — OPEN (entity linking, ~55% exact match
+   and only 44% seed-stable when free-generated; must be grounded)
+3. title -> article — PROVEN, deterministic lookup
+4. article -> atomic English facts — **VALIDATED BY D4 at oracle-linking level**
+5. facts + Urdu question -> answer — PROVEN, p=0.0023
+
+Three of five steps proven, one validated, one open. The corpus defect
+(70.47% gold-evidence title coverage) remains a structural cap on any
+retrieval-based variant and must be addressed separately from step 2.
