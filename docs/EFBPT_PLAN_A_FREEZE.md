@@ -1463,3 +1463,52 @@ Let gap = B - A = 23.95pp on this subset.
 
 ### F. Status
 Declared before execution. No D4 arm has been run.
+
+## DIAGNOSTIC D5 — declared 2026-08-14, BEFORE any measurement
+
+### Motivation (context, not evidence)
+The D4 item-4 verification (job 62521) showed pass 1 concentrating its
+6-fact budget on the first title; in the 10 inspected rows, 5 had at
+least one supplied title receiving zero facts, and the single wrong
+answer was the most extreme case (6-0). This is an anecdote from a
+non-random sample (first 10 rows, already seen). D5 exists to test it
+properly. DISCLOSURE: because those 10 rows were seen before this
+declaration, the Step-0 gate below is intentionally set well under the
+50% observed in them.
+
+### STEP 0 — existence gate (CPU only, no model, no new data)
+Measure on outputs/efbpt/d4/d4_extractions.jsonl, all 71 rows:
+for each row, attribute each fact to the title(s) whose normalized
+name or clear head-noun appears in the fact; count per row the number
+of supplied titles with ZERO attributed facts. Attribution script must
+be committed before running. Denominator: rows with >= 2 titles.
+- GATE: if >= 30% of multi-title rows have at least one zero-fact
+  title, D5 RUNS. If < 30%, D5 is CANCELLED, the result is logged, and
+  work moves directly to entity linking (step 2). No re-litigating.
+
+### ARMS (only if gate passes)
+- X1: (already run, job 59085) 6 facts, free allocation. Control.
+- X2: BALANCED extraction — one pass-1 call PER TITLE, exactly 2 facts
+  per title, all else identical to X1 pass 1.
+- X3: free allocation as X1, but total fact budget set equal to X2's
+  realized total for that row (fact-count-matched control).
+Pass 2 identical to D4 for all arms (frozen Urdu prompt, arm-B format).
+Decoding identical to D4: thinking ON, temperature 0, greedy; pass 1
+max 2048 tokens, pass 2 max 1024; dual primary/Devanagari scoring;
+unparsed = incorrect; MD5-checked instructions.
+
+### PRE-DECLARED READINGS
+Primary: paired McNemar X2 vs X1 on the 71 qids, exact two-sided.
+- Reading A: p < 0.05 and X2 > X1 -> balance helps; adopt X2 form.
+- Reading B: p < 0.05 and X2 < X1 -> balance hurts; keep X1 form.
+- Reading C: p >= 0.05 -> no detectable effect at n=71. This is the
+  EXPECTED outcome given <= 7.04pp headroom (B - X1 = 83.10 - 76.06)
+  and will be reported as a finding, not suppressed. X1 form is kept
+  and work moves to entity linking.
+Secondary (mechanism, reported alongside whichever reading fires):
+- X3 vs X1 (does fact COUNT alone matter?)
+- X2 vs X3 (does BALANCE, at matched count, matter?)
+- Coverage (fraction of titles with >= 1 fact) per arm. For X2 this is
+  a MANIPULATION CHECK ONLY (forced by construction), never a result.
+Validity: unparsed spread across X1/X2/X3 must be < 5pp, else void.
+No amendments to this section after any D5 number exists.
