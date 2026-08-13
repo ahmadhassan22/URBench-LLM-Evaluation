@@ -4242,7 +4242,6 @@ embedding retrieval (23% recall of available pages); raw pages as facts
 (p=0.23); model self-generating facts (0pp); the current corpus (70.47%).
 Open and being tested as D4: extracting atomic English facts FROM a correct
 article, which is the 15.49pp gap between O2 and B.
-
 ---
 
 ## DIAGNOSTIC D4 — can the model EXTRACT atomic English facts from a correct article?
