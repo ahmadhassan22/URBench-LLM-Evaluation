@@ -4373,3 +4373,132 @@ Five-step pipeline, no embedding retrieval, all facts in English:
 Three of five steps proven, one validated, one open. The corpus defect
 (70.47% gold-evidence title coverage) remains a structural cap on any
 retrieval-based variant and must be addressed separately from step 2.
+
+---
+
+## DIAGNOSTIC D5 — does BALANCED extraction beat free-allocation extraction?
+Run 2026-08-14, SLURM job 62555 (`d5_balanced_FULL.sbatch`), ~52 min.
+Step-0 gate 2026-08-13 (`d5_step0_gate.py`), TEST run job 62552.
+Declared in `docs/EFBPT_PLAN_A_FREEZE.md` -> DIAGNOSTIC D5 BEFORE execution.
+Outcome: hypothesis REJECTED. Logged as a null result.
+
+### WHY IT WAS RUN
+The D4 item-4 verification showed pass 1 spending its 6-fact budget mostly on
+the first title, sometimes writing ZERO facts about a second supplied title.
+Observationally, rows with a zero-fact title were wrong 39.1% of the time vs
+17.1% for rows with full coverage (Fisher p=0.0742, exploratory, found AFTER
+seeing the data). D5 tested that observation under control.
+
+### STEP 0 — existence gate (CPU only, `d5_step0_gate.py`)
+Attribution rule: a fact counts for a title if the title's token sequence
+appears in it (stem-insensitive) OR the title's head noun appears. The rule
+is deliberately loose, which attributes MORE facts and therefore makes the
+gate HARDER to pass — the bias runs AGAINST the hypothesis. The script
+self-tests against 7 rows read by hand in job 62521 and refuses to report a
+gate result if the self-test fails. All 7 passed.
+- 58 multi-title rows, 187 title-slots, 421 facts, 11.6% of facts attributed
+  to no title (facts referring to an entity without naming it).
+- **23/58 = 39.7% of multi-title rows had >= 1 zero-fact title.**
+  Strict rule (full-title match only): 29/58 = 50.0%.
+- Declared threshold was 30%. **GATE PASSED, D5 ran.**
+
+### ARMS (n=71, identical qids to D4)
+Decoding, model config, facts-block format, scorers and chunk fetch are all
+IMPORTED from `d4_extract_facts.py`, never re-implemented, so the arms differ
+only where intended. The instruction template is asserted at startup to
+reproduce D4's `EXTRACT_INSTRUCTION` byte-for-byte at n=6 (md5
+9f12f76fe4869a74518cf4f86b0d0b06), which guarantees X3 at budget 6 is the
+same prompt X1 used.
+- X1  reused from D4 — one call per row, free allocation, at most 6 facts
+- X2  BALANCED — one call PER TITLE, at most 2 facts per title
+- X3  free allocation, total budget MATCHED to X2's realized count per row
+
+X3 is the control that separates "more facts" from "balanced facts". Without
+it X2 vs X1 alone cannot distinguish the two.
+
+### RESULT
+| Arm | Form | Acc | Unparsed | Secondary |
+|-----|------|-----|----------|-----------|
+| X1 | free, <=6 facts (D4)        | 76.06% | 0.00% | 76.06% |
+| X2 | BALANCED, 2 facts/title     | 67.61% | 0.00% | 67.61% |
+| X3 | free, budget matched to X2  | 67.61% | 0.00% | 67.61% |
+
+Unparsed spread 0.00pp — validity condition satisfied, comparison stands.
+Secondary Devanagari scores identical to primary on every arm.
+
+Paired exact McNemar:
+| Comparison | b | c | p |
+|---|---|---|---|
+| X2 vs X1 (PRIMARY) | 7 | 13 | 0.2632 |
+| X3 vs X1           | 6 | 12 | 0.2379 |
+| X2 vs X3           | 7 | 7  | 1.0000 |
+
+### PRE-DECLARED READING APPLIED
+X2 - X1 = **-8.45pp**, p=0.2632 >= 0.05. Neither Reading A nor B fires.
+**READING C: no detectable effect at n=71.** The X1 form is KEPT and work
+moves to entity linking. Reading C was declared in advance as the expected
+outcome given the small headroom, and is reported, not suppressed.
+
+### THE MANIPULATION WORKED — THE HYPOTHESIS STILL FAILED
+This is the important part. D5 is not a null because the intervention failed
+to apply. Coverage moved exactly as intended:
+
+| Arm | slots with >=1 fact | rows with a zero-fact title |
+|---|---|---|
+| X1 | 85.0% | 39.7% (23/58) |
+| X2 | 95.2% | **15.5% (9/58)** |
+| X3 | 87.2% | 34.5% (20/58) |
+
+(For X2 these numbers are a MANIPULATION CHECK, forced by construction, and
+are never reported as a result.) Zero-fact rows were cut by 61% relative and
+accuracy went DOWN 8.45pp. Coverage is not the lever.
+
+### WHAT ACTUALLY MOVED, AND WHAT DID NOT
+- **Balance: ruled out.** X2 vs X3 is b=7, c=7, p=1.0000 and both arms score
+  identically at 67.61%. At matched fact count, how facts are spread across
+  titles makes no measurable difference. Two independently generated
+  extraction sets landing on the same 48/71 is strong evidence there is no
+  effect here to find.
+- **Budget: the direction worth noting, NOT a claim.** X2 and X3 are separate
+  runs with different prompts; their only shared property is a smaller fact
+  budget than X1 (median 4-5 vs 6). Both lost the same ~8.45pp. But
+  p=0.2632 and p=0.2379 — neither is significant, so "fewer facts hurt" is a
+  point estimate replicated twice, NOT an established result.
+
+### THE CONFOUND THAT THIS KILLED
+The pre-D5 observation (zero-fact rows wrong 39.1% vs 17.1%, p=0.0742) does
+NOT survive a controlled test. The most likely explanation is confounding by
+question difficulty: harder questions need more titles, and more titles means
+both more zero-fact slots AND more errors. Coverage was a SYMPTOM of hard
+questions, not a CAUSE of wrong answers. Recorded because it is exactly the
+kind of post-hoc correlation this project has been burned by before, and
+because the controlled refutation is more useful than the correlation was.
+
+### NOT ATTEMPTED, AND WHY (power calculation, declared here)
+The natural follow-up is to RAISE the budget above 6 facts. It was considered
+and REJECTED on arithmetic, before running: at n=71 and a 76.06% base rate,
+McNemar needs roughly +10-13pp to reach p<0.05, but only 7.04pp of headroom
+exists to the gold-fact ceiling (B=83.10%). No possible outcome could be
+significant. The subset cannot grow — 71 is every question whose gold titles
+all exist in the corpus. Recorded so this is not re-proposed later.
+
+### VALUE OF THIS NULL
+1. It rules out a plausible lever with a matched control, so the D4 X1 form
+   survived a genuine attempt to beat it.
+2. It demonstrates the observational-signal trap concretely, with the
+   controlled refutation in hand.
+3. It closes step 4 as "good enough" and directs all remaining effort at the
+   one unsolved step.
+
+### STATUS OF THE METHOD AFTER D5
+1. Urdu question -> Urdu entity spans — PROVEN, 97.89% (418/427)
+2. spans -> canonical English titles — **UNSOLVED, ~55% exact match, 44%
+   seed-stable. THE ONLY BLOCKER TO AN END-TO-END METHOD.**
+3. title -> article — PROVEN, deterministic
+4. article -> atomic English facts — VALIDATED (D4), and now shown robust to
+   a competing formulation (D5)
+5. facts + Urdu question -> answer — PROVEN, p=0.0023
+
+All remaining effort goes to step 2. The target claim is an end-to-end
+pipeline with real entity linking, measured against the oracle-linking upper
+bound of 76.06% and the no-facts floor of 59.15%.
