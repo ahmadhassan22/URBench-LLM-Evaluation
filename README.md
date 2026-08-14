@@ -435,6 +435,18 @@ CoT hurts binary-task performance for LLaMA and Gemma architectures due to answe
 **11. Reasoning distillation does not transfer to low-resource settings.**
 DeepSeek-R1-Distill-Qwen-7B underperforms similarly-sized instruction-tuned models on every Urdu task.
 
+**12. Knowledge, not structure and not language, is the bottleneck in Urdu multi-hop reasoning.**
+Supplying clean English facts to Qwen3-14B is worth **+20.50pp** on Urdu StrategyQA (78.00% vs 57.50% on DEV200; 83.10% vs 59.15% on the matched 71-question subset, McNemar p=0.0023). Every structural intervention tested across the full EFBPT programme moved accuracy 0–7pp. The gap is in what the model knows, not how the reasoning is organised.
+
+**13. Correct entity labels are read but knowledge-inert.**
+A causal counterfactual corrupted the entity block in the fine-tuning format: 22% of answers changed and truncation quadrupled (1.2% → 7.9%), proving the block is read. Yet on rows where both arms produced an answer, accuracy was statistically identical (63.01% vs 62.27%, p=0.71). Supplying the right name does not supply the knowledge behind the name.
+
+**14. Fact delivery fails at every automatic route except extraction.**
+On the matched 71-question subset: embedding retrieval recovers 23.15% of gold titles among pages that exist; whole correct Wikipedia pages as context are not significantly better than no facts (69.01% vs 59.15%, p=0.2295); the model's own generated facts add exactly zero (70.0% = 70.0%). Only two-pass extraction works — the model reading a correct article and writing short atomic English facts reaches **76.06% vs 59.15% (p=0.0290)**, recovering 71% of the achievable gap.
+
+**15. StrategyQA evidence titles are largely unrecoverable from the question text.**
+52.5% of gold evidence title-instances (334/636) have no lexical trace in the English question, and only 19.5% of DEV200 rows have all their gold titles lexically present. StrategyQA evidence pages are *justification* sources, not question entities — "Is SnapCap an example of a retail store?" requires the page *LendingTree*. This caps any retrieval- or linking-based method evaluated against gold evidence titles on this benchmark, independent of language. (The classifier used was lexical and produces false absents, so 52.5% is an upper bound.)
+
 ---
 
 ## Current Direction
@@ -449,11 +461,47 @@ The evidence points to a specific missing capability: **stable bilingual entity 
 
 **A fully-automated training-data pipeline was then attempted and rejected (2026-07-21).** Plan: auto-draft an entity plan, independently re-verify it with a second pass, and auto-accept only rows where both passes agree — skipping per-row human review so the method could scale past ~1,000 rows without a manual bottleneck. Tested end-to-end on a fresh 30-row blind sample against predeclared gates (≥60% accepted coverage, ≥95% accepted-row precision): result was 33% coverage, 70% precision — both gates failed. Root cause, confirmed via full manual gold audit: the two agreeing passes share the same base model and the same blind spots on rare secondary entities, so agreement is not a reliable proxy for correctness. This is a structural ceiling, not a threshold that further rule-tuning can fix.
 
-**Current plan: Plan A′ — model-drafted, human-verified, staged data curation.** Every training row is model-drafted and then checked by hand; there is no auto-accept step. Data is built in small nested stages (N=100 → 250 → 500) so the 100→250 trend is checked before committing to a full build. This follows two pieces of evidence: task-specific curated data beats generic instruction data on multi-hop QA even at small N ("Revisiting Superficial Alignment Hypothesis," arXiv:2410.03717), and fine-tuning on how a model organizes facts it already knows is safe while fine-tuning on new facts risks hallucination (Gekhman et al., EMNLP 2024) — so EFBPT is framed strictly as teaching entity-faithful use of existing knowledge, not injecting new Urdu facts.
+**Plan A′ was executed and closed (2026-08-01).** Model-drafted, human-verified, staged data curation produced 9 QLoRA adapters (3 conditions × 3 seeds). The branch **failed its predeclared gate**, and a causal counterfactual established the reason: correct entity labels are read by the model but are knowledge-inert (Key Finding 13). The design rationale still holds — task-specific curated data beats generic instruction data at small N ("Revisiting Superficial Alignment Hypothesis," arXiv:2410.03717), and tuning on how a model organizes facts it already knows is safer than injecting new facts (Gekhman et al., EMNLP 2024) — but the failure was not in the data, it was in the assumption that entity structure alone delivers knowledge.
 
-**The method itself remains a hypothesis under test.** Confirming the target failure does not establish that entity-faithful tuning fixes it; that is what the C0–C3 ablations on the Plan A′ data will decide.
+**Work then moved from model structure to knowledge delivery,** producing diagnostics D1–D6 (see *Method: EFBPT and the Knowledge-Delivery Diagnostics* above). Two-pass fact extraction is the positive result: **+16.91pp at the oracle-linking level (p=0.0290)**, verified free of invented facts. End-to-end with no gold information reaches 64.79% against a 59.15% floor and a 76.06% ceiling, recovering a third of the gap but not significant at n=71. The remaining blocker is step 2, Urdu span → canonical English title, where failure is wrong-entity selection rather than string matching.
 
 ---
+
+## Method: EFBPT and the Knowledge-Delivery Diagnostics (D1–D6)
+
+Entity-Faithful Bilingual Plan Tuning (EFBPT) was built to repair the entity-corruption failure confirmed by the c-probe. Plan A′ (QLoRA, 9 adapters, 3 conditions × 3 seeds) **failed its predeclared gate**. Rather than abandon the branch, a causal counterfactual was run to establish *why* — the result is Key Finding 13 above.
+
+That result redirected the work from model structure to knowledge delivery. Six diagnostics followed, each declared in `docs/EFBPT_PLAN_A_FREEZE.md` — arms, decoding, and how every possible outcome would be read — **before** execution. No section was amended after a number existed.
+
+| | Question | Result | Verdict |
+|---|---|---|---|
+| **D1** | Do clean English facts help? | 83.10% vs 59.15%, p=0.0023 | Facts work |
+| **D2** | Can embedding retrieval find them? | 23.15% title recall among pages that exist | Retrieval fails |
+| **D3** | Do whole correct Wikipedia pages work? | 69.01% vs 59.15%, p=0.2295 | Raw pages fail |
+| — | Can the model generate the facts itself? | 70.0% = 70.0% no-facts | Self-generation fails |
+| **D4** | Can the model **extract** atomic facts from a correct article? | 76.06% vs 59.15%, p=0.0290 | **Extraction works** |
+| **D5** | Does *balanced* extraction beat free allocation? | 67.61% vs 76.06%, p=0.2632 | Balance is not the lever |
+| **D6** | Does the pipeline work end-to-end with **no gold information**? | 64.79% vs 59.15%, p=0.4807 | Partial, insufficient |
+
+**D4 (extraction) is the positive result.** It recovers 71% of the gap between the no-facts floor (59.15%) and the clean-gold-fact ceiling (83.10%), with the paired test significant. A mandatory hand-check of 60 extracted facts against their source passages found **no invented facts**: 54/60 had zero content words absent from the source, and every named entity, number and date was present in the supplied text. Reported limitation: dropping the three unparsed baseline rows instead of scoring them incorrect shifts p to 0.0931 — the effect size survives (+13.24pp) but significance does not, so both p-values are reported.
+
+**D5 rules out extraction *form* as a lever.** Forcing 2 facts per title cut rows with a zero-fact title from 39.7% to 15.5% and raised slot coverage from 85.0% to 95.2% — the manipulation demonstrably worked — yet accuracy fell 8.45pp. Against a fact-count-matched control the difference was exactly nil (b=7, c=7, p=1.0000). This also killed an observational signal that had looked real before the controlled test (rows with a zero-fact title were wrong 39.1% vs 17.1%, Fisher p=0.0742), most plausibly confounded by question difficulty.
+
+**D6 measures the pipeline with no gold at any stage.** The model names its own entities from the Urdu question, matches them to the corpus by exact title lookup, extracts its own facts, and answers. Result: **64.79%**, between the 59.15% floor and the 76.06% oracle-linking ceiling, recovering 33% of the gap, not significant at n=71. The bottleneck is entity generation, not string matching: 57.3% of generated titles exist in the corpus and only 21.0% overlap the gold set, with failures splitting into transliteration drift (والکری → "Walcott"; ابیسل میدان → "Aylesbury Vale"), wrong-entity selection (goats → "Sheep"), and non-canonical surface forms ("Mustache" for *Moustache*). Fact extraction stayed correct even under bad input, once writing "Goats are not mentioned in the passages."
+
+A fuzzy-title-matching follow-up was **considered and rejected on arithmetic before running**: it could address only the 5 rows where nothing matched, and even a perfect fuzzy matcher reaches p=0.0931 at n=71. The subset cannot grow — 71 is every DEV200 question whose gold titles all exist in the corpus.
+
+**Component status.** Steps 1, 3 and 5 are proven; step 4 is validated at the oracle-linking level; step 2 (Urdu span → canonical English title) remains the open problem.
+
+| Step | Operation | Status |
+|---|---|---|
+| 1 | Urdu question → Urdu entity spans | Proven — 97.89% verbatim (418/427) |
+| 2 | spans → canonical English titles | **Open** — 57.3% corpus-matchable, 21.0% gold overlap |
+| 3 | title → article | Proven — deterministic lookup |
+| 4 | article → atomic English facts | Validated by D4; robust in D5; correct under bad input in D6 |
+| 5 | facts + Urdu question → answer | Proven — p=0.0023 |
+
+**Corpus defect.** The `AI-ModelScope/wikipedia 20231101.en` mirror used throughout has all 41 shards present and 6,407,814 unique page ids, yet central articles are absent in both title and text — "Douglas Noel Adams" appears 0 times across 23,963,971 chunks. Gold-evidence title coverage is 70.47%, which structurally caps every retrieval-based variant. `title_space_cache.txt` derived from the same source is likewise unreliable and is not used for validation.
 
 ## Repository Structure
 
