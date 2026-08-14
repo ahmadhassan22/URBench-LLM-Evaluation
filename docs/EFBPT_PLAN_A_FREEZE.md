@@ -1512,3 +1512,141 @@ Secondary (mechanism, reported alongside whichever reading fires):
   a MANIPULATION CHECK ONLY (forced by construction), never a result.
 Validity: unparsed spread across X1/X2/X3 must be < 5pp, else void.
 No amendments to this section after any D5 number exists.
+## DIAGNOSTIC D6 — END-TO-END with SELF-GENERATED entities
+Declared 2026-08-14, BEFORE any D6 measurement exists.
+No amendment to this section is permitted once any D6 number exists.
+
+### A. WHY THIS IS THE DECIDING EXPERIMENT
+Every result so far used GOLD article titles. D4 showed that with gold titles,
+extracted facts are worth +16.91pp (76.06% vs 59.15%, p=0.0290). D5 showed the
+extraction FORM is not the lever. The one untested question is whether the
+pipeline works when nothing is given: the model must produce its own entities,
+find its own articles, extract its own facts, and answer.
+
+The ceiling analysis of 2026-08-14 (read-only, DEV200) found that 52.5% of gold
+evidence title-instances have no lexical trace in question_en, and only 19.5%
+of DEV200 rows (23.9% of the 71-subset) have ALL gold titles lexically present.
+StrategyQA evidence titles are JUSTIFICATION pages, not question entities
+(e.g. "Is SnapCap an example of a retail store?" requires "LendingTree").
+
+DECLARED CONSEQUENCE OF THAT FINDING: recovering GOLD titles is NOT the target
+of D6 and will not be used as a success criterion. A working system needs
+titles that yield USEFUL facts, not titles that match the gold set. D6 is
+therefore scored on ANSWER ACCURACY only. Gold-title overlap is reported as a
+descriptive statistic and is explicitly NOT a gate.
+
+Caveat recorded now: the ceiling classifier was purely lexical and produces
+false ABSENTs ("Nepalese" not reduced to "Nepal"; "moustaches" not linked to
+"Facial hair"). 52.5% is therefore an UPPER bound on unrecoverability. This
+does not change D6's design, which never depends on that number.
+
+### B. ARMS (n=71, the same qids as D3/D4/D5)
+Controls already measured on these exact qids, reused, not re-run:
+  A   no facts at all ................................ 59.15%  (floor)
+  X1  GOLD titles, oracle linking, extracted facts ... 76.06%  (ceiling)
+
+New arm:
+  E1  SELF-LINKED end-to-end. Four stages, no gold information at any stage:
+      stage 0  base Qwen3-14B reads question_ur and emits entities as
+               {urdu_span, canonical_title} pairs. Base model, no adapters,
+               so E1 has no dependency on the closed Plan A' branch. The
+               existing dev200_C3_seed*.jsonl files are NOT used, because they
+               come from fine-tuned adapters and would make E1 inconsistent
+               with D4's base-model setting.
+      stage 1  each generated canonical_title is normalized with norm() and
+               looked up in the corpus by fetch_chunks. EXACT normalized match
+               only; no fuzzy matching, no alias table, no gold fallback. A
+               title that does not match yields nothing.
+      stage 2  up to CHUNKS_PER_TITLE = 3 chunks per matched title, identical
+               to D4 arm X1 and D3 arm O2.
+      stage 3  fact extraction with D4's pass-1 prompt at the D4 budget
+               (at most 6 facts), then answering with the frozen Urdu prompt.
+      Rows where no generated title matches the corpus receive NO facts and
+      are answered anyway. They are scored, never dropped.
+
+Everything except stage 0 and stage 1 is IMPORTED from d4_extract_facts.py, so
+decoding, chunk count, extraction prompt, facts-block format and scorers are
+identical to X1 by construction. The stage-0 prompt is MD5-printed in the log.
+
+### C. DECODING AND SCORING (identical to D4/D5)
+Temperature 0, greedy, single seed. Chat-template settings imported from D4,
+not restated here, so they cannot drift. Dual primary/Devanagari scoring.
+Unparsed counts as INCORRECT; the denominator is always 71.
+
+### D. VALIDITY CONDITION
+Unparsed spread across A, X1 and E1 must be < 5pp. If it is >= 5pp the
+accuracy comparison is VOID and only the descriptive statistics may be quoted.
+
+### E. POWER, DECLARED BEFORE THE RUN
+Computed 2026-08-14 from D4's discordant counts (b=19, c=7), assuming
+correctly-linked rows behave like X1 and unlinked rows like A:
+
+  effective linking   E1 acc   McNemar p vs A    significant?
+     55%               68.5%      0.180              no
+     70%               71.0%      0.096              no
+     80%               72.7%      0.078              no
+     90%               74.4%      0.035              YES
+
+At n=71, significance requires roughly 90% effective linking. The subset
+cannot grow: 71 is every DEV200 question whose gold titles all exist in the
+defective corpus. READING 2 BELOW IS THEREFORE THE EXPECTED OUTCOME. A
+non-significant positive result is a real finding here, not a failure, and
+will be reported with this power table beside it.
+
+### F. PRE-DECLARED READINGS — apply as written, invent nothing after
+Primary statistic: paired exact McNemar, E1 vs A, on all 71 qids.
+Let d = E1 - A in pp. Half the oracle gap is +8.46pp.
+
+  READING 1  — WORKING METHOD.
+               d > 0 and p < 0.05.
+               An end-to-end Urdu multi-hop method exists and is
+               statistically supported. This is the thesis contribution.
+
+  READING 2  — WORKING BUT UNDERPOWERED.
+               d >= +8.46pp and p >= 0.05.
+               Self-linking recovers at least half the oracle gap. Report as
+               a working method with an honest power limitation, beside the
+               Section E table. Do NOT claim significance. Do NOT re-run on
+               a different subset to chase a p-value.
+
+  READING 3  — PARTIAL, INSUFFICIENT.
+               0 < d < +8.46pp.
+               Self-linking helps but recovers less than half the gap.
+               Report as a partial result. The remaining bottleneck is named
+               from the Section G diagnostics, not guessed.
+
+  READING 4  — FAIL.
+               d <= 0.
+               Self-generated titles do not deliver usable knowledge. The
+               retrieval-free pipeline is closed. The thesis contribution
+               becomes the diagnostic chain plus the corpus and benchmark
+               findings, which stand on their own.
+
+Secondary, reported alongside whichever reading fires:
+  E1 vs X1 paired McNemar — how far below the oracle ceiling E1 sits.
+
+### G. MANDATORY DIAGNOSTICS, reported with every reading
+None of these is a gate. All are descriptive and must appear in the log:
+  1. entities generated per question: min / median / max.
+  2. generated titles that matched the corpus: count and percent.
+  3. rows receiving zero facts because nothing matched: count and percent,
+     plus that subgroup's accuracy against the SAME rows in arm A (a matched
+     control on the same qids, never a comparison against a global floor).
+  4. overlap between generated titles and gold required_titles: descriptive
+     only, explicitly NOT a success criterion (Section A).
+  5. facts per question: min / median / max, and the count of empty rows.
+  6. a 10-row dump, first 10 rows in file order, showing question_ur,
+     generated {urdu_span, canonical_title} pairs, which titles matched,
+     the extracted facts, gold and predicted answers.
+
+### H. WHAT IS FORBIDDEN IN D6
+- No gold titles, gold facts, gold spans or evidence ids at any stage of E1.
+- No fuzzy or embedding-based title matching. That is a separate declared
+  experiment if D6's diagnostics justify it; folding it in now would make the
+  arm untestable.
+- No dropping of unmatched or unparsed rows from the denominator.
+- No re-running D6 on a different subset after seeing the result.
+- No amendment to this section once any D6 number exists.
+
+### I. STATUS
+Declared before execution. No D6 arm has been run.
