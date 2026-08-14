@@ -4502,3 +4502,150 @@ all exist in the corpus. Recorded so this is not re-proposed later.
 All remaining effort goes to step 2. The target claim is an end-to-end
 pipeline with real entity linking, measured against the oracle-linking upper
 bound of 76.06% and the no-facts floor of 59.15%.
+---
+
+## DIAGNOSTIC D6 — END-TO-END with SELF-GENERATED entities
+Run 2026-08-14, SLURM job 62905 (`d6_endtoend_FULL.sbatch`), ~45 min.
+TEST runs: 62882 (crashed in the report block, see below), 62902 (clean).
+Declared in `docs/EFBPT_PLAN_A_FREEZE.md` -> DIAGNOSTIC D6 BEFORE execution.
+Outcome: **READING 3 — PARTIAL, INSUFFICIENT.**
+
+### WHAT WAS TESTED
+Every prior result used GOLD article titles. D6 removed all gold information
+and made the model do the whole job: read the Urdu question, name its own
+entities, find its own articles, extract its own facts, answer.
+
+Arm E1, four stages, no gold at any stage:
+  0  base Qwen3-14B reads question_ur -> [{urdu_span, canonical_title}]
+  1  each generated title -> norm() -> EXACT corpus lookup (no fuzzy match)
+  2  up to 3 chunks per matched title (equal to D3 O2 and D4 X1)
+  3  D4 pass-1 extraction (<=6 facts), then the frozen Urdu answer prompt
+Rows with no matched title received NO facts and were answered anyway, scored,
+never dropped. Stages 2-3 are IMPORTED from `d4_extract_facts.py`, so decoding,
+chunk count, extraction prompt, facts-block format and scorers are identical to
+arm X1 by construction. Stage-0 instruction md5 4675bc6b29aaca764b72c84da246bb9a.
+The Plan A' `dev200_C3_seed*.jsonl` files were deliberately NOT reused: they
+come from fine-tuned adapters and would break comparability with D4's
+base-model ceiling.
+
+### RESULT (n=71, floor 57.75%)
+| Arm | What it gets | Acc | Unparsed |
+|-----|--------------|-----|----------|
+| A  | no facts (floor)                        | 59.15% | 4.23% |
+| E1 | SELF-LINKED end-to-end, no gold         | 64.79% | 0.00% |
+| X1 | GOLD titles, oracle linking (ceiling)   | 76.06% | 0.00% |
+
+Unparsed spread 4.23pp, under the frozen 5pp threshold: comparison VALID.
+Secondary Devanagari scores identical to primary on all three arms.
+
+| Comparison | b | c | p |
+|---|---|---|---|
+| E1 vs A (PRIMARY) | 11 | 7 | 0.4807 |
+| E1 vs X1          | 7 | 15 | 0.1338 |
+
+d = E1 - A = **+5.64pp**. Half the oracle gap = +8.46pp.
+Fraction of the oracle gap recovered = 5.64 / 16.91 = **33%**.
+
+### PRE-DECLARED READING APPLIED
+d > 0 but d < half the gap, p >= 0.05 -> **READING 3: PARTIAL, INSUFFICIENT.**
+The pipeline runs end-to-end without gold and moves in the right direction, but
+recovers only a third of the oracle gap and the effect is not statistically
+supported at n=71. **This is NOT a working method and is not claimed as one.**
+Per the freeze, the bottleneck is named from the Section G diagnostics below,
+not guessed.
+
+### MANDATORY DIAGNOSTICS (freeze G, descriptive, never gates)
+- G1 entities generated per question: min=1 median=2 max=5, zero-entity rows=0.
+  Stage-0 JSON parse status: ok=71, json_error=0, empty=0, no_array=0. The
+  model followed the output format perfectly; format was never the problem.
+- G2 generated titles found in the corpus: **82/143 = 57.3%**.
+- G3 rows receiving ZERO facts: 14/71 = 19.7%. Matched control on the SAME
+  qids: E1 50.00% vs A 42.86% (n=14). Rows WITH facts, same qids: E1 68.42%
+  vs A 63.16% (n=57).
+- G4 generated-vs-gold title overlap: **42/200 = 21.0%** (DESCRIPTIVE ONLY,
+  freeze section A: explicitly NOT a success criterion).
+- G5 facts per question: min=0 median=6 max=6, empty=14.
+
+### THE BOTTLENECK, NAMED FROM THE DIAGNOSTICS
+Stage 0 (entity generation) is where the pipeline breaks, in three distinct
+ways, all visible in the G6 dump:
+1. **Transliteration drift** — والکری (Valkyrie) -> "Walcott"; ایبیسل میدانوں
+   (abyssal plains) -> "Aylesbury Vale". Fetches a REAL but WRONG article and
+   injects misleading facts. This is the same disease as the c-probe (39% of
+   rows corrupt named entities), now shown to propagate through and break a
+   downstream pipeline.
+2. **Wrong entity, right form** — بکریاں (goats) -> "Sheep"; آڈی آر ایٹ
+   (Audi R8) -> "Audi A8 L". Same effect.
+3. **Non-canonical surface form** — "Mustache" (real page: Moustache),
+   "Women" (real page: Woman), "Cacti", "Leaves". Matches nothing, row gets
+   no facts.
+Extraction itself behaved correctly under bad input: on row 10325585 it wrote
+"Goats are not mentioned in the passages." The damage was entirely upstream.
+
+### D7 (FUZZY TITLE MATCHING) — CONSIDERED AND REJECTED ON ARITHMETIC
+Recorded here so it is not re-proposed. Read-only analysis of the D6 outputs
+split the 15 rows where E1 is wrong but X1 is right:
+- (a) matched_titles EMPTY, fuzzy matching could conceivably help: **5 rows**
+- (b) matched_titles NON-EMPTY — the model linked to a real but wrong article,
+  which fuzzy matching CANNOT fix: **10 rows**
+Best-case ceiling, assuming all 5 rescued and none broken:
+| rescued | E1 acc | p vs A |
+|---|---|---|
+| 0 (actual) | 64.79% | 0.4807 |
+| 3          | 69.02% | 0.1892 |
+| **5 (perfect)** | **71.83%** | **0.0931** |
+Significance would require b=18 vs the observed b=11 — seven more wins than
+exist to be won. A PERFECT fuzzy matcher still cannot reach p<0.05 at n=71,
+and the subset cannot grow. Additionally, of the 62 unmatched title-instances
+only about half have any real target: "Dyqam Squad", "Cool Sprocket", "Focal
+Force", "Salamis_Lez" are hallucinated entities with nothing to match to.
+D7 is therefore NOT declared and NOT run.
+
+### THE STRUCTURAL FINDING THIS CONFIRMS
+G4 shows only 21.0% of gold titles appear among the generated ones, even
+though stage 0 usually names a sensible entity for the question. This matches
+the independent ceiling analysis of 2026-08-14: 52.5% of gold evidence
+title-instances have NO lexical trace in question_en, and only 19.5% of DEV200
+rows (23.9% of the 71-subset) have ALL gold titles lexically present.
+StrategyQA evidence titles are JUSTIFICATION pages, not question entities
+("Is SnapCap an example of a retail store?" requires "LendingTree").
+**Consequence: the pipeline is near its structural ceiling on this benchmark,
+and no amount of engineering at stage 1 changes that.** The ceiling classifier
+was purely lexical and produces false ABSENTs ("Nepalese" not reduced to
+"Nepal"), so 52.5% is an UPPER bound on unrecoverability — but the direction
+is not in doubt.
+
+### BUG FOUND AND FIXED (does not affect any number)
+TEST job 62882 crashed with KeyError 'pred_secondary' in the report block,
+AFTER all data files were written and verified. Cause: `d1_armA.jsonl`
+predates AMENDMENT 5 and has no `pred_secondary` field; D4 never hit this
+because it scored arm A on primary only. Fix: `load_arm()` backfills
+`pred_secondary` from the stored generation using the frozen secondary
+extractor, never touching primary preds. This is a bug fix, not a design
+change — arms, decoding and readings were untouched and no D6 number existed
+at the time.
+
+### VERIFICATION PERFORMED BEFORE THE RUN
+- 30/30 automated checks of the script against every clause of the D6 freeze
+  (arms, decoding, validity condition, all four readings, all six diagnostics,
+  the no-gold-in-E1 rule, no-overwrite guard, fsync + line-count verification,
+  matched-control requirement in G3).
+- Stage-0 parser stress-tested against 16 malformed model outputs (code
+  fences, preamble prose, trailing commas, truncated JSON, null/blank/missing
+  titles, non-list JSON, empty and None) — no exception in any case, and
+  truncated JSON recovers via regex fallback.
+- Gold-leakage audit: `r["required"]` appears only in subset construction and
+  in the G4 descriptive statistic, never inside any E1 stage.
+
+### STATUS OF THE METHOD AFTER D6
+1. Urdu question -> Urdu entity spans — PROVEN, 97.89% (418/427)
+2. spans -> canonical English titles — **THE BOTTLENECK. 57.3% of generated
+   titles exist in the corpus; only 21.0% overlap the gold set. Failure is
+   wrong-entity selection (transliteration drift), NOT string matching.**
+3. title -> article — PROVEN, deterministic
+4. article -> atomic English facts — VALIDATED (D4), robust to a competing
+   formulation (D5), and correct even under wrong input (D6)
+5. facts + Urdu question -> answer — PROVEN, p=0.0023
+
+End-to-end without gold: 64.79%, between the 59.15% floor and the 76.06%
+oracle ceiling, recovering 33% of the gap, not significant at n=71.
