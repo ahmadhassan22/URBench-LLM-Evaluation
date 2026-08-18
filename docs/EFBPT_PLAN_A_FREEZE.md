@@ -1990,3 +1990,47 @@ unless a separate answer-level experiment is declared and run.
 ### J. STATUS
 Declared before execution. No L0 part has been run.
 
+## L0 AMENDMENT 1 — COREF rule replaced by a hand-confirmed list
+Declared 2026-08-18, BEFORE any Part B or Part C number exists. Part A is a
+census, not a measurement; no gate has been applied. Amending is therefore
+permitted under freeze discipline. After Parts B/C run, it would not be.
+
+REASON. The declared automatic COREF rule (similarity < 0.50 AND the span
+contains a possessive/demonstrative marker) is unsound. In Urdu, کے/کی are
+ordinary genitive particles inside descriptive noun phrases, not markers of
+reference. String similarity cannot separate a TRANSLATION from a REFERENCE,
+because both have near-zero character overlap with the title:
+  یورپ کی تاریخ -> History of Europe   is a translation, fully linkable
+  اس کے دادا    -> Genghis Khan        is a reference, not linkable
+The rule excluded 17 pairs, of which ~15 are ordinary translations. Excluding
+them would have discarded linkable pairs and shrunk n for no reason.
+
+REPLACEMENT RULE. COREF is no longer detected automatically. It is an
+explicit, hand-confirmed list, reviewed by a native Urdu speaker against the
+printed census. A pair is COREF only if the span points at an entity named or
+implied elsewhere rather than naming or describing it directly.
+
+The confirmed COREF list is exactly two pairs:
+  اس کے دادا        -> Genghis Khan    ("his grandfather")
+  نسان کے سی ای او  -> Carlos Ghosn    ("CEO of Nissan", a role, title is a person)
+
+Adjudicated and NOT COREF (recorded so the decision is not revisited):
+  امریکہ کے صدر     -> President of the United States  (direct translation)
+  ڈایناسورز کا دور  -> Mesozoic  (describes/identifies the era; not a pronoun
+                                  or definite reference)
+  یورپ کی تاریخ, مغربی شہد کی مکھی, احتیاطی صحت کی دیکھ بھال, 1700 کی دہائی,
+  سونے کے وقت, شہد کی موم, پتے کے چھلانگ مارنے والے, نیا سال کی شام,
+  بجلی کے بند ہونے, کالج کی ڈگری, ریاستہائے متحدہ کا محکمہ,
+  وہ لڑکا جس نے بھیڑیا ہونے کا شور مچایا  -- all translations, all LINKABLE.
+
+RESULTING COUNTS. TRANSLIT 126, SEMANTIC 161, COREF 2, LINKABLE 287 of 289.
+Power at n=287 is unchanged from the freeze section G table: about +4pp
+detectable. The TRANSLIT threshold of 0.70 is NOT changed.
+
+SUSPECTED BAD GOLD ANNOTATION, logged not corrected:
+  شہد کے بچھڑے -> Honey badger. The span reads "honey's calves". Standard Urdu
+  renderings are شہد بیجر, ہنی بیجر or ریٹل (verified against Urdu dictionary
+  sources 2026-08-18). The pair is retained in LINKABLE so the evaluation set
+  is not altered after declaration, but any linker failure on this pair must
+  be attributed to the annotation, not to the method.
+  
