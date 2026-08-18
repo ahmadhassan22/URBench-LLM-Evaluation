@@ -2813,6 +2813,7 @@ Retrieval is cross-lingual (English pool → Urdu test questions).
 > are not available at deployment).
 
 #### GSM8K — FAIR
+**RETRACTED 2026-08-18 — this result is CONTAMINATED (answer leakage). Superseded by EXPERIMENT G1 at the end of this file. The number below must not be quoted.**
 - Eval set: 700 items (data/sdfr_splits/gsm8k_eval.jsonl), thinking ON, max_tokens=2048
 - Baseline-fair (CoT, no demos): 621/700 = **88.71%**
 - SDFR-fair (CoT + retrieved demos): 678/700 = **96.86%**
@@ -4649,3 +4650,97 @@ at the time.
 
 End-to-end without gold: 64.79%, between the 59.15% floor and the 76.06%
 oracle ceiling, recovering 33% of the gap, not significant at n=71.
+
+---
+
+## EXPERIMENT G1 — SDFR-UR on GSM8K with a DECONTAMINATED retrieval pool
+Run 2026-08-18, SLURM job 65110 (`g1_gsm8k_FULL.sbatch`), ~29 min.
+TEST run job 65099. Script: `eval/error_analysis_tests/g1_sdfr_gsm8k_clean.py`.
+Declared in `docs/EFBPT_PLAN_A_FREEZE.md` -> EXPERIMENT G1 BEFORE execution.
+Outcome: **READING 2 — NO EFFECT.**
+
+### WHY — the contamination audit (2026-08-15)
+A read-only audit established that the previously reported GSM8K SDFR result
+is contaminated and must not be claimed:
+- Evaluation set = 700 Urdu translations of items from the GSM8K TRAIN split.
+- Demonstration pool = the GSM8K TRAIN split, 7,473 records.
+- Overlap: every one of the 700 eval items has its English source present in
+  the pool as an exact (question, answer) match — **700/700 = 100%**.
+- `retrieve()` performs a bare FAISS top-k with **no self-exclusion** of the
+  query item.
+- Reconstruction: the eval item's own English source was retrieved in the top
+  3 for **632/700 = 90.29%** (rank 1: 580, rank 2: 36, rank 3: 16), and the
+  gold answer appeared in the demonstration block for **647/700 = 92.43%**.
+- Generations confirm the mechanism, e.g. GSM8K_0004: "The previous example
+  had the same numbers and the answer was 14, so this must be correct."
+
+**The reported 96.86% (b=63, c=6, p=4.47e-13) is answer leakage, not a method
+effect. It is retracted.** A separately recorded figure of "SDFR 99.38% on a
+clean GSM8K subset" does not match the file on disk (96.86% over all 700) and
+is also withdrawn.
+
+The audit also confirmed what was NOT wrong: baseline and SDFR use
+byte-identical answer extractors and identical decoding (temperature 0.0,
+max_tokens 2048, enable_thinking=True), with 700/700 paired qids and no
+duplicates. The comparison machinery was sound; the retrieval pool was not.
+
+### METHOD
+Identical to `sdfr_gsm8k_fair.py` in every respect except pool construction:
+same eval items and order, same embedder, same FAISS index, same TOP_K=3,
+same prompt template, same extractor, same decoding.
+- Decontamination by exact (question, answer) match against the positionally
+  aligned English source file `data/gsm8k_raw/gsm8k_main_train_700.jsonl`
+  (the eval `question` field is Urdu, so the match is made via the English
+  source, whose answers align with the eval answers 700/700).
+- 700 records removed, **6,773 remain** — both asserted at runtime.
+- Independent cross-check: matching on the answer string alone selects the
+  same 700 rows. The script dies if the two methods disagree.
+- The FAISS index (ntotal 7,473) is left INTACT and filtering is done by pool
+  position. Deleting rows from the pool list would desynchronise `pool[i]`
+  from the index ids and silently corrupt every retrieval.
+- Runtime near-duplicate guard: any neighbour with SequenceMatcher ratio
+  >= 0.90 against the eval item's English source question is dropped, with
+  backfill to exactly TOP_K=3.
+
+### RESULT (n=700)
+| Arm | | Acc | Unparsed |
+|---|---|---|---|
+| B0 | baseline CoT, reused from disk, not re-run | 88.71% (621/700) | 16 |
+| S1 | SDFR, DECONTAMINATED pool | 87.14% (610/700) | 24 |
+
+Unparseable-rate spread 1.14pp, under the frozen 5pp threshold: **VALID**.
+Paired exact McNemar S1 vs B0: **b=21, c=32, p=0.1690**.
+d = S1 - B0 = **-1.57pp**.
+
+### PRE-DECLARED READING APPLIED
+p >= 0.05 -> **READING 2 — NO EFFECT.** The original GSM8K gain was leakage.
+**SDFR-UR is NOT claimed as a method on GSM8K.** At n=700 the design detects
+roughly +1.3pp under a clean discordant split and +3pp even under a noisy one
+(power table computed before the run, freeze section E), so this is a
+substantive null, not an underpowered one.
+
+Note: c=32 > b=21 — demonstrations broke more items than they fixed. This is
+not significant and harm is NOT claimed, but there is no hidden win here
+either; the point estimate is negative.
+
+### PIQA STATUS (recorded with G1, not part of it)
+The PIQA pool/eval split IS clean: pool = English positions 0-599, eval =
+Urdu positions 600-749, exact overlap 0, no retrieved demonstration reaching
+0.90 similarity. But the paired test is b=27, c=19, **p=0.302 — NOT
+significant**. The apparent +5.33pp is not statistically supported, and the
+mechanism is label-bias correction: the baseline predicts label 1 on 109/150
+items against a gold distribution of 73/77, and SDFR shifts to 89/150,
+gaining on gold-0 items (36/73 -> 50/73) while losing on gold-1 items
+(72/77 -> 66/77). **PIQA is NOT claimed as a method win.**
+
+### SEPARATE DATA BUG FOUND BY THE AUDIT
+Five positions where the English and Urdu PIQA records disagree on the label
+(indices 524, 631, 637, 640, 704), four of them inside the 150-item PIQA
+evaluation range. This is a translation-alignment defect in `data/piqa_raw/`,
+independent of SDFR, and must be corrected before any PIQA number is quoted.
+
+### CONSEQUENCE
+SDFR-UR is not a working method on GSM8K or PIQA. Demonstration retrieval
+does not help tasks whose knowledge is already internal to the model. The
+one confirmed positive result in this project remains D4: two-pass fact
+extraction on knowledge-dependent multi-hop reasoning, +16.91pp, p=0.0290.

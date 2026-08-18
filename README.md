@@ -206,16 +206,16 @@ SDFR-UR replaces fixed in-context examples with **dynamically retrieved cross-li
 
 | Dataset | Fair Baseline | SDFR-UR | Δ | Verdict |
 |---|---|---|---|---|
-| **GSM8K** | 88.71% | **96.86%** | **+8.15pp** | ✅ **Confirmed win** |
-| GSM8K *(zero-truncation subset, n=649)* | 94.30% | 99.38% | +5.08pp | ✅ Clean-floor win |
-| **PIQA** | 72.00% | **77.33%** | **+5.33pp** | ✅ **Confirmed win** — mechanism: label-bias correction |
+| **GSM8K** | 88.71% | 87.14% | −1.57pp | ❌ **RETRACTED** — earlier +8.15pp was answer leakage; clean re-run p=0.1690 |
+| GSM8K *(decontaminated pool, n=700)* | 88.71% | 87.14% | −1.57pp | ❌ No effect (McNemar b=21, c=32, p=0.1690) |
+| PIQA | 72.00% | 77.33% | +5.33pp | ⚠️ **Not significant** (McNemar b=27, c=19, p=0.302); mechanism: label-bias correction |
 | BoolQ | 84.89% | 85.48% | +0.59pp | ➡️ Parity (both thinking-OFF) |
 | CSQA | 63.33% | 61.00% | −2.33pp | ❌ Slight loss |
 | StrategyQA *(no-facts)* | 65.50% | 69.43% | +3.93pp | ❌ **Not a reasoning win** — see below |
 
-**GSM8K is the strongest result:** +8.15pp raw, +5.08pp on the truncation-free subset. The honest reportable range is **+5pp (clean) to +8pp (raw)**.
+**GSM8K is RETRACTED (2026-08-18).** The +8.15pp was answer leakage: the 700 evaluation items are Urdu translations of GSM8K *train*, the retrieval pool *is* GSM8K train, overlap was 700/700, and `retrieve()` had no self-exclusion. The item's own source problem was retrieved for 90.3% of items and the gold answer sat in the prompt for 92.4%. Re-run with a decontaminated pool (700 records removed, 6,773 remaining, 829 leaked neighbours filtered across 644/700 items): **88.71% baseline vs 87.14% SDFR, d = −1.57pp, McNemar p=0.1690 — no effect.** See EXPERIMENT G1 in `experiments.md`.
 
-**PIQA — mechanism identified, reported openly.** Both baseline and SDFR over-predict label `1` (gold is balanced 77/73; baseline predicts 109×`1`, SDFR 89×`1`). Mechanism inspection attributes the gain to *retrieval mitigating label-order bias via balanced demonstrations* rather than to improved physical reasoning. The accuracy gain is real; the mechanism is not the one originally hypothesised.
+**PIQA — not statistically significant.** The pool/eval split is genuinely clean (zero overlap, no near-duplicates), but the paired test gives b=27, c=19, **p=0.302**. Both arms over-predict label `1` (gold 77/73; baseline predicts 109×`1`, SDFR 89×`1`), and the shift gains on gold-0 items (36/73 → 50/73) while losing on gold-1 (72/77 → 66/77). The mechanism is label-bias correction, and the gain is not supported at n=150. **PIQA is not claimed as a method win.**
 
 **StrategyQA is a confirmed method weakness, not a win.** The +3.93pp gain did **not** survive mechanism verification:
 
@@ -405,8 +405,8 @@ XLT consistently underperformed CoT. Two failure modes: token truncation cutting
 **1. Experimental confounds, not model behaviour, drove most early "findings."**
 Mismatched thinking modes, token budgets, gold-fact availability, and evaluation-set sizes produced dramatic but spurious effects — including an apparent −21.96pp "retrieval catastrophe" on StrategyQA that vanished under controlled conditions. Controlled re-testing is now a precondition for any claim.
 
-**2. SDFR-UR is a confirmed win on arithmetic and physical reasoning.**
-Under the fair regime: GSM8K +8.15pp (+5.08pp on the truncation-free subset), PIQA +5.33pp. Cross-lingual demonstration retrieval transfers *reasoning structure* effectively.
+**2. SDFR-UR is NOT a confirmed win. Both apparent wins failed verification.**
+GSM8K's +8.15pp was answer leakage from a contaminated retrieval pool; re-measured cleanly at n=700 the effect disappears (−1.57pp, p=0.1690). PIQA's +5.33pp is not statistically significant (p=0.302) and is attributable to label-bias correction. Demonstration retrieval does not improve Urdu reasoning on tasks whose knowledge is already internal to the model.
 
 **3. SDFR-UR does not genuinely help multi-hop factual reasoning.**
 The nominal StrategyQA gain is label-copying, not reasoning — confirmed by mechanism inspection. Positive deltas are not accepted without mechanism verification.
