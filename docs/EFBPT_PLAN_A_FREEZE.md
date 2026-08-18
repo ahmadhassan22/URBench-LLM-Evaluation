@@ -1815,3 +1815,178 @@ gold-1 items (72/77 -> 66/77). PIQA is therefore NOT claimed as a method win.
 
 ### K. STATUS
 Declared before execution. No G1 arm has been run.
+
+## EXPERIMENT L0 — PRE-TEST for constrained entity linking
+Declared 2026-08-18, BEFORE any L0 measurement exists.
+No amendment to this section is permitted once any L0 number exists.
+L0 measures only. It decides whether a constrained-linking method (L1) is
+worth building. L0 is NOT itself a method experiment.
+
+### A. WHY — the intervention the diagnostics prescribe
+D6 established that steps 1, 3, 4 and 5 of the pipeline work and step 2
+(Urdu span -> canonical English title) is the sole failure point. The failure
+mode is free generation into an open vocabulary: والکری -> "Walcott",
+ایبیسل میدان -> "Aylesbury Vale", بکریاں -> "Sheep". Extraction stayed correct
+under bad input, so the damage is entirely upstream.
+
+The intervention the symptom prescribes is to convert GENERATION into
+SELECTION: retrieve candidate titles for the Urdu span from a closed set, and
+have the model choose. A title absent from the candidate set cannot be
+produced, so transliteration drift becomes structurally impossible rather
+than statistically discouraged.
+
+The ceiling of that method is the retriever's recall@k. L0 measures that
+ceiling, plus an honest baseline, before any method is built.
+
+### B. THREE FLAWS FOUND WHILE STRESS-TESTING THIS PROPOSAL
+Recorded because each one changed the design.
+
+1. **recall@k is NOT final accuracy.** The model must still pick the correct
+   candidate from k. If recall@10 = 75% and pick-accuracy is 85%, delivered
+   accuracy is 64%, not 75%. An earlier draft of this experiment used a flat
+   "recall >= 75%" gate; that gate was wrong and is replaced by the
+   baseline-relative gate in Section F.
+2. **The existing ~55% linking baseline is unverified.** It appears in
+   `experiments.md` (54.2 / 56.3 / 54.7% across seeds, 44% seed-stable) with
+   NO producing script; a repository-wide search found none. It must not be
+   used as a gate. L0 re-measures the baseline on the exact evaluation pairs.
+3. **n=289 is contaminated by unlinkable and trivial pairs.** The gold files
+   contain coreference spans ('اس کے دادا' -> Genghis Khan, "his grandfather")
+   which no linker can resolve from the span, and clean transliterations
+   ('میامی' -> Miami) which inflate any score. A census must classify every
+   pair BEFORE the gate is applied.
+
+### C. DATA
+Gold Urdu-span -> English-title pairs, human-verified, from:
+- `data/strategyqa_official/efbpt/plan_a_gold_100.jsonl` (100 rows, field
+  `entities`, id field `qid`)
+- `data/strategyqa_official/efbpt/blind30_gold.jsonl` (30 rows, field
+  `question_entities`, id field `urbench_qid`)
+Combined: 130 rows, **289 pairs**, 278 distinct canonical titles, 0 shared
+qids, 2 shared exact pairs (kept, deduplicated by (qid, span)).
+Neither file has a testability field; the census in Part A creates one.
+
+Candidate title universe: the set of unique titles present in
+`rag/index/wikipedia_full_meta.jsonl`, obtained by a single sequential scan.
+Expected size ~6,402,346 (the `corpus_unique_titles` value recorded in
+`outputs/efbpt/d2/d2_title_coverage.json`). The script must print the count
+it actually observes and must NOT assert equality, because the recorded value
+is from a prior scan and a mismatch is information, not an error.
+`data/strategyqa_official/efbpt/title_space_cache.txt` MUST NOT be used: it is
+recorded as unreliable in experiments.md (6 of 13 known-real titles absent).
+The universe must come from the corpus, because a title absent from the corpus
+cannot be fetched by step 3 and is therefore useless even if linked correctly.
+
+### D. THE THREE PARTS
+**Part A — span census (CPU).** Classify all 289 pairs into exactly one
+bucket, by rules declared here:
+- `COREF` — the span contains no proper name and functions as a reference to
+  an entity named elsewhere (possessive or demonstrative phrases such as
+  "his grandfather"). Operational rule: the span shares no token with the
+  canonical title after transliteration-insensitive comparison, AND the span
+  contains a possessive or demonstrative marker (اس, ان, یہ, وہ, کے, کی).
+  Flagged for human confirmation; the script prints every COREF candidate.
+- `TRANSLIT` — the span is a phonetic rendering of the title. Operational
+  rule: character-level similarity between a Latin transliteration of the
+  span and the title is >= 0.70.
+- `SEMANTIC` — everything else (common nouns, descriptive phrases,
+  translated rather than transliterated names).
+`LINKABLE` = TRANSLIT + SEMANTIC. COREF pairs are EXCLUDED from the gate and
+from the primary statistic, and their count is reported.
+The first 30 classifications are printed for human inspection. If the human
+judges the classifier unreliable, L0 stops and the rules are revised BEFORE
+any Part B or Part C number is generated.
+
+**Part B — baseline re-measurement (GPU, ~5 min).** Run D6's stage-0 prompt
+(md5 4675bc6b29aaca764b72c84da246bb9a) on the 130 questions with the base
+model, identical decoding to D6. For each gold pair, the baseline is scored
+CORRECT if any generated `canonical_title` matches the gold title under
+norm(). This is free generation, the arm the method must beat.
+
+**Part C — retrieval ceiling (GPU, ~20 min).** Scan the corpus for unique
+titles, encode them with
+`paraphrase-multilingual-MiniLM-L12-v2` (the same encoder used by SDFR and by
+`rag/`), build a flat inner-product index over normalized vectors, encode the
+289 Urdu spans, and report **recall@1, @5, @10, @20, @50, @100**: the fraction
+of pairs whose gold title appears among the top-k retrieved titles.
+
+### E. VALIDITY CONDITIONS
+- Every number must be reported three ways: over ALL pairs, over LINKABLE
+  pairs, and over SEMANTIC pairs only. A headline computed only over TRANSLIT
+  pairs is not a result.
+- If the observed unique-title count differs from 6,402,346 by more than 5%,
+  the discrepancy must be printed prominently; the run continues but the
+  difference is reported.
+- If any gold title is absent from the corpus title universe, recall for that
+  pair is 0 by construction. The count of such pairs MUST be reported
+  separately, because it is a corpus-coverage failure, not a retriever
+  failure, and it caps recall independently of the encoder.
+- Part B and Part C must be scored over the identical pair set.
+
+### F. PRE-DECLARED GATE — apply as written
+Let **B** = Part-B baseline accuracy over LINKABLE pairs.
+Let **R10** = Part-C recall@10 over LINKABLE pairs.
+Assume a pick-accuracy of 0.85 (an optimistic-but-not-absurd estimate for a
+14B model choosing among 10 candidates; it is an assumption, declared here,
+not a measurement).
+
+- **GATE PASS — BUILD L1.** `R10 * 0.85 >= B + 6pp`.
+  The ceiling clears the baseline by enough that a detectable improvement is
+  possible. Proceed to declare and build constrained selection.
+- **GATE FAIL — DO NOT BUILD.** `R10 * 0.85 < B`.
+  The ceiling is at or below the baseline. Constrained linking cannot help.
+  Report as a finding: multilingual sentence embeddings do not retrieve
+  entity titles from Urdu spans well enough to support constrained linking.
+  Do NOT build L1. Do NOT retry with a different encoder inside the remaining
+  time budget.
+- **MARGINAL — DECIDE JOINTLY.** `B <= R10 * 0.85 < B + 6pp`.
+  Report the full recall@k curve. The decision is made with the supervisor
+  and the student, in writing, before any further work. No unilateral build.
+
+The 6pp margin is not arbitrary: at n≈180 LINKABLE pairs, +5pp is the
+smallest paired-McNemar-detectable improvement under a moderate breakage
+ratio (c/b ≈ 0.4). Building toward a target below that margin would repeat
+the D5 and D6 error of running an experiment that cannot reach significance.
+
+### G. POWER, COMPUTED BEFORE THE RUN
+For a later L1 comparing constrained selection against free generation,
+paired exact McNemar:
+
+| n (LINKABLE pairs) | smallest detectable gain |
+|---|---|
+| 289 | +3pp |
+| 215 | +4pp |
+| 180 | +5pp |
+| 130 | +7pp |
+| 65  | +14pp |
+
+Sensitivity to how often constraining BREAKS a previously correct link
+(c/b ratio), at n=215: c/b=0.2 -> +4pp; c/b=0.4 -> +5pp; c/b=0.6 -> +8pp;
+c/b=0.8 -> +17pp. **A high breakage ratio is the main threat to L1's power.**
+If L1 is built, it must therefore be designed as a HYBRID — fall back to free
+generation when retrieval returns nothing above a confidence threshold —
+rather than as an unconditional replacement. That design choice is declared
+here, before any L0 number exists, so it cannot be introduced afterwards to
+rescue a result.
+
+### H. WHAT IS FORBIDDEN
+- No use of `title_space_cache.txt` as the candidate universe.
+- No gate applied to numbers computed over TRANSLIT pairs alone.
+- No substitution of a different encoder after seeing a failing recall.
+- No use of the unverified ~55% figure anywhere in the gate.
+- No building of L1 if the gate fails.
+- No amendment to this section once any L0 number exists.
+
+### I. WHAT L0 CANNOT TELL US
+Recorded so it is not overclaimed later. L0 measures the retrieval ceiling
+and the free-generation baseline. It does NOT measure pick-accuracy, which is
+assumed at 0.85 and could be materially lower. It does not establish that
+better linking improves ANSWER accuracy — the ceiling analysis of 2026-08-14
+showed 52.5% of gold evidence titles have no lexical trace in the question, so
+answer-level gains remain capped by the benchmark regardless of linking
+quality. L1, if built, is claimed at the LINKING level, not the answer level,
+unless a separate answer-level experiment is declared and run.
+
+### J. STATUS
+Declared before execution. No L0 part has been run.
+
