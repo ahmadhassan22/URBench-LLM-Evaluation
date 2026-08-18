@@ -1650,3 +1650,168 @@ None of these is a gate. All are descriptive and must appear in the log:
 
 ### I. STATUS
 Declared before execution. No D6 arm has been run.
+
+## EXPERIMENT G1 — SDFR-UR on GSM8K with a DECONTAMINATED retrieval pool
+Declared 2026-08-15, BEFORE any G1 measurement exists.
+No amendment to this section is permitted once any G1 number exists.
+
+### A. WHY THIS EXPERIMENT EXISTS — the contamination audit
+A read-only audit of the fair-regime SDFR outputs (2026-08-15) established
+that the previously reported GSM8K result is CONTAMINATED and must not be
+claimed. Facts from that audit, all reproducible from the scripts on disk:
+
+- The evaluation set is 700 Urdu translations of items drawn from the GSM8K
+  TRAIN split (`data/gsm8k_raw/gsm8k_main_train_700_ur.jsonl`).
+- The demonstration pool is the GSM8K TRAIN split, 7,473 records
+  (`data/retrieval_pools/gsm8k_train_en.jsonl` -> `data/sdfr_splits/gsm8k_pool.jsonl`).
+- Every one of the 700 evaluation items has its English source record present
+  in the pool as an exact (question, answer) match: **700/700 = 100% overlap**.
+- Neither SDFR script excludes the query item from its own retrieved
+  neighbours. `retrieve()` performs a bare FAISS top-k with no id, position,
+  question or answer comparison. Quoted in the audit; NO SUCH EXCLUSION EXISTS.
+- Reconstruction with the same pool, index and local embedding model shows the
+  evaluation item's own English source was retrieved in the top 3 for
+  **632/700 = 90.29%** of items (rank 1: 580, rank 2: 36, rank 3: 16), and the
+  gold answer string appears in the reconstructed demonstration block for
+  **647/700 = 92.43%**.
+- Model generations confirm the mechanism explicitly, e.g. GSM8K_0004:
+  "The previous example had the same numbers and the answer was 14, so this
+  must be correct."
+
+The reported effect (621/700 = 88.71% baseline vs 678/700 = 96.86% SDFR,
+b=63, c=6, p=4.47e-13) is therefore **answer leakage, not a method effect**.
+The number is retracted here and must not appear as a result anywhere.
+
+Note on a separate prior error: the figure "SDFR 99.38% on a clean GSM8K
+subset" recorded earlier does not match the file on disk, which shows 96.86%
+over all 700. The on-disk value governs; the 99.38% figure is withdrawn.
+
+Note on scoring fairness: the audit confirmed the baseline and SDFR arms use
+byte-identical answer extractors (differing only by one source comment) and
+identical decoding (temperature 0.0, max_tokens 2048, enable_thinking=True,
+same model and vLLM settings). Pairing is intact: 700/700 shared qids, no
+duplicates, no question or gold mismatches. The comparison machinery was
+sound; the retrieval pool was not.
+
+### B. THE QUESTION G1 ASKS
+Does similarity-based demonstration retrieval help Urdu GSM8K reasoning when
+the model can no longer be shown the answer to the question it is being asked?
+
+This is the only formulation under which SDFR-UR can be claimed as a method.
+
+### C. ARMS (n=700, identical eval items to the contaminated run)
+- **B0** baseline CoT, fair regime. REUSED from
+  `outputs/sdfr/cot_gsm8k_baseline_fair_qwen3_14b.jsonl`, 621/700 = 88.71%.
+  Not re-run: the audit confirmed its decoding and extractor already match.
+- **S1** SDFR with a DECONTAMINATED pool. Identical to
+  `sdfr_gsm8k_fair.py` in every respect except pool construction.
+
+Decontamination procedure, declared here and to be implemented exactly:
+1. For each of the 700 evaluation items, locate its English source record by
+   exact (question, answer) match in the 7,473-record pool. The audit proved
+   all 700 match uniquely.
+2. Remove those 700 records from the pool. Expected pool size after removal:
+   **6,773**. The script MUST assert this count and die otherwise.
+3. Additionally apply a runtime near-duplicate guard: for each query, drop any
+   retrieved demonstration whose normalized question has
+   `difflib.SequenceMatcher` ratio >= 0.90 against the evaluation item's
+   English source question, and backfill from the next-ranked neighbour so
+   every item still receives exactly TOP_K demonstrations. The count of drops
+   must be logged.
+4. The script MUST report, before generation: pool size, records removed, and
+   the number of evaluation items whose own source is still reachable in the
+   pool. That last number MUST be 0 or the run aborts.
+
+Everything else is held fixed: same embedding model, same FAISS construction
+procedure, same TOP_K, same prompt template, same extractor, same decoding
+(temperature 0.0, max_tokens 2048, enable_thinking=True), same 700 eval items
+in the same order.
+
+### D. VALIDITY CONDITIONS
+- Pairing: S1 must produce exactly 700 rows with the same qid set as B0. Any
+  mismatch voids the run.
+- The unparseable-prediction rate must be reported for both arms. B0 is
+  16/700 = 2.29%. If S1's rate differs from B0's by more than 5pp, the
+  accuracy comparison is VOID and only descriptive statistics may be quoted.
+- Unparseable predictions count as INCORRECT. The denominator is always 700.
+- If the post-removal pool size is not exactly 6,773, or if any evaluation
+  item's own source remains reachable, the run is INVALID and no reading
+  fires.
+
+### E. POWER, COMPUTED BEFORE THE RUN
+At n=700 with a paired exact McNemar test and B0 at 621/700 = 88.71%, the
+detectable effect depends on how the discordant pairs split. Computed
+2026-08-15, before the run:
+
+| net wins (S1-B0) | as pp | p if c=b/4 | p if c=b/2 | p if c=2b/3 |
+|---|---|---|---|---|
+| 9  | +1.29pp | 0.035 | 0.122 | 0.233 |
+| 14 | +2.00pp | 0.007 | 0.044 | 0.120 |
+| 21 | +3.00pp | 0.001 | 0.011 | 0.050 |
+
+So a gain of roughly **+1.3pp reaches significance under a clean split, and
++3pp reaches it even under a noisy one**. This is far better powered than any
+experiment on the 71-question StrategyQA subset, where only very large
+effects were ever detectable. G1 is therefore a fair test of the method: a
+real effect of modest size CAN be found here, so a null result is
+informative rather than merely underpowered.
+
+### F. PRE-DECLARED READINGS — apply as written, invent nothing afterwards
+Primary statistic: paired exact McNemar, S1 vs B0, over all 700 qids,
+`scipy.stats.binomtest(min(b, c), b + c, 0.5)`. Let d = S1 - B0 in pp.
+
+- **READING 1 — METHOD CONFIRMED.** d > 0 and p < 0.05.
+  Similarity-based demonstration retrieval genuinely improves Urdu
+  arithmetic reasoning. SDFR-UR may be claimed as a working method, scoped to
+  arithmetic reasoning, and MUST be reported together with the contamination
+  history in Section A.
+- **READING 2 — NO EFFECT.** p >= 0.05, regardless of the sign of d.
+  The original GSM8K gain was leakage. SDFR-UR is NOT claimed as a method on
+  GSM8K. This is a substantive finding at n=700, not an underpowered null,
+  and is reported as such.
+- **READING 3 — METHOD HARMS.** d < 0 and p < 0.05.
+  Retrieved demonstrations actively hurt once the answer is removed. Reported
+  as a finding; SDFR-UR is not claimed.
+
+### G. MANDATORY DIAGNOSTICS, reported with every reading (never gates)
+1. Pool size before and after removal; number of records removed.
+2. Runtime near-duplicate drops: total count, and the number of evaluation
+   items affected.
+3. Maximum and mean SequenceMatcher similarity between each evaluation item's
+   English source question and its retrieved demonstrations, after filtering.
+4. Count and percentage of evaluation items whose gold answer string still
+   appears anywhere in the final prompt, WITH the reason (a different problem
+   may legitimately share a numeric answer). This is descriptive; it is NOT a
+   gate, because two unrelated problems can share the answer "12".
+5. Unparseable-prediction counts for both arms.
+6. The first 10 S1 items in file order: question, the TOP_K retrieved
+   demonstration questions, gold, prediction, and the last 200 characters of
+   the generation.
+
+### H. WHAT IS FORBIDDEN
+- No change to the evaluation set, the prompt template, the extractor, the
+  decoding settings, or TOP_K. Only the pool changes.
+- No re-running on a different evaluation subset after seeing the result.
+- No claiming the contaminated 96.86% figure under any framing.
+- No amendment to this section once any G1 number exists.
+
+### I. SEPARATE, PRE-EXISTING DATA BUG (not part of G1)
+The audit found 5 positions where the English and Urdu PIQA records disagree
+on the label (indices 524, 631, 637, 640, 704), four of them inside the
+150-item PIQA evaluation range. This is a translation-alignment defect in
+`data/piqa_raw/`, independent of SDFR. It must be recorded in
+`experiments.md` and corrected before any PIQA number is quoted. It does not
+affect G1.
+
+### J. PIQA STATUS, recorded here for completeness
+The PIQA pool/eval split IS clean: pool = English positions 0-599, eval =
+Urdu positions 600-749, exact overlap 0, no retrieved demonstration reaching
+0.90 similarity to its query. But the paired test is b=27, c=19,
+**p=0.302** — NOT significant. The apparent +5.33pp is not statistically
+supported, and the mechanism is label-bias correction: the baseline predicts
+label 1 on 109/150 items against a gold distribution of 73/77, and SDFR
+shifts to 89/150, gaining on gold-0 items (36/73 -> 50/73) while losing on
+gold-1 items (72/77 -> 66/77). PIQA is therefore NOT claimed as a method win.
+
+### K. STATUS
+Declared before execution. No G1 arm has been run.
