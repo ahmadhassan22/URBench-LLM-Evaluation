@@ -4744,3 +4744,92 @@ SDFR-UR is not a working method on GSM8K or PIQA. Demonstration retrieval
 does not help tasks whose knowledge is already internal to the model. The
 one confirmed positive result in this project remains D4: two-pass fact
 extraction on knowledge-dependent multi-hop reasoning, +16.91pp, p=0.0290.
+
+## EFBPT L0 — constrained title-linking pre-test (2026-08-18)
+
+### PURPOSE
+L0 was a pre-test conducted before building L1. It tested whether constrained
+title selection with `paraphrase-multilingual-MiniLM-L12-v2` had enough ceiling
+to beat free canonical-title generation.
+
+### PART A — CENSUS
+The frozen set contained **289 pair instances**: **126 TRANSLIT**, **161
+SEMANTIC**, and **2 COREF**. The two COREF cases were hand-confirmed under
+Amendment 1. The declared LINKABLE gate set therefore contained **287** pairs
+(TRANSLIT + SEMANTIC).
+
+### PART B — FREE-GENERATION BASELINE
+Part B used the frozen D6 stage-0 prompt. All **289/289** pair instances were
+measurable.
+
+| Set | Correct / n | Baseline B |
+|---|---:|---:|
+| ALL | 131/289 | 45.33% |
+| LINKABLE | 131/287 | 45.64% |
+| SEMANTIC | 58/161 | 36.02% |
+| TRANSLIT | 73/126 | 57.94% |
+
+### PART C — CONSTRAINED TITLE RETRIEVAL
+Part C encoded Urdu spans and the actual deduplicated English-title universe
+with `paraphrase-multilingual-MiniLM-L12-v2`. The unique title universe was
+**6,402,346** titles. The gold title was absent from that corpus for **86/289
+gold pair instances**.
+
+| Set | n | R@1 | R@5 | R@10 | R@20 | R@50 | R@100 |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| ALL | 289 | 5.88% | 9.34% | 11.76% | 13.49% | 15.57% | 17.99% |
+| LINKABLE | 287 | 5.92% | 9.41% | 11.85% | 13.59% | 15.68% | 18.12% |
+| SEMANTIC | 161 | 8.07% | 11.80% | 15.53% | 18.01% | 21.12% | 25.47% |
+| TRANSLIT | 126 | 3.17% | 6.35% | 7.14% | 7.94% | 8.73% | 8.73% |
+
+### FROZEN GATE AND VERDICT
+The gate set was LINKABLE. **B = 45.64%**, **R@10 = 11.85%**, and the frozen
+**PICK_ACC = 0.85**, giving **delivered = 10.07%**. Passing required **B + 6
+percentage points = 51.64%**. Verdict: **GATE FAIL — DO NOT BUILD L1**.
+
+### INTERPRETATION
+The declared MiniLM raw Urdu-span -> English-title constrained-retrieval route
+failed the predeclared gate. This does not establish that every possible
+entity-linking method is impossible. L1 must not be built under this frozen
+branch.
+
+### DIAGNOSTIC HISTORY
+Job 65459 was diagnostic only, not a declared experiment. Its first run showed
+English title self-retrieval of **99.5% @1** and much poorer Urdu-span
+retrieval. After inspection, that exact diagnostic percentage set must be
+treated as provisional: the 5,000-title filler contained duplicate normalized
+titles and was not sampled with proper reservoir sampling. Production L0 Part
+C did deduplicate titles, so this diagnostic bug does **not** invalidate the
+final L0 result.
+
+The corrected diagnostic completed on **2026-08-19** as job **65737**
+(COMPLETED, exit `0:0`, elapsed `00:07:16`). It fixed the
+duplicate-normalized-title bug and used deterministic reservoir sampling over
+unique non-gold normalized titles. The scan covered **23,963,971** corpus lines
+and **6,402,346** unique normalized corpus titles. From **289** gold pairs and
+**278** distinct normalized gold titles, **194/278** distinct titles were
+corpus-present, yielding **203** usable pair instances. With **5,000** unique
+non-gold filler titles, the final diagnostic universe contained **5,194 UNIQUE
+titles**.
+
+| Query set (same 5,194-title universe) | n | R@1 | R@5 | R@10 |
+|---|---:|---:|---:|---:|
+| English gold-title self retrieval | 203 | 99.5% | 99.5% | 99.5% |
+| Urdu spans — ALL | 203 | 28.1% | 36.0% | 36.5% |
+| Urdu spans — TRANSLIT | 89 | 15.7% | 21.3% | 22.5% |
+| Urdu spans — SEMANTIC | 112 | 38.4% | 48.2% | 48.2% |
+
+The corrected ALL R@10 (**36.5%**) is essentially consistent with the earlier
+provisional value (**36.9%**), so the duplicate bug did not cause the
+substantive finding. English self-retrieval at **99.5%** shows that basic title
+extraction, embedding, and scoring are functioning. The narrow supported
+conclusion is that this MiniLM encoder/title representation aligns raw Urdu
+entity spans poorly with canonical English Wikipedia titles; it does **not**
+show that the encoder generally cannot handle Urdu. Because this easier
+diagnostic uses only 5,194 titles and excludes corpus-absent gold titles, it
+cannot replace the official full-universe result.
+
+This run was diagnostic only: it creates no gate and does **not** change or
+reopen the frozen L0 gate. The authoritative production result remains
+**LINKABLE B = 45.64%**, **LINKABLE R@10 = 11.85%**, **delivered = 10.07%**,
+against a **51.64%** pass threshold: **GATE FAIL — DO NOT BUILD L1**.
