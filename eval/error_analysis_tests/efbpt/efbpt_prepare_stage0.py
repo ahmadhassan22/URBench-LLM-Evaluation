@@ -38,7 +38,7 @@ D2_RECALL_SPLIT_PATH = REPO / "outputs/efbpt/d2/d2_recall_split.json"
 CORPUS_METADATA_RELATIVE_PATH = "rag/index/wikipedia_full_meta.jsonl"
 OUTPUT_DIR = REPO / "data/strategyqa_official/efbpt/stage0"
 
-FREEZE_COMMIT = "fc3013afd5631d1979c78c10230c25d2ef11eedf"
+FREEZE_COMMIT = "8ee4f5bb932aa89b5d2bd07523a7492a261e741b"
 EXPECTED_SHA256 = {
     DEV200_PATH: "1ae2cd21c93d1c8d3fda8f6990a183df558e6509d0884fadb29983f5f610d43c",
     D2_COVERAGE_PATH: "334d4de46a2c0d498807c45ef34f466aa17d554559a9e3ac7c7ba6e84479d3e5",
