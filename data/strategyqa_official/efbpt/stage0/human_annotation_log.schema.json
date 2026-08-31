@@ -2,164 +2,144 @@
   "$id": "human_annotation_log.schema.json",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
-  "allOf": [
+  "description": "Append-only union of independent annotation/adjudication state records and durable pre-reveal audit events; preparation creates no log rows.",
+  "oneOf": [
     {
-      "if": {
-        "properties": {
-          "pass1_completed": {
-            "const": false
-          }
-        },
-        "required": [
-          "pass1_completed"
-        ]
-      },
-      "then": {
-        "properties": {
-          "blind_discovery_candidates": {
-            "maxItems": 0
-          },
-          "pass1_round": {
-            "type": "null"
-          },
-          "pass1_timestamp": {
-            "type": "null"
-          },
-          "pass2_decision": {
-            "type": "null"
-          },
-          "pass3_decision": {
-            "type": "null"
-          },
-          "source_role": {
-            "type": "null"
-          }
-        }
-      }
-    },
-    {
-      "if": {
-        "properties": {
-          "pass2_decision": {
-            "type": "null"
-          }
-        },
-        "required": [
-          "pass2_decision"
-        ]
-      },
-      "then": {
-        "properties": {
-          "concrete_intermediate_information": {
-            "type": "null"
-          },
-          "confidence": {
-            "type": "null"
-          },
-          "dependency_status": {
-            "type": "null"
-          },
-          "explicit_relation_type": {
-            "type": "null"
-          },
-          "official_support_path_references": {
-            "maxItems": 0
-          },
-          "parent_source_titles": {
-            "maxItems": 0
-          },
-          "pass2_round": {
-            "type": "null"
-          },
-          "pass2_timestamp": {
-            "type": "null"
-          },
-          "pass3_decision": {
-            "type": "null"
-          },
-          "proposed_parent_source_titles": {
-            "maxItems": 0
-          },
-          "rationale": {
-            "type": "null"
-          },
-          "source_role": {
-            "type": "null"
-          },
-          "urdu_span_if_explicit": {
-            "type": "null"
-          }
-        }
-      }
-    },
-    {
-      "if": {
-        "properties": {
-          "pass2_decision": {
-            "const": "EXPLICIT"
-          }
-        },
-        "required": [
-          "pass2_decision"
-        ]
-      },
-      "then": {
-        "properties": {
-          "confidence": {
-            "enum": [
-              "HIGH",
-              "MEDIUM",
-              "LOW"
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "pass1_completed": {
+                "const": false
+              }
+            },
+            "required": [
+              "pass1_completed"
             ]
           },
-          "explicit_relation_type": {
-            "enum": [
-              "DIRECT_MENTION",
-              "TRANSLITERATION",
-              "COMMON_ALIAS_OR_ABBREVIATION",
-              "MORPHOLOGICAL_OR_DEMONYM",
-              "DIRECT_SPECIFIC_CONCEPT"
-            ]
-          },
-          "pass3_decision": {
-            "type": "null"
-          },
-          "rationale": {
-            "minLength": 1,
-            "type": "string"
-          },
-          "source_role": {
-            "const": "EXPLICIT"
-          }
-        }
-      }
-    },
-    {
-      "if": {
-        "properties": {
-          "pass2_decision": {
-            "const": "NOT_YET_EXPLICIT"
+          "then": {
+            "properties": {
+              "blind_discovery_candidates": {
+                "maxItems": 0
+              },
+              "pass1_round": {
+                "type": "null"
+              },
+              "pass1_timestamp": {
+                "type": "null"
+              },
+              "pass2_decision": {
+                "type": "null"
+              },
+              "pass3_decision": {
+                "type": "null"
+              },
+              "source_role": {
+                "type": "null"
+              }
+            }
           }
         },
-        "required": [
-          "pass2_decision"
-        ]
-      },
-      "then": {
-        "properties": {
-          "explicit_relation_type": {
-            "type": "null"
+        {
+          "if": {
+            "properties": {
+              "pass2_decision": {
+                "type": "null"
+              }
+            },
+            "required": [
+              "pass2_decision"
+            ]
           },
-          "urdu_span_if_explicit": {
-            "type": "null"
+          "then": {
+            "properties": {
+              "concrete_intermediate_information": {
+                "type": "null"
+              },
+              "confidence": {
+                "type": "null"
+              },
+              "dependency_status": {
+                "type": "null"
+              },
+              "explicit_relation_type": {
+                "type": "null"
+              },
+              "official_support_path_references": {
+                "maxItems": 0
+              },
+              "parent_source_titles": {
+                "maxItems": 0
+              },
+              "pass2_round": {
+                "type": "null"
+              },
+              "pass2_timestamp": {
+                "type": "null"
+              },
+              "pass3_decision": {
+                "type": "null"
+              },
+              "proposed_parent_source_titles": {
+                "maxItems": 0
+              },
+              "rationale": {
+                "type": "null"
+              },
+              "source_role": {
+                "type": "null"
+              },
+              "urdu_span_if_explicit": {
+                "type": "null"
+              }
+            }
           }
-        }
-      }
-    },
-    {
-      "if": {
-        "allOf": [
-          {
+        },
+        {
+          "if": {
+            "properties": {
+              "pass2_decision": {
+                "const": "EXPLICIT"
+              }
+            },
+            "required": [
+              "pass2_decision"
+            ]
+          },
+          "then": {
+            "properties": {
+              "confidence": {
+                "enum": [
+                  "HIGH",
+                  "MEDIUM",
+                  "LOW"
+                ]
+              },
+              "explicit_relation_type": {
+                "enum": [
+                  "DIRECT_MENTION",
+                  "TRANSLITERATION",
+                  "COMMON_ALIAS_OR_ABBREVIATION",
+                  "MORPHOLOGICAL_OR_DEMONYM",
+                  "DIRECT_SPECIFIC_CONCEPT"
+                ]
+              },
+              "pass3_decision": {
+                "type": "null"
+              },
+              "rationale": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "source_role": {
+                "const": "EXPLICIT"
+              }
+            }
+          }
+        },
+        {
+          "if": {
             "properties": {
               "pass2_decision": {
                 "const": "NOT_YET_EXPLICIT"
@@ -169,7 +149,73 @@
               "pass2_decision"
             ]
           },
-          {
+          "then": {
+            "properties": {
+              "explicit_relation_type": {
+                "type": "null"
+              },
+              "urdu_span_if_explicit": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "allOf": [
+              {
+                "properties": {
+                  "pass2_decision": {
+                    "const": "NOT_YET_EXPLICIT"
+                  }
+                },
+                "required": [
+                  "pass2_decision"
+                ]
+              },
+              {
+                "properties": {
+                  "pass3_decision": {
+                    "type": "null"
+                  }
+                },
+                "required": [
+                  "pass3_decision"
+                ]
+              }
+            ]
+          },
+          "then": {
+            "properties": {
+              "concrete_intermediate_information": {
+                "type": "null"
+              },
+              "confidence": {
+                "type": "null"
+              },
+              "dependency_status": {
+                "type": "null"
+              },
+              "official_support_path_references": {
+                "maxItems": 0
+              },
+              "parent_source_titles": {
+                "maxItems": 0
+              },
+              "proposed_parent_source_titles": {
+                "maxItems": 0
+              },
+              "rationale": {
+                "type": "null"
+              },
+              "source_role": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "if": {
             "properties": {
               "pass3_decision": {
                 "type": "null"
@@ -178,280 +224,673 @@
             "required": [
               "pass3_decision"
             ]
-          }
-        ]
-      },
-      "then": {
-        "properties": {
-          "concrete_intermediate_information": {
-            "type": "null"
           },
-          "confidence": {
-            "type": "null"
-          },
-          "dependency_status": {
-            "type": "null"
-          },
-          "official_support_path_references": {
-            "maxItems": 0
-          },
-          "parent_source_titles": {
-            "maxItems": 0
-          },
-          "proposed_parent_source_titles": {
-            "maxItems": 0
-          },
-          "rationale": {
-            "type": "null"
-          },
-          "source_role": {
-            "type": "null"
-          }
-        }
-      }
-    },
-    {
-      "if": {
-        "properties": {
-          "pass3_decision": {
-            "type": "null"
-          }
-        },
-        "required": [
-          "pass3_decision"
-        ]
-      },
-      "then": {
-        "properties": {
-          "pass3_round": {
-            "type": "null"
-          },
-          "pass3_timestamp": {
-            "type": "null"
-          }
-        }
-      }
-    },
-    {
-      "if": {
-        "properties": {
-          "pass3_decision": {
-            "enum": [
-              "LATENT_BRIDGE",
-              "AMBIGUOUS"
-            ]
-          }
-        },
-        "required": [
-          "pass3_decision"
-        ]
-      },
-      "then": {
-        "properties": {
-          "confidence": {
-            "enum": [
-              "HIGH",
-              "MEDIUM",
-              "LOW"
-            ]
-          },
-          "pass2_decision": {
-            "const": "NOT_YET_EXPLICIT"
-          },
-          "rationale": {
-            "minLength": 1,
-            "type": "string"
-          }
-        }
-      }
-    },
-    {
-      "if": {
-        "properties": {
-          "pass3_decision": {
-            "const": "LATENT_BRIDGE"
-          }
-        },
-        "required": [
-          "pass3_decision"
-        ]
-      },
-      "then": {
-        "properties": {
-          "concrete_intermediate_information": {
-            "minLength": 1,
-            "type": "string"
-          },
-          "dependency_status": {
-            "enum": [
-              "CLEAR_DEPENDENCY",
-              "MULTIPLE_PLAUSIBLE_PARENTS",
-              "PARALLEL_OR_UNORDERED",
-              "UNRESOLVED",
-              "NOT_APPLICABLE"
-            ]
-          },
-          "official_support_path_references": {
-            "minItems": 1
-          },
-          "source_role": {
-            "const": "LATENT_BRIDGE"
-          }
-        }
-      }
-    },
-    {
-      "if": {
-        "properties": {
-          "pass3_decision": {
-            "const": "AMBIGUOUS"
-          }
-        },
-        "required": [
-          "pass3_decision"
-        ]
-      },
-      "then": {
-        "properties": {
-          "source_role": {
-            "const": "AMBIGUOUS"
-          }
-        }
-      }
-    },
-    {
-      "if": {
-        "properties": {
-          "adjudicated_role": {
-            "enum": [
-              "EXPLICIT",
-              "LATENT_BRIDGE",
-              "AMBIGUOUS"
-            ]
-          }
-        },
-        "required": [
-          "adjudicated_role"
-        ]
-      },
-      "then": {
-        "anyOf": [
-          {
+          "then": {
             "properties": {
-              "adjudication_timestamp": {
+              "pass3_round": {
+                "type": "null"
+              },
+              "pass3_timestamp": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "pass3_decision": {
+                "enum": [
+                  "LATENT_BRIDGE",
+                  "AMBIGUOUS"
+                ]
+              }
+            },
+            "required": [
+              "pass3_decision"
+            ]
+          },
+          "then": {
+            "properties": {
+              "confidence": {
+                "enum": [
+                  "HIGH",
+                  "MEDIUM",
+                  "LOW"
+                ]
+              },
+              "pass2_decision": {
+                "const": "NOT_YET_EXPLICIT"
+              },
+              "rationale": {
+                "minLength": 1,
                 "type": "string"
               }
             }
-          },
-          {
+          }
+        },
+        {
+          "if": {
             "properties": {
-              "adjudication_round": {
-                "type": "integer"
+              "pass3_decision": {
+                "const": "LATENT_BRIDGE"
+              }
+            },
+            "required": [
+              "pass3_decision"
+            ]
+          },
+          "then": {
+            "properties": {
+              "concrete_intermediate_information": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "dependency_status": {
+                "enum": [
+                  "CLEAR_DEPENDENCY",
+                  "MULTIPLE_PLAUSIBLE_PARENTS",
+                  "PARALLEL_OR_UNORDERED",
+                  "UNRESOLVED",
+                  "NOT_APPLICABLE"
+                ]
+              },
+              "official_support_path_references": {
+                "minItems": 1
+              },
+              "source_role": {
+                "const": "LATENT_BRIDGE"
               }
             }
           }
-        ],
-        "properties": {
-          "adjudication_changed_bridge_eligibility": {
-            "type": "boolean"
-          },
-          "adjudication_rationale": {
-            "minLength": 1,
-            "type": "string"
-          },
-          "adjudication_required": {
-            "const": true
-          },
-          "adjudicator_id": {
-            "minLength": 1,
-            "type": "string"
-          }
-        }
-      }
-    },
-    {
-      "if": {
-        "properties": {
-          "adjudication_required": {
-            "const": false
-          }
         },
-        "required": [
-          "adjudication_required"
-        ]
-      },
-      "then": {
-        "properties": {
-          "adjudicated_role": {
-            "type": "null"
-          },
-          "adjudication_changed_bridge_eligibility": {
-            "type": "null"
-          },
-          "adjudication_rationale": {
-            "type": "null"
-          },
-          "adjudication_round": {
-            "type": "null"
-          },
-          "adjudication_timestamp": {
-            "type": "null"
-          },
-          "adjudicator_id": {
-            "type": "null"
-          },
-          "answer_inspection_exception_used": {
-            "const": false
-          }
-        }
-      }
-    },
-    {
-      "if": {
-        "properties": {
-          "answer_inspection_exception_used": {
-            "const": true
-          }
-        },
-        "required": [
-          "answer_inspection_exception_used"
-        ]
-      },
-      "then": {
-        "properties": {
-          "adjudication_required": {
-            "const": true
-          },
-          "answer_inspection_exceptions": {
-            "minItems": 1
-          }
-        }
-      }
-    },
-    {
-      "if": {
-        "properties": {
-          "answer_inspection_exception_used": {
-            "enum": [
-              null,
-              false
+        {
+          "if": {
+            "properties": {
+              "pass3_decision": {
+                "const": "AMBIGUOUS"
+              }
+            },
+            "required": [
+              "pass3_decision"
             ]
+          },
+          "then": {
+            "properties": {
+              "source_role": {
+                "const": "AMBIGUOUS"
+              }
+            }
           }
         },
-        "required": [
-          "answer_inspection_exception_used"
-        ]
-      },
-      "then": {
-        "properties": {
-          "answer_inspection_exceptions": {
-            "maxItems": 0
+        {
+          "if": {
+            "properties": {
+              "adjudicated_role": {
+                "enum": [
+                  "EXPLICIT",
+                  "LATENT_BRIDGE",
+                  "AMBIGUOUS"
+                ]
+              }
+            },
+            "required": [
+              "adjudicated_role"
+            ]
+          },
+          "then": {
+            "anyOf": [
+              {
+                "properties": {
+                  "adjudication_timestamp": {
+                    "type": "string"
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "adjudication_round": {
+                    "type": "integer"
+                  }
+                }
+              }
+            ],
+            "properties": {
+              "adjudication_changed_bridge_eligibility": {
+                "type": "boolean"
+              },
+              "adjudication_rationale": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "adjudication_required": {
+                "const": true
+              },
+              "adjudicator_id": {
+                "minLength": 1,
+                "type": "string"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "adjudication_required": {
+                "const": false
+              }
+            },
+            "required": [
+              "adjudication_required"
+            ]
+          },
+          "then": {
+            "properties": {
+              "adjudicated_role": {
+                "type": "null"
+              },
+              "adjudication_changed_bridge_eligibility": {
+                "type": "null"
+              },
+              "adjudication_rationale": {
+                "type": "null"
+              },
+              "adjudication_round": {
+                "type": "null"
+              },
+              "adjudication_timestamp": {
+                "type": "null"
+              },
+              "adjudicator_id": {
+                "type": "null"
+              },
+              "answer_inspection_exception_used": {
+                "const": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "answer_inspection_exception_used": {
+                "const": true
+              }
+            },
+            "required": [
+              "answer_inspection_exception_used"
+            ]
+          },
+          "then": {
+            "properties": {
+              "adjudication_required": {
+                "const": true
+              },
+              "answer_inspection_exceptions": {
+                "minItems": 1
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "answer_inspection_exception_used": {
+                "enum": [
+                  null,
+                  false
+                ]
+              }
+            },
+            "required": [
+              "answer_inspection_exception_used"
+            ]
+          },
+          "then": {
+            "properties": {
+              "answer_inspection_exceptions": {
+                "maxItems": 0
+              }
+            }
           }
         }
-      }
+      ],
+      "properties": {
+        "adjudicated_role": {
+          "description": "Adjudicated role stored separately from the original annotator role.",
+          "enum": [
+            null,
+            "EXPLICIT",
+            "LATENT_BRIDGE",
+            "AMBIGUOUS"
+          ]
+        },
+        "adjudication_changed_bridge_eligibility": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "adjudication_rationale": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "adjudication_required": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "adjudication_round": {
+          "minimum": 1,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "adjudication_timestamp": {
+          "format": "date-time",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "adjudicator_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "annotation_timestamp": {
+          "format": "date-time",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "annotator_id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "answer_inspection_exception_used": {
+          "description": "Null means adjudication is unfinished; false/true records exception use.",
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "answer_inspection_exceptions": {
+          "items": {
+            "additionalProperties": false,
+            "allOf": [
+              {
+                "anyOf": [
+                  {
+                    "properties": {
+                      "timestamp": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  {
+                    "properties": {
+                      "round": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                ]
+              }
+            ],
+            "properties": {
+              "changed_decision": {
+                "type": "boolean"
+              },
+              "reason": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "round": {
+                "minimum": 1,
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "timestamp": {
+                "format": "date-time",
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "viewer": {
+                "minLength": 1,
+                "type": "string"
+              }
+            },
+            "required": [
+              "reason",
+              "viewer",
+              "timestamp",
+              "round",
+              "changed_decision"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "blind_discovery_candidates": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "concrete_intermediate_information": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "confidence": {
+          "enum": [
+            null,
+            "HIGH",
+            "MEDIUM",
+            "LOW"
+          ]
+        },
+        "dependency_status": {
+          "enum": [
+            null,
+            "CLEAR_DEPENDENCY",
+            "MULTIPLE_PLAUSIBLE_PARENTS",
+            "PARALLEL_OR_UNORDERED",
+            "UNRESOLVED",
+            "NOT_APPLICABLE"
+          ]
+        },
+        "disagreement_flag": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "explicit_relation_type": {
+          "enum": [
+            null,
+            "DIRECT_MENTION",
+            "TRANSLITERATION",
+            "COMMON_ALIAS_OR_ABBREVIATION",
+            "MORPHOLOGICAL_OR_DEMONYM",
+            "DIRECT_SPECIFIC_CONCEPT"
+          ]
+        },
+        "official_support_path_references": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "parent_source_titles": {
+          "description": "Finalized human parent titles, when defensible under the freeze.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "pass1_completed": {
+          "description": "False means Pass 1 has not been completed; true freezes its candidates.",
+          "type": "boolean"
+        },
+        "pass1_round": {
+          "minimum": 1,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "pass1_timestamp": {
+          "format": "date-time",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "pass2_decision": {
+          "description": "Null means unfinished Pass 2 and never means NOT_YET_EXPLICIT.",
+          "enum": [
+            null,
+            "EXPLICIT",
+            "NOT_YET_EXPLICIT"
+          ]
+        },
+        "pass2_round": {
+          "minimum": 1,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "pass2_timestamp": {
+          "format": "date-time",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "pass3_decision": {
+          "description": "Null means Pass 3 has not been completed or was not applicable.",
+          "enum": [
+            null,
+            "LATENT_BRIDGE",
+            "AMBIGUOUS"
+          ]
+        },
+        "pass3_round": {
+          "minimum": 1,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "pass3_timestamp": {
+          "format": "date-time",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "proposed_parent_source_titles": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "rationale": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "round": {
+          "minimum": 1,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "source_instance_id": {
+          "pattern": "^s0-[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "source_role": {
+          "description": "Original annotator role; never overwritten by adjudication.",
+          "enum": [
+            null,
+            "EXPLICIT",
+            "LATENT_BRIDGE",
+            "AMBIGUOUS"
+          ]
+        },
+        "urdu_span_if_explicit": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "source_instance_id",
+        "annotator_id",
+        "pass1_completed",
+        "blind_discovery_candidates",
+        "pass1_timestamp",
+        "pass1_round",
+        "pass2_decision",
+        "pass2_timestamp",
+        "pass2_round",
+        "pass3_decision",
+        "pass3_timestamp",
+        "pass3_round",
+        "source_role",
+        "explicit_relation_type",
+        "urdu_span_if_explicit",
+        "confidence",
+        "rationale",
+        "concrete_intermediate_information",
+        "dependency_status",
+        "proposed_parent_source_titles",
+        "parent_source_titles",
+        "official_support_path_references",
+        "disagreement_flag",
+        "adjudication_required",
+        "adjudicated_role",
+        "adjudication_rationale",
+        "adjudication_changed_bridge_eligibility",
+        "adjudicator_id",
+        "adjudication_timestamp",
+        "adjudication_round",
+        "answer_inspection_exception_used",
+        "answer_inspection_exceptions",
+        "annotation_timestamp",
+        "round"
+      ],
+      "type": "object"
+    },
+    {
+      "additionalProperties": false,
+      "properties": {
+        "annotation_pass": {
+          "enum": [
+            "PASS_3",
+            "ADJUDICATION"
+          ]
+        },
+        "annotator_id": {
+          "description": "Role-qualified identity of the annotator or adjudicator requesting the reveal.",
+          "minLength": 1,
+          "type": "string"
+        },
+        "event_type": {
+          "const": "SUPPORTING_TEXT_VIEW"
+        },
+        "official_support_path_references": {
+          "items": {
+            "description": "Permitted support-path identity only; paragraph text is forbidden.",
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array",
+          "uniqueItems": true
+        },
+        "round": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "source_instance_id": {
+          "pattern": "^s0-[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "timestamp": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      "required": [
+        "event_type",
+        "source_instance_id",
+        "annotator_id",
+        "timestamp",
+        "round",
+        "annotation_pass",
+        "official_support_path_references"
+      ],
+      "type": "object"
+    },
+    {
+      "additionalProperties": false,
+      "properties": {
+        "annotation_pass": {
+          "const": "ADJUDICATION"
+        },
+        "annotator_id": {
+          "description": "Role-qualified identity of the annotator or adjudicator requesting the reveal.",
+          "minLength": 1,
+          "type": "string"
+        },
+        "changed_decision": {
+          "description": "Null means the final effect of answer inspection is not yet determined.",
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "event_type": {
+          "const": "ANSWER_INSPECTION"
+        },
+        "provisional_role": {
+          "description": "Role recorded before answer reveal so the final effect can be determined after resume.",
+          "enum": [
+            "EXPLICIT",
+            "LATENT_BRIDGE",
+            "AMBIGUOUS"
+          ]
+        },
+        "reason": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "round": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "source_instance_id": {
+          "pattern": "^s0-[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "timestamp": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      "required": [
+        "event_type",
+        "source_instance_id",
+        "annotator_id",
+        "timestamp",
+        "round",
+        "annotation_pass",
+        "reason",
+        "provisional_role",
+        "changed_decision"
+      ],
+      "type": "object"
     }
   ],
-  "description": "One independent source_instance_id x annotator record with lossless Pass-1, Pass-2, Pass-3, and adjudication state; preparation creates no log rows.",
   "properties": {
     "adjudicated_role": {
       "description": "Adjudicated role stored separately from the original annotator role.",
@@ -498,6 +937,12 @@
       "type": [
         "string",
         "null"
+      ]
+    },
+    "annotation_pass": {
+      "enum": [
+        "PASS_3",
+        "ADJUDICATION"
       ]
     },
     "annotation_timestamp": {
@@ -585,6 +1030,12 @@
       },
       "type": "array"
     },
+    "changed_decision": {
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
     "concrete_intermediate_information": {
       "type": [
         "string",
@@ -613,6 +1064,12 @@
       "type": [
         "boolean",
         "null"
+      ]
+    },
+    "event_type": {
+      "enum": [
+        "SUPPORTING_TEXT_VIEW",
+        "ANSWER_INSPECTION"
       ]
     },
     "explicit_relation_type": {
@@ -706,11 +1163,22 @@
       },
       "type": "array"
     },
+    "provisional_role": {
+      "enum": [
+        "EXPLICIT",
+        "LATENT_BRIDGE",
+        "AMBIGUOUS"
+      ]
+    },
     "rationale": {
       "type": [
         "string",
         "null"
       ]
+    },
+    "reason": {
+      "minLength": 1,
+      "type": "string"
     },
     "round": {
       "minimum": 1,
@@ -732,6 +1200,10 @@
         "AMBIGUOUS"
       ]
     },
+    "timestamp": {
+      "format": "date-time",
+      "type": "string"
+    },
     "urdu_span_if_explicit": {
       "type": [
         "string",
@@ -739,42 +1211,6 @@
       ]
     }
   },
-  "required": [
-    "source_instance_id",
-    "annotator_id",
-    "pass1_completed",
-    "blind_discovery_candidates",
-    "pass1_timestamp",
-    "pass1_round",
-    "pass2_decision",
-    "pass2_timestamp",
-    "pass2_round",
-    "pass3_decision",
-    "pass3_timestamp",
-    "pass3_round",
-    "source_role",
-    "explicit_relation_type",
-    "urdu_span_if_explicit",
-    "confidence",
-    "rationale",
-    "concrete_intermediate_information",
-    "dependency_status",
-    "proposed_parent_source_titles",
-    "parent_source_titles",
-    "official_support_path_references",
-    "disagreement_flag",
-    "adjudication_required",
-    "adjudicated_role",
-    "adjudication_rationale",
-    "adjudication_changed_bridge_eligibility",
-    "adjudicator_id",
-    "adjudication_timestamp",
-    "adjudication_round",
-    "answer_inspection_exception_used",
-    "answer_inspection_exceptions",
-    "annotation_timestamp",
-    "round"
-  ],
-  "title": "EFBPT Stage-0 append-only human annotation log row",
+  "title": "EFBPT Stage-0 append-only human annotation and sensitive-view event",
   "type": "object"
 }

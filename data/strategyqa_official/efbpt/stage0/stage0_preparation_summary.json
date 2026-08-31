@@ -59,9 +59,9 @@
     "source_instances": 636
   },
   "dataset_status": "DEV200_SPENT_DEVELOPMENT_DATA",
-  "freeze_commit": "fc3013afd5631d1979c78c10230c25d2ef11eedf",
+  "freeze_commit": "8ee4f5bb932aa89b5d2bd07523a7492a261e741b",
   "human_annotation_log_created": false,
   "human_judgments_inferred": false,
-  "preparation_commit": "865b5e82de27902f7391ebfe7ebc6e272f414653",
+  "preparation_commit": "4f405983487a1f789580d7790745a541d59091f3",
   "retrieval_hop_inferred": false
 }

@@ -7,20 +7,20 @@
   },
   "artifact_scope": "NOT ANNOTATOR-FACING",
   "artifact_sha256": {
-    "human_annotation_log.schema.json": "c1e362590736ff3e5128c5378f08c997727d001407d7e6992d7a220469bcf925",
+    "human_annotation_log.schema.json": "b8f2a2676ac416e239c04a7a12611f73f7f2f3e6528008b53e12a1e66a521d7f",
     "lexical_trace_instances.jsonl": "890e9346efee9e2da267b68f73e68d02b708559981f6fa541162d030a373bc8f",
     "official_evidence_links.jsonl": "d59b956ca4003a8438653cc9930f810f5eea1e1655aba104e738152b9a137d0e",
     "pass1_question_manifest.jsonl": "73cb5f1b99f0b146c723c2c46aafe1cd4006ba95c251d0def7d463675ae45f18",
     "pass2_order_manifest.json": "26044698c74928f57da68e0d35f42fbbf8c3f09c4d84ea451c5f7b68bb90cb75",
     "reliability160_manifest.json": "e1adfa109ef05007b067f55d3eceaf1bd7c2d271adc63a307fc63a4e71e63219",
     "source_instance_master.jsonl": "5ebd1968a8ac2f8013b595b69f8bd320025ca7b46d50b602e17f248ce739a084",
-    "stage0_preparation_summary.json": "9c9d1ace717ae0ee600c8c179663d89a43f06d66d1c7be4d3d9680d3290341f0"
+    "stage0_preparation_summary.json": "ff2540107d1e13ea45dd67188fc5649b4f30edb13aa14622643911cae470c03e"
   },
   "corpus_metadata_path": "rag/index/wikipedia_full_meta.jsonl",
-  "freeze_commit": "fc3013afd5631d1979c78c10230c25d2ef11eedf",
-  "generation_timestamp_utc": "2026-08-31T06:31:30.203887Z",
+  "freeze_commit": "8ee4f5bb932aa89b5d2bd07523a7492a261e741b",
+  "generation_timestamp_utc": "2026-08-31T14:49:40.899139Z",
   "pass2_scheduler_algorithm_version": "max_remaining_one_iteration_holdout_v1",
-  "preparation_script_commit": "865b5e82de27902f7391ebfe7ebc6e272f414653",
+  "preparation_script_commit": "4f405983487a1f789580d7790745a541d59091f3",
   "preparation_script_path": "eval/error_analysis_tests/efbpt/efbpt_prepare_stage0.py",
   "prng_call_order": {
     "pass2": [
