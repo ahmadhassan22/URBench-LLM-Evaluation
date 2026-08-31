@@ -1,0 +1,67 @@
+{
+  "artifact_scope": "NOT ANNOTATOR-FACING",
+  "canonical_artifacts": [
+    "source_instance_master.jsonl",
+    "official_evidence_links.jsonl",
+    "lexical_trace_instances.jsonl",
+    "pass1_question_manifest.jsonl",
+    "pass2_order_manifest.json",
+    "reliability160_manifest.json",
+    "human_annotation_log.schema.json",
+    "stage0_preparation_summary.json",
+    "reproducibility_manifest.json"
+  ],
+  "counts": {
+    "annotator_step_cells": 1755,
+    "dev200_rows": 200,
+    "dev200_unique_qids": 200,
+    "distinct_normalized_titles": 613,
+    "distinct_raw_titles": 613,
+    "evidence_annotators_per_qid": 3,
+    "evidence_link_rows": 2204,
+    "exact_title": {
+      "absent_instances": 191,
+      "distinct_absent": 181,
+      "distinct_present": 432,
+      "full_qids": 71,
+      "partial_qids": 113,
+      "present_instances": 445,
+      "zero_qids": 16
+    },
+    "lexical_trace": {
+      "absent": 334,
+      "all_visible_qids": 39,
+      "exact": 256,
+      "no": 334,
+      "partial": 46,
+      "yes": 302
+    },
+    "marker_rows": 837,
+    "no_evidence_markers": 309,
+    "operation_markers": 528,
+    "paragraph_occurrence_rows": 1367,
+    "pass1_qids": 200,
+    "pass2_adjacent_same_qid": 0,
+    "pass2_unique_ids": 636,
+    "reliability_quotas": {
+      "NO__EXACT_ABSENT": 21,
+      "NO__EXACT_PRESENT": 63,
+      "YES__EXACT_ABSENT": 27,
+      "YES__EXACT_PRESENT": 49
+    },
+    "reliability_sample": 160,
+    "reliability_strata": {
+      "NO__EXACT_ABSENT": 83,
+      "NO__EXACT_PRESENT": 251,
+      "YES__EXACT_ABSENT": 108,
+      "YES__EXACT_PRESENT": 194
+    },
+    "source_instances": 636
+  },
+  "dataset_status": "DEV200_SPENT_DEVELOPMENT_DATA",
+  "freeze_commit": "fc3013afd5631d1979c78c10230c25d2ef11eedf",
+  "human_annotation_log_created": false,
+  "human_judgments_inferred": false,
+  "preparation_commit": "865b5e82de27902f7391ebfe7ebc6e272f414653",
+  "retrieval_hop_inferred": false
+}

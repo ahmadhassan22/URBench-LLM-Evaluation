@@ -1,0 +1,1149 @@
+{
+  "allocation_algorithm": "proportional_largest_remainder_v1",
+  "artifact_scope": "NOT ANNOTATOR-FACING",
+  "population_size": 636,
+  "remainder_tie_break": "lexical_stratum_name",
+  "sample_size": 160,
+  "sampled_instances": [
+    {
+      "draw_order": 1,
+      "source_instance_id": "s0-ccc721923518f94b61ee18601cbbd66c442e6ff354dbc27088c541896c489514",
+      "stratum": "NO__EXACT_ABSENT",
+      "stratum_draw_order": 1,
+      "urbench_qid": "30fcf62f58849cb4ab05"
+    },
+    {
+      "draw_order": 2,
+      "source_instance_id": "s0-24c332e0cae26b34eae3cd7e92a945099105fa41b02d975ec076e566b835dc4b",
+      "stratum": "NO__EXACT_ABSENT",
+      "stratum_draw_order": 2,
+      "urbench_qid": "38ef97eb7cdd4200fd00"
+    },
+    {
+      "draw_order": 3,
+      "source_instance_id": "s0-2f1450906fe75bc1747f59661e5151d6ba32b01251e1650cbf7ec5c647542506",
+      "stratum": "NO__EXACT_ABSENT",
+      "stratum_draw_order": 3,
+      "urbench_qid": "7f4effbc97ab2b5fd4a7"
+    },
+    {
+      "draw_order": 4,
+      "source_instance_id": "s0-e9418ec3cafeb281c67ac94da2ab4b2dfd753006187d50c07764b685592ec35e",
+      "stratum": "NO__EXACT_ABSENT",
+      "stratum_draw_order": 4,
+      "urbench_qid": "06215d4b6f1a4b975d9c"
+    },
+    {
+      "draw_order": 5,
+      "source_instance_id": "s0-333a9acb82d32480803987bfe8f116e090661ec806d18c4402818796d9ae7430",
+      "stratum": "NO__EXACT_ABSENT",
+      "stratum_draw_order": 5,
+      "urbench_qid": "9cfa675eeebfbbdb2487"
+    },
+    {
+      "draw_order": 6,
+      "source_instance_id": "s0-f13ccf1a31592500c3c1b80759687ed9fcab2fda2513a6e56359e43143baa2f6",
+      "stratum": "NO__EXACT_ABSENT",
+      "stratum_draw_order": 6,
+      "urbench_qid": "64354cb6ee6d987d4f0f"
+    },
+    {
+      "draw_order": 7,
+      "source_instance_id": "s0-0175b2421fb4922e48ad3c4ca4ba2b9e3bb04a61d481c01f4cbe15eb5396bd72",
+      "stratum": "NO__EXACT_ABSENT",
+      "stratum_draw_order": 7,
+      "urbench_qid": "3157a0f428531ebed7b9"
+    },
+    {
+      "draw_order": 8,
+      "source_instance_id": "s0-5abdfc5438d6e3afd190fb865dd5d609006f1ebd420e72db60d4e28408b8c309",
+      "stratum": "NO__EXACT_ABSENT",
+      "stratum_draw_order": 8,
+      "urbench_qid": "20abc7ba538a2fd1dd76"
+    },
+    {
+      "draw_order": 9,
+      "source_instance_id": "s0-7a4f1a74cad659813c2c8a6fbd09b43ac49dd88af5ea398fe1ac9bb918db145b",
+      "stratum": "NO__EXACT_ABSENT",
+      "stratum_draw_order": 9,
+      "urbench_qid": "f4a731f739533c52becd"
+    },
+    {
+      "draw_order": 10,
+      "source_instance_id": "s0-53df2a94d2a275d8603230c1a023247c91c03f918635a9f3b42b18ccaca74304",
+      "stratum": "NO__EXACT_ABSENT",
+      "stratum_draw_order": 10,
+      "urbench_qid": "c51fd5841358ded6eaec"
+    },
+    {
+      "draw_order": 11,
+      "source_instance_id": "s0-187aee70d28460af1b70f09ada023de62e453fc10b711646d8e4a7ccd9cc5fcf",
+      "stratum": "NO__EXACT_ABSENT",
+      "stratum_draw_order": 11,
+      "urbench_qid": "9bb59488a227a5f5cd62"
+    },
+    {
+      "draw_order": 12,
+      "source_instance_id": "s0-bf994e788b7aac4a0d73bb4c2c410e57cced488dd6dff537808b4d88fd4df3e4",
+      "stratum": "NO__EXACT_ABSENT",
+      "stratum_draw_order": 12,
+      "urbench_qid": "2aba85e0e138ad86035e"
+    },
+    {
+      "draw_order": 13,
+      "source_instance_id": "s0-c3485cbb69d16bf680203355f233c2111d70f5042800cefe3a5b697927545ef5",
+      "stratum": "NO__EXACT_ABSENT",
+      "stratum_draw_order": 13,
+      "urbench_qid": "1534ef2130cb48d6abb4"
+    },
+    {
+      "draw_order": 14,
+      "source_instance_id": "s0-091eae2e84325860fd5eb88b20ba8cf3ef94b3d74eeb739615304815123bc886",
+      "stratum": "NO__EXACT_ABSENT",
+      "stratum_draw_order": 14,
+      "urbench_qid": "91917c5e30dbf8552b34"
+    },
+    {
+      "draw_order": 15,
+      "source_instance_id": "s0-7ba03357f87bbcee341b7bf211793e70f698cd567e7287b340070207eedf9870",
+      "stratum": "NO__EXACT_ABSENT",
+      "stratum_draw_order": 15,
+      "urbench_qid": "17b8fa74f450c4d0e56b"
+    },
+    {
+      "draw_order": 16,
+      "source_instance_id": "s0-8001ed7972adbf2d6490c793481e8495eafc4b75d01267fdf51db68b6090d9c9",
+      "stratum": "NO__EXACT_ABSENT",
+      "stratum_draw_order": 16,
+      "urbench_qid": "3157a0f428531ebed7b9"
+    },
+    {
+      "draw_order": 17,
+      "source_instance_id": "s0-111397d4f1d6be1c3a6d769d122eb5a524f48d33684651ea6ef3ce091dba1824",
+      "stratum": "NO__EXACT_ABSENT",
+      "stratum_draw_order": 17,
+      "urbench_qid": "cac8e6300a98cf6128af"
+    },
+    {
+      "draw_order": 18,
+      "source_instance_id": "s0-f893b35876588d276c847442cb9e4163755377e1e8d5390f69fcccb1840203c0",
+      "stratum": "NO__EXACT_ABSENT",
+      "stratum_draw_order": 18,
+      "urbench_qid": "fdeec181aeee06303113"
+    },
+    {
+      "draw_order": 19,
+      "source_instance_id": "s0-e9a15d0f8d8e899b6a8615cd550230b7aafb92db73ebf8911aca4840de989d0f",
+      "stratum": "NO__EXACT_ABSENT",
+      "stratum_draw_order": 19,
+      "urbench_qid": "27368c21e50b6af694ab"
+    },
+    {
+      "draw_order": 20,
+      "source_instance_id": "s0-fb08111d87d5d46310dad733021fa9735d954ceb4042bc739323f192af9cbc68",
+      "stratum": "NO__EXACT_ABSENT",
+      "stratum_draw_order": 20,
+      "urbench_qid": "80aa769f55b14c1e4d8d"
+    },
+    {
+      "draw_order": 21,
+      "source_instance_id": "s0-c4eff71573fd03d2462e27281ad33598ac38b24d4f8a7c52b3668b0215142847",
+      "stratum": "NO__EXACT_ABSENT",
+      "stratum_draw_order": 21,
+      "urbench_qid": "a406e06cd0164c1c6d15"
+    },
+    {
+      "draw_order": 22,
+      "source_instance_id": "s0-fecaf99a0e4e04e3c6248c75a6c960a48a83bb95b2555f0de480e67f0fe8c5a0",
+      "stratum": "NO__EXACT_PRESENT",
+      "stratum_draw_order": 1,
+      "urbench_qid": "f43533225534420816d6"
+    },
+    {
+      "draw_order": 23,
+      "source_instance_id": "s0-dedf7a4f995b3464adfd8c80d62b53032e08d356ff4d26a06870779fedc85e88",
+      "stratum": "NO__EXACT_PRESENT",
+      "stratum_draw_order": 2,
+      "urbench_qid": "7419826e4373eb1e83ff"
+    },
+    {
+      "draw_order": 24,
+      "source_instance_id": "s0-82056fbec82a50f16cdf93adce881815b177f3d23cc2e9c850ee04a4650eb34c",
+      "stratum": "NO__EXACT_PRESENT",
+      "stratum_draw_order": 3,
+      "urbench_qid": "06724dc213e0dae715f5"
+    },
+    {
+      "draw_order": 25,
+      "source_instance_id": "s0-d8f23e096eea28febd66796d11c2bdf670c83d7cb136d337f87a5a8c1583abf4",
+      "stratum": "NO__EXACT_PRESENT",
+      "stratum_draw_order": 4,
+      "urbench_qid": "e6d3973ed3feb8a42928"
+    },
+    {
+      "draw_order": 26,
+      "source_instance_id": "s0-06822b80daef4adef609e11d8b05179aa65950a3c8f0fe3e771e4a3c6cc7dd8f",
+      "stratum": "NO__EXACT_PRESENT",
+      "stratum_draw_order": 5,
+      "urbench_qid": "fdeec181aeee06303113"
+    },
+    {
+      "draw_order": 27,
+      "source_instance_id": "s0-68ed4d9361af910abd903631cf3223eceb87ecc59674d59c1861ca19bfdea6cc",
+      "stratum": "NO__EXACT_PRESENT",
+      "stratum_draw_order": 6,
+      "urbench_qid": "80aa769f55b14c1e4d8d"
+    },
+    {
+      "draw_order": 28,
+      "source_instance_id": "s0-0b4909f03867a4e83cc5cc9f32fed5911495613a0db9a923d337d47f9fbbd85d",
+      "stratum": "NO__EXACT_PRESENT",
+      "stratum_draw_order": 7,
+      "urbench_qid": "8e03ed9fce31618b095a"
+    },
+    {
+      "draw_order": 29,
+      "source_instance_id": "s0-e8c1bc4d635e5774c22d095e3bd1b6861fca2d8c412062f2ab92ae385251165b",
+      "stratum": "NO__EXACT_PRESENT",
+      "stratum_draw_order": 8,
+      "urbench_qid": "0fe3edf35bd1a1e662a9"
+    },
+    {
+      "draw_order": 30,
+      "source_instance_id": "s0-5a61c30f105a7c28063d6110d61359b20f5750b8cddf255df43ddbeacf8db78b",
+      "stratum": "NO__EXACT_PRESENT",
+      "stratum_draw_order": 9,
+      "urbench_qid": "069c88860654c9c5df0b"
+    },
+    {
+      "draw_order": 31,
+      "source_instance_id": "s0-a3834788ce394acc2fce658e262ba52c49b7f8a16e61601618113735f0635623",
+      "stratum": "NO__EXACT_PRESENT",
+      "stratum_draw_order": 10,
+      "urbench_qid": "3ae8644164c547560eda"
+    },
+    {
+      "draw_order": 32,
+      "source_instance_id": "s0-0ed967fe05f9e7c5f6a45fbc0f2728ca7bce81d3f70cd5284d91416aee123bba",
+      "stratum": "NO__EXACT_PRESENT",
+      "stratum_draw_order": 11,
+      "urbench_qid": "24a3aff40ef7fd04e208"
+    },
+    {
+      "draw_order": 33,
+      "source_instance_id": "s0-2e39836001f1414283b5da7c189e5a277d71e4033da310a02ba110f1b20fc39f",
+      "stratum": "NO__EXACT_PRESENT",
+      "stratum_draw_order": 12,
+      "urbench_qid": "7be51fdef30345de666e"
+    },
+    {
+      "draw_order": 34,
+      "source_instance_id": "s0-aa555b726a6ffc9e262c0c06adabffde6c9f3b89867f13175870cc22927a46d6",
+      "stratum": "NO__EXACT_PRESENT",
+      "stratum_draw_order": 13,
+      "urbench_qid": "3b1834a6dd331eb1d791"
+    },
+    {
+      "draw_order": 35,
+      "source_instance_id": "s0-3a20c7ac887ef379f9330808dbf7a21dbd2e33b65422e458d9a91f25c75598e2",
+      "stratum": "NO__EXACT_PRESENT",
+      "stratum_draw_order": 14,
+      "urbench_qid": "684d4c03be354635b80f"
+    },
+    {
+      "draw_order": 36,
+      "source_instance_id": "s0-610876bf5c6d90ad52f7fc9928a8651bcdb9d75e94c2cb5d622487fdc0a23a01",
+      "stratum": "NO__EXACT_PRESENT",
+      "stratum_draw_order": 15,
+      "urbench_qid": "9384dfc0aabc73026925"
+    },
+    {
+      "draw_order": 37,
+      "source_instance_id": "s0-fd62d75d656c472b02343e4e59f604c27f5389609dc8a30cb3d1d4d3ef27523a",
+      "stratum": "NO__EXACT_PRESENT",
+      "stratum_draw_order": 16,
+      "urbench_qid": "2c9f3c00412a4018380f"
+    },
+    {
+      "draw_order": 38,
+      "source_instance_id": "s0-cbb748b1a92e20576bfa47f10d63c8037759f8e034481cd5bd82389943fa764d",
+      "stratum": "NO__EXACT_PRESENT",
+      "stratum_draw_order": 17,
+      "urbench_qid": "9052063382d30870a2ed"
+    },
+    {
+      "draw_order": 39,
+      "source_instance_id": "s0-dff1d1d5304561627949a8b281ed874e5c2d0e3e9c6c083bc707d4b65062d3de",
+      "stratum": "NO__EXACT_PRESENT",
+      "stratum_draw_order": 18,
+      "urbench_qid": "ae0891799990442fbb0e"
+    },
+    {
+      "draw_order": 40,
+      "source_instance_id": "s0-863e3bb19b91a275317c64a7e018eff87a7c9f8de1957207f22f4c25ebef911c",
+      "stratum": "NO__EXACT_PRESENT",
+      "stratum_draw_order": 19,
+      "urbench_qid": "8d06b619a7045ed02f51"
+    },
+    {
+      "draw_order": 41,
+      "source_instance_id": "s0-524c40da1a403eb5283c5354e74da6d33c19a6bd685dace88a53374db07948b7",
+      "stratum": "NO__EXACT_PRESENT",
+      "stratum_draw_order": 20,
+      "urbench_qid": "71ca1a8a75c5c582ab3f"
+    },
+    {
+      "draw_order": 42,
+      "source_instance_id": "s0-27d15938edd19cb18660fc6ec4689602773b0e7494e7b3b56fb48286bcacedcf",
+      "stratum": "NO__EXACT_PRESENT",
+      "stratum_draw_order": 21,
+      "urbench_qid": "8cfde6ee28d059a5aff6"
+    },
+    {
+      "draw_order": 43,
+      "source_instance_id": "s0-5ace2db26af22c6eca5a92b97f9fa7a07facd4e6cee158288a2f857adc0db265",
+      "stratum": "NO__EXACT_PRESENT",
+      "stratum_draw_order": 22,
+      "urbench_qid": "30fcf62f58849cb4ab05"
+    },
+    {
+      "draw_order": 44,
+      "source_instance_id": "s0-8245eb2e75f6f68090fc6e515492b538b5d493e0e345b85eb64afcb29b7d9973",
+      "stratum": "NO__EXACT_PRESENT",
+      "stratum_draw_order": 23,
+      "urbench_qid": "1eb8a833f2f5f1698b52"
+    },
+    {
+      "draw_order": 45,
+      "source_instance_id": "s0-18103241f488e495b6c9b839f65c2246aa1f3e049e69a39f903cc627a82152fd",
+      "stratum": "NO__EXACT_PRESENT",
+      "stratum_draw_order": 24,
+      "urbench_qid": "e12fef0504a959e49b23"
+    },
+    {
+      "draw_order": 46,
+      "source_instance_id": "s0-845afbc8b393e78d36c494f6ae3ca08d8c81e32bd05d8eb61326f40b7be9380d",
+      "stratum": "NO__EXACT_PRESENT",
+      "stratum_draw_order": 25,
+      "urbench_qid": "598be3dcddbd7775a827"
+    },
+    {
+      "draw_order": 47,
+      "source_instance_id": "s0-0f0af544062d39f46f1b1c795d6efad382592959efa25dc35afcf608963008b7",
+      "stratum": "NO__EXACT_PRESENT",
+      "stratum_draw_order": 26,
+      "urbench_qid": "265dd54c248f8b048851"
+    },
+    {
+      "draw_order": 48,
+      "source_instance_id": "s0-710b306894403535d85824204b9e6d3f5f8fbc73270df422edc7de93e485b505",
+      "stratum": "NO__EXACT_PRESENT",
+      "stratum_draw_order": 27,
+      "urbench_qid": "3570d57f16a40488ff42"
+    },
+    {
+      "draw_order": 49,
+      "source_instance_id": "s0-720207d83c1459246afbd20626499b4507e02b57b5221de65c95c2c1f84e19fc",
+      "stratum": "NO__EXACT_PRESENT",
+      "stratum_draw_order": 28,
+      "urbench_qid": "7571100f05bc56919c78"
+    },
+    {
+      "draw_order": 50,
+      "source_instance_id": "s0-690851e1bb7b4514032b2fc19140460468b789c5fa96f67fdc4d94f7ad1bc0b6",
+      "stratum": "NO__EXACT_PRESENT",
+      "stratum_draw_order": 29,
+      "urbench_qid": "f8e6087cd52c925fedad"
+    },
+    {
+      "draw_order": 51,
+      "source_instance_id": "s0-3462420deff3a3074bc942bb913ee4b716679baf151236441936fe21c9ea59eb",
+      "stratum": "NO__EXACT_PRESENT",
+      "stratum_draw_order": 30,
+      "urbench_qid": "690a36d5fed5b17969aa"
+    },
+    {
+      "draw_order": 52,
+      "source_instance_id": "s0-406248a28368e3a5f674f1b5674e5b4bca845014cdb7fdf669346beadbd7e039",
+      "stratum": "NO__EXACT_PRESENT",
+      "stratum_draw_order": 31,
+      "urbench_qid": "84a83f07a543ae3024c9"
+    },
+    {
+      "draw_order": 53,
+      "source_instance_id": "s0-492ccea2efe6bff42aa35cfe54b26f0026fc60f57a6e637c012105a938b101c2",
+      "stratum": "NO__EXACT_PRESENT",
+      "stratum_draw_order": 32,
+      "urbench_qid": "076f905ae36408b5ee69"
+    },
+    {
+      "draw_order": 54,
+      "source_instance_id": "s0-5c1dc0950d66d97aefec90baf49dbae0cb2bf16850776e01d10243d117b28ecb",
+      "stratum": "NO__EXACT_PRESENT",
+      "stratum_draw_order": 33,
+      "urbench_qid": "703db4629ff46d82a205"
+    },
+    {
+      "draw_order": 55,
+      "source_instance_id": "s0-323dd6577891846c6bcf5cdae979395c48e819b2d2cb9094f69d39b3da190de7",
+      "stratum": "NO__EXACT_PRESENT",
+      "stratum_draw_order": 34,
+      "urbench_qid": "9576ab36999e196b87bb"
+    },
+    {
+      "draw_order": 56,
+      "source_instance_id": "s0-be8409efafa24d5073647e99125b0180cec6dc5a0ad733aa0b6b0dab3a271655",
+      "stratum": "NO__EXACT_PRESENT",
+      "stratum_draw_order": 35,
+      "urbench_qid": "73ca2ef1da65b2a2ebe6"
+    },
+    {
+      "draw_order": 57,
+      "source_instance_id": "s0-24de0d6d41c47ef7bd2252c719069147ba469ffb3a9fe0b012b2e6964622403f",
+      "stratum": "NO__EXACT_PRESENT",
+      "stratum_draw_order": 36,
+      "urbench_qid": "9cfa675eeebfbbdb2487"
+    },
+    {
+      "draw_order": 58,
+      "source_instance_id": "s0-7fd2152532f2189e75962234ab73af98f394c16fe82140c69140aed7a2694d54",
+      "stratum": "NO__EXACT_PRESENT",
+      "stratum_draw_order": 37,
+      "urbench_qid": "3503e8d41364eb0b33bc"
+    },
+    {
+      "draw_order": 59,
+      "source_instance_id": "s0-2d2076967a30ba73bfc34db70167c8923c1b03db445fa0a3ba4101c680ee9b30",
+      "stratum": "NO__EXACT_PRESENT",
+      "stratum_draw_order": 38,
+      "urbench_qid": "bfb0f6c573076a1a0634"
+    },
+    {
+      "draw_order": 60,
+      "source_instance_id": "s0-dd0aff50c5027b49c960a6d66193272dac9c1045f3a883b89680d512a6f29358",
+      "stratum": "NO__EXACT_PRESENT",
+      "stratum_draw_order": 39,
+      "urbench_qid": "3ebb62af96f836d2d4d6"
+    },
+    {
+      "draw_order": 61,
+      "source_instance_id": "s0-5f30df4b05a0cf35f056f4b131b8f883761b743e09f747e7b727c9e5cac4f9d7",
+      "stratum": "NO__EXACT_PRESENT",
+      "stratum_draw_order": 40,
+      "urbench_qid": "e6d3973ed3feb8a42928"
+    },
+    {
+      "draw_order": 62,
+      "source_instance_id": "s0-75ed08fdcb8f5dece2c98e3a123f2810ac09b563b36b846336f7db9fb2d76e25",
+      "stratum": "NO__EXACT_PRESENT",
+      "stratum_draw_order": 41,
+      "urbench_qid": "9247b5afb2eef4c9f95b"
+    },
+    {
+      "draw_order": 63,
+      "source_instance_id": "s0-4cb81162cb474c131e753e42588b5247b6c9cf9bc7af973454dec49d28152bf3",
+      "stratum": "NO__EXACT_PRESENT",
+      "stratum_draw_order": 42,
+      "urbench_qid": "4e1b65e81ec09397b26e"
+    },
+    {
+      "draw_order": 64,
+      "source_instance_id": "s0-ae53d8a8b16ad4c8509b5d3403c786d6de7179f9f363756561ba547c4cf28f2e",
+      "stratum": "NO__EXACT_PRESENT",
+      "stratum_draw_order": 43,
+      "urbench_qid": "1a4eb85c31188af515b0"
+    },
+    {
+      "draw_order": 65,
+      "source_instance_id": "s0-5d558c53c8a37fb438372322b6b7f8faf6847107c7ea53a832b25fd1d543eb7a",
+      "stratum": "NO__EXACT_PRESENT",
+      "stratum_draw_order": 44,
+      "urbench_qid": "92c263f997f09dbb74a8"
+    },
+    {
+      "draw_order": 66,
+      "source_instance_id": "s0-499a419f7e0492ccef96781d60a0b1dc2ab930207611c240482bfd2afb1a8033",
+      "stratum": "NO__EXACT_PRESENT",
+      "stratum_draw_order": 45,
+      "urbench_qid": "8d06b619a7045ed02f51"
+    },
+    {
+      "draw_order": 67,
+      "source_instance_id": "s0-a243759b1caec19302c4a6cf7f3f23e93f9b1706e82af05959ad7137c80ecb3a",
+      "stratum": "NO__EXACT_PRESENT",
+      "stratum_draw_order": 46,
+      "urbench_qid": "b8df6ac181c4c5b280f9"
+    },
+    {
+      "draw_order": 68,
+      "source_instance_id": "s0-55a0ed87ccb6f1d785e6b7a589e8215fa169094e1b6608029bcf68134750b45a",
+      "stratum": "NO__EXACT_PRESENT",
+      "stratum_draw_order": 47,
+      "urbench_qid": "2c9f3c00412a4018380f"
+    },
+    {
+      "draw_order": 69,
+      "source_instance_id": "s0-15cf94fdd0fe32be86028e06cd0df515a56e3e032aadd50b10ca5590291fe85e",
+      "stratum": "NO__EXACT_PRESENT",
+      "stratum_draw_order": 48,
+      "urbench_qid": "fc9339f21f44a3841a7c"
+    },
+    {
+      "draw_order": 70,
+      "source_instance_id": "s0-5a34eaaee1a0d39741e7304bef4ca7d1c5527572f5be1678e14348958d109dd2",
+      "stratum": "NO__EXACT_PRESENT",
+      "stratum_draw_order": 49,
+      "urbench_qid": "e26a5601edb90a738d56"
+    },
+    {
+      "draw_order": 71,
+      "source_instance_id": "s0-74a174264620d904c09bdc57f9015a324c9130048af5195d99dcb09ca4de1771",
+      "stratum": "NO__EXACT_PRESENT",
+      "stratum_draw_order": 50,
+      "urbench_qid": "64354cb6ee6d987d4f0f"
+    },
+    {
+      "draw_order": 72,
+      "source_instance_id": "s0-c8ad41719fa6b45c30a96d539a2ea2dffb3b75a90b5f9602cc0518c1919cbb78",
+      "stratum": "NO__EXACT_PRESENT",
+      "stratum_draw_order": 51,
+      "urbench_qid": "d8fd81e475df8c2f6972"
+    },
+    {
+      "draw_order": 73,
+      "source_instance_id": "s0-def19df25cc9e0ab858c14eb61d548792385ff53aee969a6d91c9c7ea2f4d04e",
+      "stratum": "NO__EXACT_PRESENT",
+      "stratum_draw_order": 52,
+      "urbench_qid": "e12a00a2c45fcb4f38e7"
+    },
+    {
+      "draw_order": 74,
+      "source_instance_id": "s0-741f82246da01a9316d05a7a0ecfa7e79615276acba88bee51bcca97f5da15a3",
+      "stratum": "NO__EXACT_PRESENT",
+      "stratum_draw_order": 53,
+      "urbench_qid": "7be51fdef30345de666e"
+    },
+    {
+      "draw_order": 75,
+      "source_instance_id": "s0-50faa3f7932370ae816305e5dbbdff777deae5dc32117dcfb2e1d3d862f87cab",
+      "stratum": "NO__EXACT_PRESENT",
+      "stratum_draw_order": 54,
+      "urbench_qid": "959fb200fccf056f00d7"
+    },
+    {
+      "draw_order": 76,
+      "source_instance_id": "s0-9b719227331d86e776853e95108bb9fd91bcad2e4fa5448de35af59094464824",
+      "stratum": "NO__EXACT_PRESENT",
+      "stratum_draw_order": 55,
+      "urbench_qid": "8d3ddaee20ad48edc066"
+    },
+    {
+      "draw_order": 77,
+      "source_instance_id": "s0-e41275f44795fe35ce511877a1be38a961dc658341567bd9ec741ce7021897f1",
+      "stratum": "NO__EXACT_PRESENT",
+      "stratum_draw_order": 56,
+      "urbench_qid": "86ead3f15417204affc2"
+    },
+    {
+      "draw_order": 78,
+      "source_instance_id": "s0-a53267872a8c74785d492666b121196119a10b9b3514e9c72412e9d92b3dc84b",
+      "stratum": "NO__EXACT_PRESENT",
+      "stratum_draw_order": 57,
+      "urbench_qid": "3cec996f26ec99d0a519"
+    },
+    {
+      "draw_order": 79,
+      "source_instance_id": "s0-0dcbd0e872f0d041ebc46252259b7991520d1690d2bef495ec3a0ad5b3a3fe68",
+      "stratum": "NO__EXACT_PRESENT",
+      "stratum_draw_order": 58,
+      "urbench_qid": "86ead3f15417204affc2"
+    },
+    {
+      "draw_order": 80,
+      "source_instance_id": "s0-917a59086f2c06e43a17c91fe64dfb366ec191f93fb5b55e47c39d17de1e0f90",
+      "stratum": "NO__EXACT_PRESENT",
+      "stratum_draw_order": 59,
+      "urbench_qid": "2aba85e0e138ad86035e"
+    },
+    {
+      "draw_order": 81,
+      "source_instance_id": "s0-f24da1822a00dd1fec8db7d33d28ab23f37fef36d660fbd6bcf431c5c2f14734",
+      "stratum": "NO__EXACT_PRESENT",
+      "stratum_draw_order": 60,
+      "urbench_qid": "7b84d2bc643ddc2085f0"
+    },
+    {
+      "draw_order": 82,
+      "source_instance_id": "s0-0ed9997c8669b7ec4d305fa0265a6972d704e7c76ebc372830dfe053486b7cd1",
+      "stratum": "NO__EXACT_PRESENT",
+      "stratum_draw_order": 61,
+      "urbench_qid": "d1dbb41001ab4ad3b924"
+    },
+    {
+      "draw_order": 83,
+      "source_instance_id": "s0-2b24e9829844feb3c5191c02ba96b3c0d1d9a93bd51531dcaeb0251557654181",
+      "stratum": "NO__EXACT_PRESENT",
+      "stratum_draw_order": 62,
+      "urbench_qid": "bfb0f6c573076a1a0634"
+    },
+    {
+      "draw_order": 84,
+      "source_instance_id": "s0-b1a4222ea43b2f444524ddd48019bba90d8ab167a5bad476080bd1372e25b1de",
+      "stratum": "NO__EXACT_PRESENT",
+      "stratum_draw_order": 63,
+      "urbench_qid": "38ef97eb7cdd4200fd00"
+    },
+    {
+      "draw_order": 85,
+      "source_instance_id": "s0-959afb0667339beb9be03277e52e344d2e8f19e60b961ba9d03f4728b39dc5c4",
+      "stratum": "YES__EXACT_ABSENT",
+      "stratum_draw_order": 1,
+      "urbench_qid": "076f3f72b7e6d17073eb"
+    },
+    {
+      "draw_order": 86,
+      "source_instance_id": "s0-53b7fbb959f4cba7e22a3870e5cff39651ce432f6cef1e8d7732d0ffcecd18f8",
+      "stratum": "YES__EXACT_ABSENT",
+      "stratum_draw_order": 2,
+      "urbench_qid": "3157a0f428531ebed7b9"
+    },
+    {
+      "draw_order": 87,
+      "source_instance_id": "s0-d89c830da57ee89e1d1baf7ab233aac223f44857a6dcf0a07b9dce9dda72decb",
+      "stratum": "YES__EXACT_ABSENT",
+      "stratum_draw_order": 3,
+      "urbench_qid": "b64be915de0e671e8548"
+    },
+    {
+      "draw_order": 88,
+      "source_instance_id": "s0-e95bd8f49dd108b67ea3abeabee242e3ea450f1d321d6d414576b821f5fa918e",
+      "stratum": "YES__EXACT_ABSENT",
+      "stratum_draw_order": 4,
+      "urbench_qid": "d0145341694e7034555d"
+    },
+    {
+      "draw_order": 89,
+      "source_instance_id": "s0-863702c2205448aa0ac402711cebeb6b181ae30895784112046e4e3745256d9a",
+      "stratum": "YES__EXACT_ABSENT",
+      "stratum_draw_order": 5,
+      "urbench_qid": "b6713901d33bc1020596"
+    },
+    {
+      "draw_order": 90,
+      "source_instance_id": "s0-bb0709498fd05c9348c24caea6b493894e1e10c243139060519575aeabad0a80",
+      "stratum": "YES__EXACT_ABSENT",
+      "stratum_draw_order": 6,
+      "urbench_qid": "b6713901d33bc1020596"
+    },
+    {
+      "draw_order": 91,
+      "source_instance_id": "s0-6c63b3b2c79e6c1daf8024256ed1536952613d39767049954f9da8ac46264263",
+      "stratum": "YES__EXACT_ABSENT",
+      "stratum_draw_order": 7,
+      "urbench_qid": "9384dfc0aabc73026925"
+    },
+    {
+      "draw_order": 92,
+      "source_instance_id": "s0-334b9c08bfafe518760ff1261c2fc6361721862983e80b8681d5f85843671d56",
+      "stratum": "YES__EXACT_ABSENT",
+      "stratum_draw_order": 8,
+      "urbench_qid": "3a61dcbed7e358b3aee8"
+    },
+    {
+      "draw_order": 93,
+      "source_instance_id": "s0-10b739101ffe3dd06ad4e55912031f0f8154da179c7e47a928cd458d28db91c8",
+      "stratum": "YES__EXACT_ABSENT",
+      "stratum_draw_order": 9,
+      "urbench_qid": "bfb0f6c573076a1a0634"
+    },
+    {
+      "draw_order": 94,
+      "source_instance_id": "s0-6fae8b68a401bf0af7c5292c4679dd90d2900ae628420e418361d5d49fed9551",
+      "stratum": "YES__EXACT_ABSENT",
+      "stratum_draw_order": 10,
+      "urbench_qid": "9e78c01675a198781cca"
+    },
+    {
+      "draw_order": 95,
+      "source_instance_id": "s0-f4d9b0a2c5a673c35b526e93db3b13a1a612858a0efa358c7dc0d4029d52520c",
+      "stratum": "YES__EXACT_ABSENT",
+      "stratum_draw_order": 11,
+      "urbench_qid": "42c947475244ed02629e"
+    },
+    {
+      "draw_order": 96,
+      "source_instance_id": "s0-43e7c0950e13fca6f02099bbfca60ab7b132bc32036289366625aec809841bc8",
+      "stratum": "YES__EXACT_ABSENT",
+      "stratum_draw_order": 12,
+      "urbench_qid": "4ec8cd118be8a53ec516"
+    },
+    {
+      "draw_order": 97,
+      "source_instance_id": "s0-c02c27279f54a9150eb83e783a71259ff645a080995c83a738c669063b5c729b",
+      "stratum": "YES__EXACT_ABSENT",
+      "stratum_draw_order": 13,
+      "urbench_qid": "8d708927b1593d8b9b42"
+    },
+    {
+      "draw_order": 98,
+      "source_instance_id": "s0-76514f1a59448500c9813b71aac17dcab5a0003804be21b8770d08d56813d588",
+      "stratum": "YES__EXACT_ABSENT",
+      "stratum_draw_order": 14,
+      "urbench_qid": "d808a0c72dbe605309ab"
+    },
+    {
+      "draw_order": 99,
+      "source_instance_id": "s0-24e6789ba35eaf16856a72122443c652acdec3a175af20da8d3ef5cf7241d79a",
+      "stratum": "YES__EXACT_ABSENT",
+      "stratum_draw_order": 15,
+      "urbench_qid": "315575d5cbdd1d154744"
+    },
+    {
+      "draw_order": 100,
+      "source_instance_id": "s0-825ec1203be0dc4b52f9ca2032a444efa9d2d6ee8ef9ce12847166c893bcbc1b",
+      "stratum": "YES__EXACT_ABSENT",
+      "stratum_draw_order": 16,
+      "urbench_qid": "27368c21e50b6af694ab"
+    },
+    {
+      "draw_order": 101,
+      "source_instance_id": "s0-9599c362a296a6fe7c80246adf2a289d70a60527bc7880f4f54c35b855c01aac",
+      "stratum": "YES__EXACT_ABSENT",
+      "stratum_draw_order": 17,
+      "urbench_qid": "2e8e9e51f0f290e32d27"
+    },
+    {
+      "draw_order": 102,
+      "source_instance_id": "s0-c455d15b9954ff79a4ef16bee8f3c9278f108f7af1f790fd16bbc8a320c53db6",
+      "stratum": "YES__EXACT_ABSENT",
+      "stratum_draw_order": 18,
+      "urbench_qid": "ae0891799990442fbb0e"
+    },
+    {
+      "draw_order": 103,
+      "source_instance_id": "s0-f4cfd573a2b753966ad8bac64671b3f600d6a3c8add2641f55466c505598888d",
+      "stratum": "YES__EXACT_ABSENT",
+      "stratum_draw_order": 19,
+      "urbench_qid": "67079beff747978ed4c2"
+    },
+    {
+      "draw_order": 104,
+      "source_instance_id": "s0-aa114ff325e9deee9ae97f0e53b022abd2e87ce2ec3d79e3bc73ea6a269dfdac",
+      "stratum": "YES__EXACT_ABSENT",
+      "stratum_draw_order": 20,
+      "urbench_qid": "de62d38623fde2c2285a"
+    },
+    {
+      "draw_order": 105,
+      "source_instance_id": "s0-fe91a8b2202aacd99d99d35943a1705d7f614814c5cb312c45497f9b904a2706",
+      "stratum": "YES__EXACT_ABSENT",
+      "stratum_draw_order": 21,
+      "urbench_qid": "3ae8644164c547560eda"
+    },
+    {
+      "draw_order": 106,
+      "source_instance_id": "s0-fc9e9341676914f079bde221adb2e973ed0d42358ea5f9aeddf3524e57d7c0df",
+      "stratum": "YES__EXACT_ABSENT",
+      "stratum_draw_order": 22,
+      "urbench_qid": "b8df6ac181c4c5b280f9"
+    },
+    {
+      "draw_order": 107,
+      "source_instance_id": "s0-6624519d22aadc52ed4b32c9313336f52857a4cdd1dca6f234d5989e6bd97749",
+      "stratum": "YES__EXACT_ABSENT",
+      "stratum_draw_order": 23,
+      "urbench_qid": "f4a731f739533c52becd"
+    },
+    {
+      "draw_order": 108,
+      "source_instance_id": "s0-d7f58c994b24e46e090c1a4a1d699e28dd841454f639c5a863418a9554162bee",
+      "stratum": "YES__EXACT_ABSENT",
+      "stratum_draw_order": 24,
+      "urbench_qid": "80ca095e38ab73b908ff"
+    },
+    {
+      "draw_order": 109,
+      "source_instance_id": "s0-2ef58dcff81027b66fb87de3c8d3b07df77f119eb531fa1995155b0df14fb81d",
+      "stratum": "YES__EXACT_ABSENT",
+      "stratum_draw_order": 25,
+      "urbench_qid": "3295844627a9bd1b9135"
+    },
+    {
+      "draw_order": 110,
+      "source_instance_id": "s0-ca726f53aeaaadbe5b8a5d78107ba0c78f216082c02c21b3a44d78682eb87f3b",
+      "stratum": "YES__EXACT_ABSENT",
+      "stratum_draw_order": 26,
+      "urbench_qid": "d0183768701c74f966c5"
+    },
+    {
+      "draw_order": 111,
+      "source_instance_id": "s0-d60e67ec77188bda9e122002a090bfd462a2a35fe6ad556cecb5a7f1d64ccb72",
+      "stratum": "YES__EXACT_ABSENT",
+      "stratum_draw_order": 27,
+      "urbench_qid": "f69c8412d57ad726d658"
+    },
+    {
+      "draw_order": 112,
+      "source_instance_id": "s0-bdf56f5198fae63556f0595cdde616c4d250ad06e891d45e156058d0e94c1769",
+      "stratum": "YES__EXACT_PRESENT",
+      "stratum_draw_order": 1,
+      "urbench_qid": "b747938f597b09e43603"
+    },
+    {
+      "draw_order": 113,
+      "source_instance_id": "s0-c415421ef30d0c2e3f83111b09a2e4c72ce196a630e52708fc632df3b5930d20",
+      "stratum": "YES__EXACT_PRESENT",
+      "stratum_draw_order": 2,
+      "urbench_qid": "16c08e5f354b035c41a5"
+    },
+    {
+      "draw_order": 114,
+      "source_instance_id": "s0-b29cad2664544d090a0303e386a35732e96aee31bd478e71cf8b9a2a0407c425",
+      "stratum": "YES__EXACT_PRESENT",
+      "stratum_draw_order": 3,
+      "urbench_qid": "4e1b65e81ec09397b26e"
+    },
+    {
+      "draw_order": 115,
+      "source_instance_id": "s0-2bde1fb10751e7479b7e8ca248a0792ae26669415a78a7732b5e93e922dbdaef",
+      "stratum": "YES__EXACT_PRESENT",
+      "stratum_draw_order": 4,
+      "urbench_qid": "e530682239bb5e59ebf0"
+    },
+    {
+      "draw_order": 116,
+      "source_instance_id": "s0-56d03f5f2f00f6a8694e112cee882dacf5f91c2990351714eaf7de45dd7592c1",
+      "stratum": "YES__EXACT_PRESENT",
+      "stratum_draw_order": 5,
+      "urbench_qid": "abd771e9a20b107e7e56"
+    },
+    {
+      "draw_order": 117,
+      "source_instance_id": "s0-ab234d5f30450a62d1150ce625f43ea2731ed433f43f0558d56ad5b16b3e4650",
+      "stratum": "YES__EXACT_PRESENT",
+      "stratum_draw_order": 6,
+      "urbench_qid": "d0145341694e7034555d"
+    },
+    {
+      "draw_order": 118,
+      "source_instance_id": "s0-756b4f0b9e2c089a054216f3753733158263dab72e03d580fa75b1d958def4d3",
+      "stratum": "YES__EXACT_PRESENT",
+      "stratum_draw_order": 7,
+      "urbench_qid": "fba624d8c01833419760"
+    },
+    {
+      "draw_order": 119,
+      "source_instance_id": "s0-f0740f798321432c8982d33082a2802ab1b0ee03bb6cdaa1d35fd78de8972c62",
+      "stratum": "YES__EXACT_PRESENT",
+      "stratum_draw_order": 8,
+      "urbench_qid": "9711b3fc634e6f4f471d"
+    },
+    {
+      "draw_order": 120,
+      "source_instance_id": "s0-efda88dfcfacbd8c6a0616aaa31f9d64957ef0656450539d713cd6af31b60764",
+      "stratum": "YES__EXACT_PRESENT",
+      "stratum_draw_order": 9,
+      "urbench_qid": "de62d38623fde2c2285a"
+    },
+    {
+      "draw_order": 121,
+      "source_instance_id": "s0-74932108ddeaa18905430598142ddfdcd26f23a39fc2d9bce45a1b5feacf9914",
+      "stratum": "YES__EXACT_PRESENT",
+      "stratum_draw_order": 10,
+      "urbench_qid": "05e9cdc44f1b066badd7"
+    },
+    {
+      "draw_order": 122,
+      "source_instance_id": "s0-95b384437efd56404a8ace088266568c498022bed815c3ce24df3c77c49e9e61",
+      "stratum": "YES__EXACT_PRESENT",
+      "stratum_draw_order": 11,
+      "urbench_qid": "3bba4ea27500361cb141"
+    },
+    {
+      "draw_order": 123,
+      "source_instance_id": "s0-924c4d08c9d9e435b780ce4a0bc7f4333fcc6dafaa0fe9d24a31808bc4fe6b3c",
+      "stratum": "YES__EXACT_PRESENT",
+      "stratum_draw_order": 12,
+      "urbench_qid": "9bb59488a227a5f5cd62"
+    },
+    {
+      "draw_order": 124,
+      "source_instance_id": "s0-cafda805eb2c07c37f8665d6318bd8b0d2d9d667fa745e23dcd8e02e9ce4c550",
+      "stratum": "YES__EXACT_PRESENT",
+      "stratum_draw_order": 13,
+      "urbench_qid": "3503e8d41364eb0b33bc"
+    },
+    {
+      "draw_order": 125,
+      "source_instance_id": "s0-32430f14d9919acf6490ff1eeb5d1efc9763df610b59e9dcf50689bd94cfde11",
+      "stratum": "YES__EXACT_PRESENT",
+      "stratum_draw_order": 14,
+      "urbench_qid": "e87b63e92165b417d37f"
+    },
+    {
+      "draw_order": 126,
+      "source_instance_id": "s0-5724076054c89def93bb73efb4aae9a3b5578169b7568f143e8c5f1d6daa8cd4",
+      "stratum": "YES__EXACT_PRESENT",
+      "stratum_draw_order": 15,
+      "urbench_qid": "d808a0c72dbe605309ab"
+    },
+    {
+      "draw_order": 127,
+      "source_instance_id": "s0-d3bdf0284982036c6014a6a32368061f191012126886664a5947fc27c90df54c",
+      "stratum": "YES__EXACT_PRESENT",
+      "stratum_draw_order": 16,
+      "urbench_qid": "d0183768701c74f966c5"
+    },
+    {
+      "draw_order": 128,
+      "source_instance_id": "s0-a4e5dabdae19bdd4e56f9509456f72cf697a372132ea2aac0a8140b37593d087",
+      "stratum": "YES__EXACT_PRESENT",
+      "stratum_draw_order": 17,
+      "urbench_qid": "f7b1cc5b3fab95aa1be4"
+    },
+    {
+      "draw_order": 129,
+      "source_instance_id": "s0-d08dd131f94d1b2c499c0c5da23ba87a2c0378eb1cce78314b7eae9f2d72bd73",
+      "stratum": "YES__EXACT_PRESENT",
+      "stratum_draw_order": 18,
+      "urbench_qid": "06724dc213e0dae715f5"
+    },
+    {
+      "draw_order": 130,
+      "source_instance_id": "s0-2f4d1fdb76d0c9b1d8bc3757877943ae24ebde564870bf02e0b67c9d871fbf8e",
+      "stratum": "YES__EXACT_PRESENT",
+      "stratum_draw_order": 19,
+      "urbench_qid": "8d708927b1593d8b9b42"
+    },
+    {
+      "draw_order": 131,
+      "source_instance_id": "s0-d8b844aad2f23bbab9cac663b90c9359bdbfd9f8aecb98f09ec428fd3db9324b",
+      "stratum": "YES__EXACT_PRESENT",
+      "stratum_draw_order": 20,
+      "urbench_qid": "502d4dae6f08e73a5569"
+    },
+    {
+      "draw_order": 132,
+      "source_instance_id": "s0-80116ab4a1d721cfd55c32213c8709213700588c64b54b0b8f2e7b7da15a4909",
+      "stratum": "YES__EXACT_PRESENT",
+      "stratum_draw_order": 21,
+      "urbench_qid": "f43533225534420816d6"
+    },
+    {
+      "draw_order": 133,
+      "source_instance_id": "s0-d2fd688a91403816a9b1b9fe50586e6919da4cb4e3a41968f2a4f37249821afa",
+      "stratum": "YES__EXACT_PRESENT",
+      "stratum_draw_order": 22,
+      "urbench_qid": "8cfde6ee28d059a5aff6"
+    },
+    {
+      "draw_order": 134,
+      "source_instance_id": "s0-cb583c789baf784e52c29e010477abe5cfa4a0e7576ab95ff38c96ffbece334a",
+      "stratum": "YES__EXACT_PRESENT",
+      "stratum_draw_order": 23,
+      "urbench_qid": "7f139bf51273517efd4e"
+    },
+    {
+      "draw_order": 135,
+      "source_instance_id": "s0-a7fbaf8afd2a65401f11a96eca9d5881bf4e8e59664e031242c0ec1ccbe4c691",
+      "stratum": "YES__EXACT_PRESENT",
+      "stratum_draw_order": 24,
+      "urbench_qid": "01430717f590ad3f4e74"
+    },
+    {
+      "draw_order": 136,
+      "source_instance_id": "s0-04b061ec14520f18dd0181ff43db998813295cb9f20c780acd02237cd8217c8e",
+      "stratum": "YES__EXACT_PRESENT",
+      "stratum_draw_order": 25,
+      "urbench_qid": "7b84d2bc643ddc2085f0"
+    },
+    {
+      "draw_order": 137,
+      "source_instance_id": "s0-5b3d46da83c0031c6ea315f21097a23f4ad7242f4f3157de2162a606e47d4df3",
+      "stratum": "YES__EXACT_PRESENT",
+      "stratum_draw_order": 26,
+      "urbench_qid": "15885efe6f91724c16d9"
+    },
+    {
+      "draw_order": 138,
+      "source_instance_id": "s0-44476eb3ac4e7a807b8f98766202b6ad6db156b2e8255c12b2faf4afa2bff885",
+      "stratum": "YES__EXACT_PRESENT",
+      "stratum_draw_order": 27,
+      "urbench_qid": "8e03ed9fce31618b095a"
+    },
+    {
+      "draw_order": 139,
+      "source_instance_id": "s0-9f232f14ed9b2a77a1576c77519aaef5f16631a24f661679950c651d1450162a",
+      "stratum": "YES__EXACT_PRESENT",
+      "stratum_draw_order": 28,
+      "urbench_qid": "018f6ea10facddae3b2e"
+    },
+    {
+      "draw_order": 140,
+      "source_instance_id": "s0-fa684a8141f5129f58be4d1c10ce25fef1278641ee2bbc7199a6d66146019943",
+      "stratum": "YES__EXACT_PRESENT",
+      "stratum_draw_order": 29,
+      "urbench_qid": "9883d6c816d4855035ea"
+    },
+    {
+      "draw_order": 141,
+      "source_instance_id": "s0-2bc781de796bc5a427522f7e9f3158272fdb4246fd318b6ec706c733f0abf063",
+      "stratum": "YES__EXACT_PRESENT",
+      "stratum_draw_order": 30,
+      "urbench_qid": "1d923b8a2778448a9716"
+    },
+    {
+      "draw_order": 142,
+      "source_instance_id": "s0-511ddd70195104a13e5c0c5cfc7adae1fa5cb91477095533e96bc0d3ac5d7d50",
+      "stratum": "YES__EXACT_PRESENT",
+      "stratum_draw_order": 31,
+      "urbench_qid": "71ca1a8a75c5c582ab3f"
+    },
+    {
+      "draw_order": 143,
+      "source_instance_id": "s0-aab7aba822c06a339ce215d61b18f054ccb870c3f5591b90020d6c56d439b025",
+      "stratum": "YES__EXACT_PRESENT",
+      "stratum_draw_order": 32,
+      "urbench_qid": "b77170e15c0b1bd72340"
+    },
+    {
+      "draw_order": 144,
+      "source_instance_id": "s0-30a606e2e31d89fcc26b844d3327968f82774273fcd290c47a580c30afffdc18",
+      "stratum": "YES__EXACT_PRESENT",
+      "stratum_draw_order": 33,
+      "urbench_qid": "7b84d2bc643ddc2085f0"
+    },
+    {
+      "draw_order": 145,
+      "source_instance_id": "s0-a385feb86267951d31f7c2dd1b8bfb4324246ccb1a1c75beb8f82a6b7bde4ac1",
+      "stratum": "YES__EXACT_PRESENT",
+      "stratum_draw_order": 34,
+      "urbench_qid": "6c43fa359095fd0845f5"
+    },
+    {
+      "draw_order": 146,
+      "source_instance_id": "s0-8df4d9801b76443105bfc4aa99fca177fd35832ff03b527c37b4fa18a15bd650",
+      "stratum": "YES__EXACT_PRESENT",
+      "stratum_draw_order": 35,
+      "urbench_qid": "10325585370ba368ca9a"
+    },
+    {
+      "draw_order": 147,
+      "source_instance_id": "s0-0896db9f3f9072b46dbef0779be2d1c51ce1768d9a2b8363dca02dfd04d9a17b",
+      "stratum": "YES__EXACT_PRESENT",
+      "stratum_draw_order": 36,
+      "urbench_qid": "15885efe6f91724c16d9"
+    },
+    {
+      "draw_order": 148,
+      "source_instance_id": "s0-dedee35ca5f043ea12129b7681455eef75536d9d98cc8b0c5340b0af38382e21",
+      "stratum": "YES__EXACT_PRESENT",
+      "stratum_draw_order": 37,
+      "urbench_qid": "f07a6acf27e25dedbb8d"
+    },
+    {
+      "draw_order": 149,
+      "source_instance_id": "s0-3c209a0d2f977a7b4bb3c6ec5d73872cf5f80f9791a3941b3839a034acd47034",
+      "stratum": "YES__EXACT_PRESENT",
+      "stratum_draw_order": 38,
+      "urbench_qid": "7419826e4373eb1e83ff"
+    },
+    {
+      "draw_order": 150,
+      "source_instance_id": "s0-31e71939e8edd9e7b2cbe9f9b3088d9ba5c52360abd792c73588e29ec4a96594",
+      "stratum": "YES__EXACT_PRESENT",
+      "stratum_draw_order": 39,
+      "urbench_qid": "e6d3973ed3feb8a42928"
+    },
+    {
+      "draw_order": 151,
+      "source_instance_id": "s0-d6e2cab2d4ecf351abb8b9546d36bff7c6a4ea76230d06105a08f1e970486945",
+      "stratum": "YES__EXACT_PRESENT",
+      "stratum_draw_order": 40,
+      "urbench_qid": "e530682239bb5e59ebf0"
+    },
+    {
+      "draw_order": 152,
+      "source_instance_id": "s0-3c33e049d0c93b1e78765d1d5b5c4cc6764e7a0b722a3cda9130c4f583265b60",
+      "stratum": "YES__EXACT_PRESENT",
+      "stratum_draw_order": 41,
+      "urbench_qid": "16c08e5f354b035c41a5"
+    },
+    {
+      "draw_order": 153,
+      "source_instance_id": "s0-b236531b04ab177a2e26c85d9c4fe1463f1e9118def7ceef947ed497f491af41",
+      "stratum": "YES__EXACT_PRESENT",
+      "stratum_draw_order": 42,
+      "urbench_qid": "a2dfceff60d5b18fc70d"
+    },
+    {
+      "draw_order": 154,
+      "source_instance_id": "s0-4f1ab83702359b85bf362fd770327a53d7bd3648008fd8c6d128f05afd3b1449",
+      "stratum": "YES__EXACT_PRESENT",
+      "stratum_draw_order": 43,
+      "urbench_qid": "c70d40b57fa67ea13ed6"
+    },
+    {
+      "draw_order": 155,
+      "source_instance_id": "s0-8edc5b618a23763d5c18a2b6919535446f431222ca14b980172d61785142eb14",
+      "stratum": "YES__EXACT_PRESENT",
+      "stratum_draw_order": 44,
+      "urbench_qid": "703db4629ff46d82a205"
+    },
+    {
+      "draw_order": 156,
+      "source_instance_id": "s0-3f8dd03d7ea574d03a1509b28b13c18477379c425af4743015d3dafde6186d1a",
+      "stratum": "YES__EXACT_PRESENT",
+      "stratum_draw_order": 45,
+      "urbench_qid": "8eecf2ff459ef5a9b98a"
+    },
+    {
+      "draw_order": 157,
+      "source_instance_id": "s0-0a42d251f4f223126b0a7e5d36a11b0e76c7aa6dcb7a97fcf5f584e453dde394",
+      "stratum": "YES__EXACT_PRESENT",
+      "stratum_draw_order": 46,
+      "urbench_qid": "5f24cbd41798ed5c7608"
+    },
+    {
+      "draw_order": 158,
+      "source_instance_id": "s0-c694d67b7786ccbcf19bcc5e57468468391a709c187c2a9b2f483f7cdf26cfbb",
+      "stratum": "YES__EXACT_PRESENT",
+      "stratum_draw_order": 47,
+      "urbench_qid": "068379affae04debca2b"
+    },
+    {
+      "draw_order": 159,
+      "source_instance_id": "s0-a62f33ab37d412d10de5a76cd6aba78d06ba628bbb1a84703179a98c3c61eb61",
+      "stratum": "YES__EXACT_PRESENT",
+      "stratum_draw_order": 48,
+      "urbench_qid": "9850eb1534206facd067"
+    },
+    {
+      "draw_order": 160,
+      "source_instance_id": "s0-2924250262587db6c6ad269209f0b5a8847fb4def34f4b0ae2ed8824e6922e65",
+      "stratum": "YES__EXACT_PRESENT",
+      "stratum_draw_order": 49,
+      "urbench_qid": "42c947475244ed02629e"
+    }
+  ],
+  "sampling_algorithm": "python_random_sample_sorted_source_ids_v1",
+  "seed": 20260822,
+  "stratum_counts": {
+    "NO__EXACT_ABSENT": 83,
+    "NO__EXACT_PRESENT": 251,
+    "YES__EXACT_ABSENT": 108,
+    "YES__EXACT_PRESENT": 194
+  },
+  "stratum_order": [
+    "NO__EXACT_ABSENT",
+    "NO__EXACT_PRESENT",
+    "YES__EXACT_ABSENT",
+    "YES__EXACT_PRESENT"
+  ],
+  "stratum_quotas": {
+    "NO__EXACT_ABSENT": 21,
+    "NO__EXACT_PRESENT": 63,
+    "YES__EXACT_ABSENT": 27,
+    "YES__EXACT_PRESENT": 49
+  }
+}
