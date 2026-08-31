@@ -895,14 +895,7 @@ def human_annotation_schema() -> dict[str, Any]:
         "annotation_timestamp": nullable_timestamp,
         "round": nullable_round,
     }
-    return {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "$id": "human_annotation_log.schema.json",
-        "title": "EFBPT Stage-0 append-only human annotation log row",
-        "description": (
-            "One independent source_instance_id x annotator record with lossless "
-            "Pass-1, Pass-2, Pass-3, and adjudication state; preparation creates no log rows."
-        ),
+    annotation_record_schema = {
         "type": "object",
         "additionalProperties": False,
         "required": list(properties),
@@ -1132,6 +1125,118 @@ def human_annotation_schema() -> dict[str, Any]:
         ],
     }
 
+    sensitive_event_common = {
+        "event_type": {
+            "enum": ["SUPPORTING_TEXT_VIEW", "ANSWER_INSPECTION"],
+        },
+        "source_instance_id": {
+            "type": "string",
+            "pattern": "^s0-[0-9a-f]{64}$",
+        },
+        "annotator_id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Role-qualified identity of the annotator or adjudicator requesting the reveal.",
+        },
+        "timestamp": {
+            "type": "string",
+            "format": "date-time",
+        },
+        "round": {
+            "type": "integer",
+            "minimum": 1,
+        },
+        "annotation_pass": {
+            "enum": ["PASS_3", "ADJUDICATION"],
+        },
+    }
+    supporting_text_view_schema = {
+        "type": "object",
+        "additionalProperties": False,
+        "required": [
+            "event_type",
+            "source_instance_id",
+            "annotator_id",
+            "timestamp",
+            "round",
+            "annotation_pass",
+            "official_support_path_references",
+        ],
+        "properties": {
+            **sensitive_event_common,
+            "event_type": {"const": "SUPPORTING_TEXT_VIEW"},
+            "official_support_path_references": {
+                "type": "array",
+                "minItems": 1,
+                "uniqueItems": True,
+                "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Permitted support-path identity only; paragraph text is forbidden.",
+                },
+            },
+        },
+    }
+    answer_inspection_schema = {
+        "type": "object",
+        "additionalProperties": False,
+        "required": [
+            "event_type",
+            "source_instance_id",
+            "annotator_id",
+            "timestamp",
+            "round",
+            "annotation_pass",
+            "reason",
+            "provisional_role",
+            "changed_decision",
+        ],
+        "properties": {
+            **sensitive_event_common,
+            "event_type": {"const": "ANSWER_INSPECTION"},
+            "annotation_pass": {"const": "ADJUDICATION"},
+            "reason": {"type": "string", "minLength": 1},
+            "provisional_role": {
+                "enum": ["EXPLICIT", "LATENT_BRIDGE", "AMBIGUOUS"],
+                "description": "Role recorded before answer reveal so the final effect can be determined after resume.",
+            },
+            "changed_decision": {
+                "type": ["boolean", "null"],
+                "description": "Null means the final effect of answer inspection is not yet determined.",
+            },
+        },
+    }
+    root_properties = dict(properties)
+    root_properties.update(
+        {
+            "event_type": sensitive_event_common["event_type"],
+            "timestamp": sensitive_event_common["timestamp"],
+            "annotation_pass": sensitive_event_common["annotation_pass"],
+            "reason": {"type": "string", "minLength": 1},
+            "provisional_role": {
+                "enum": ["EXPLICIT", "LATENT_BRIDGE", "AMBIGUOUS"]
+            },
+            "changed_decision": {"type": ["boolean", "null"]},
+        }
+    )
+    return {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "$id": "human_annotation_log.schema.json",
+        "title": "EFBPT Stage-0 append-only human annotation and sensitive-view event",
+        "description": (
+            "Append-only union of independent annotation/adjudication state records and "
+            "durable pre-reveal audit events; preparation creates no log rows."
+        ),
+        "type": "object",
+        "additionalProperties": False,
+        "properties": root_properties,
+        "oneOf": [
+            annotation_record_schema,
+            supporting_text_view_schema,
+            answer_inspection_schema,
+        ],
+    }
+
 
 def reconstruct_evidence_from_links(rows: list[dict[str, Any]]) -> list[Any]:
     require(rows, "cannot reconstruct empty official evidence")
@@ -1288,6 +1393,112 @@ def validate_prepared(prepared: dict[str, Any], dev_rows: list[dict[str, Any]]) 
             "reliability sample contains an unknown source ID")
 
     require(schema.get("additionalProperties") is False, "human log schema must reject extra fields")
+    schema_branches = schema.get("oneOf")
+    require(
+        isinstance(schema_branches, list) and len(schema_branches) == 3,
+        "human log schema must have one annotation branch and two sensitive-event branches",
+    )
+    event_branches: dict[str, dict[str, Any]] = {}
+    annotation_branches: list[dict[str, Any]] = []
+    for branch in schema_branches:
+        require(
+            isinstance(branch, dict) and branch.get("additionalProperties") is False,
+            "every human-log branch must reject extra fields",
+        )
+        branch_properties = branch.get("properties")
+        require(isinstance(branch_properties, dict), "human-log branch lacks properties")
+        event_type = branch_properties.get("event_type", {}).get("const")
+        if event_type is None:
+            annotation_branches.append(branch)
+        else:
+            require(event_type not in event_branches, "duplicate sensitive event type")
+            event_branches[event_type] = branch
+    require(len(annotation_branches) == 1, "human log schema lacks one preserved annotation branch")
+    require(
+        set(event_branches) == {"SUPPORTING_TEXT_VIEW", "ANSWER_INSPECTION"},
+        "human log schema sensitive-event vocabulary changed",
+    )
+
+    annotation_branch = annotation_branches[0]
+    annotation_properties = annotation_branch["properties"]
+    require(
+        set(annotation_branch.get("required", [])) == set(annotation_properties),
+        "completed annotation records no longer require every preserved field",
+    )
+    require(
+        annotation_properties["source_role"]["enum"]
+        == [None, "EXPLICIT", "LATENT_BRIDGE", "AMBIGUOUS"],
+        "source-role vocabulary changed",
+    )
+    require(
+        annotation_properties["pass2_decision"]["enum"]
+        == [None, "EXPLICIT", "NOT_YET_EXPLICIT"],
+        "Pass-2 vocabulary changed",
+    )
+    require(
+        annotation_properties["pass3_decision"]["enum"]
+        == [None, "LATENT_BRIDGE", "AMBIGUOUS"],
+        "Pass-3 vocabulary changed",
+    )
+    require(
+        annotation_properties["answer_inspection_exceptions"]["items"]
+        ["properties"]["changed_decision"]
+        == {"type": "boolean"},
+        "completed adjudication must retain a final Boolean changed_decision",
+    )
+
+    supporting_branch = event_branches["SUPPORTING_TEXT_VIEW"]
+    supporting_required = {
+        "event_type",
+        "source_instance_id",
+        "annotator_id",
+        "timestamp",
+        "round",
+        "annotation_pass",
+        "official_support_path_references",
+    }
+    require(
+        set(supporting_branch.get("required", [])) == supporting_required,
+        "supporting-text view event fields changed",
+    )
+    require(
+        supporting_branch["properties"]["official_support_path_references"].get("minItems")
+        == 1,
+        "supporting-text view event lacks a support-path reference",
+    )
+
+    answer_branch = event_branches["ANSWER_INSPECTION"]
+    answer_required = {
+        "event_type",
+        "source_instance_id",
+        "annotator_id",
+        "timestamp",
+        "round",
+        "annotation_pass",
+        "reason",
+        "provisional_role",
+        "changed_decision",
+    }
+    require(
+        set(answer_branch.get("required", [])) == answer_required,
+        "answer-inspection event fields changed",
+    )
+    require(
+        answer_branch["properties"]["annotation_pass"] == {"const": "ADJUDICATION"},
+        "answer inspection is not restricted to adjudication",
+    )
+    require(
+        answer_branch["properties"]["changed_decision"]["type"]
+        == ["boolean", "null"],
+        "answer-inspection changed_decision must allow Boolean or unknown null",
+    )
+    require(
+        not recursively_forbidden_keys(
+            schema,
+            {"answer", "gold_answer", "paragraph_text", "paragraph_content"},
+        ),
+        "sensitive-view schema stores answer or paragraph text",
+    )
     require("ABSTAIN" not in json.dumps(schema, ensure_ascii=False), "schema contains forbidden ABSTAIN")
     require("CORPUS_ABSENT" not in json.dumps(schema, ensure_ascii=False),
             "schema contains forbidden CORPUS_ABSENT")
