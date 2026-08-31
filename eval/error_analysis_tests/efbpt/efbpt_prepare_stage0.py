@@ -788,63 +788,348 @@ def build_pass2_manifest(sources: list[dict[str, Any]]) -> dict[str, Any]:
 
 def human_annotation_schema() -> dict[str, Any]:
     nullable_string = {"type": ["string", "null"]}
+    nullable_timestamp = {"type": ["string", "null"], "format": "date-time"}
+    nullable_round = {"type": ["integer", "null"], "minimum": 1}
+    nullable_boolean = {"type": ["boolean", "null"]}
+    source_role = {"enum": [None, "EXPLICIT", "LATENT_BRIDGE", "AMBIGUOUS"]}
+    explicit_relation_type = {
+        "enum": [
+            None,
+            "DIRECT_MENTION",
+            "TRANSLITERATION",
+            "COMMON_ALIAS_OR_ABBREVIATION",
+            "MORPHOLOGICAL_OR_DEMONYM",
+            "DIRECT_SPECIFIC_CONCEPT",
+        ]
+    }
+    confidence = {"enum": [None, "HIGH", "MEDIUM", "LOW"]}
+    dependency_status = {
+        "enum": [
+            None,
+            "CLEAR_DEPENDENCY",
+            "MULTIPLE_PLAUSIBLE_PARENTS",
+            "PARALLEL_OR_UNORDERED",
+            "UNRESOLVED",
+            "NOT_APPLICABLE",
+        ]
+    }
+    string_list = {"type": "array", "items": {"type": "string"}}
+    answer_inspection_event = {
+        "type": "object",
+        "additionalProperties": False,
+        "required": ["reason", "viewer", "timestamp", "round", "changed_decision"],
+        "properties": {
+            "reason": {"type": "string", "minLength": 1},
+            "viewer": {"type": "string", "minLength": 1},
+            "timestamp": nullable_timestamp,
+            "round": nullable_round,
+            "changed_decision": {"type": "boolean"},
+        },
+        "allOf": [
+            {
+                "anyOf": [
+                    {"properties": {"timestamp": {"type": "string"}}},
+                    {"properties": {"round": {"type": "integer"}}},
+                ]
+            }
+        ],
+    }
+    properties = {
+        "source_instance_id": {"type": "string", "pattern": "^s0-[0-9a-f]{64}$"},
+        "annotator_id": {"type": "string", "minLength": 1},
+        "pass1_completed": {
+            "type": "boolean",
+            "description": "False means Pass 1 has not been completed; true freezes its candidates.",
+        },
+        "blind_discovery_candidates": string_list,
+        "pass1_timestamp": nullable_timestamp,
+        "pass1_round": nullable_round,
+        "pass2_decision": {
+            "description": "Null means unfinished Pass 2 and never means NOT_YET_EXPLICIT.",
+            "enum": [None, "EXPLICIT", "NOT_YET_EXPLICIT"],
+        },
+        "pass2_timestamp": nullable_timestamp,
+        "pass2_round": nullable_round,
+        "pass3_decision": {
+            "description": "Null means Pass 3 has not been completed or was not applicable.",
+            "enum": [None, "LATENT_BRIDGE", "AMBIGUOUS"],
+        },
+        "pass3_timestamp": nullable_timestamp,
+        "pass3_round": nullable_round,
+        # The following remain the annotator's original pre-adjudication record.
+        "source_role": {
+            **source_role,
+            "description": "Original annotator role; never overwritten by adjudication.",
+        },
+        "explicit_relation_type": explicit_relation_type,
+        "urdu_span_if_explicit": nullable_string,
+        "confidence": confidence,
+        "rationale": nullable_string,
+        "concrete_intermediate_information": nullable_string,
+        "dependency_status": dependency_status,
+        "proposed_parent_source_titles": string_list,
+        "parent_source_titles": {
+            **string_list,
+            "description": "Finalized human parent titles, when defensible under the freeze.",
+        },
+        "official_support_path_references": string_list,
+        "disagreement_flag": nullable_boolean,
+        "adjudication_required": nullable_boolean,
+        "adjudicated_role": {
+            **source_role,
+            "description": "Adjudicated role stored separately from the original annotator role.",
+        },
+        "adjudication_rationale": nullable_string,
+        "adjudication_changed_bridge_eligibility": nullable_boolean,
+        "adjudicator_id": nullable_string,
+        "adjudication_timestamp": nullable_timestamp,
+        "adjudication_round": nullable_round,
+        "answer_inspection_exception_used": {
+            **nullable_boolean,
+            "description": "Null means adjudication is unfinished; false/true records exception use.",
+        },
+        "answer_inspection_exceptions": {
+            "type": "array",
+            "items": answer_inspection_event,
+        },
+        "annotation_timestamp": nullable_timestamp,
+        "round": nullable_round,
+    }
     return {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "$id": "human_annotation_log.schema.json",
         "title": "EFBPT Stage-0 append-only human annotation log row",
-        "description": "One independent source_instance_id x annotator record; preparation creates no log rows.",
+        "description": (
+            "One independent source_instance_id x annotator record with lossless "
+            "Pass-1, Pass-2, Pass-3, and adjudication state; preparation creates no log rows."
+        ),
         "type": "object",
         "additionalProperties": False,
-        "required": [
-            "source_instance_id",
-            "annotator_id",
-            "blind_discovery_candidates",
-            "source_role",
-            "explicit_relation_type",
-            "urdu_span_if_explicit",
-            "confidence",
-            "rationale",
-            "concrete_intermediate_information",
-            "dependency_status",
-            "proposed_parent_source_titles",
-            "official_support_path_references",
-            "annotation_timestamp",
-            "round",
+        "required": list(properties),
+        "properties": properties,
+        "allOf": [
+            {
+                "if": {
+                    "properties": {"pass1_completed": {"const": False}},
+                    "required": ["pass1_completed"],
+                },
+                "then": {
+                    "properties": {
+                        "blind_discovery_candidates": {"maxItems": 0},
+                        "pass1_timestamp": {"type": "null"},
+                        "pass1_round": {"type": "null"},
+                        "pass2_decision": {"type": "null"},
+                        "pass3_decision": {"type": "null"},
+                        "source_role": {"type": "null"},
+                    }
+                },
+            },
+            {
+                "if": {
+                    "properties": {"pass2_decision": {"type": "null"}},
+                    "required": ["pass2_decision"],
+                },
+                "then": {
+                    "properties": {
+                        "pass2_timestamp": {"type": "null"},
+                        "pass2_round": {"type": "null"},
+                        "pass3_decision": {"type": "null"},
+                        "source_role": {"type": "null"},
+                        "explicit_relation_type": {"type": "null"},
+                        "urdu_span_if_explicit": {"type": "null"},
+                        "confidence": {"type": "null"},
+                        "rationale": {"type": "null"},
+                        "concrete_intermediate_information": {"type": "null"},
+                        "dependency_status": {"type": "null"},
+                        "proposed_parent_source_titles": {"maxItems": 0},
+                        "parent_source_titles": {"maxItems": 0},
+                        "official_support_path_references": {"maxItems": 0},
+                    }
+                },
+            },
+            {
+                "if": {
+                    "properties": {"pass2_decision": {"const": "EXPLICIT"}},
+                    "required": ["pass2_decision"],
+                },
+                "then": {
+                    "properties": {
+                        "pass3_decision": {"type": "null"},
+                        "source_role": {"const": "EXPLICIT"},
+                        "explicit_relation_type": {
+                            "enum": [
+                                "DIRECT_MENTION",
+                                "TRANSLITERATION",
+                                "COMMON_ALIAS_OR_ABBREVIATION",
+                                "MORPHOLOGICAL_OR_DEMONYM",
+                                "DIRECT_SPECIFIC_CONCEPT",
+                            ]
+                        },
+                        "confidence": {"enum": ["HIGH", "MEDIUM", "LOW"]},
+                        "rationale": {"type": "string", "minLength": 1},
+                    }
+                },
+            },
+            {
+                "if": {
+                    "properties": {"pass2_decision": {"const": "NOT_YET_EXPLICIT"}},
+                    "required": ["pass2_decision"],
+                },
+                "then": {
+                    "properties": {
+                        "explicit_relation_type": {"type": "null"},
+                        "urdu_span_if_explicit": {"type": "null"},
+                    }
+                },
+            },
+            {
+                "if": {
+                    "allOf": [
+                        {
+                            "properties": {
+                                "pass2_decision": {"const": "NOT_YET_EXPLICIT"}
+                            },
+                            "required": ["pass2_decision"],
+                        },
+                        {
+                            "properties": {"pass3_decision": {"type": "null"}},
+                            "required": ["pass3_decision"],
+                        },
+                    ]
+                },
+                "then": {
+                    "properties": {
+                        "source_role": {"type": "null"},
+                        "confidence": {"type": "null"},
+                        "rationale": {"type": "null"},
+                        "concrete_intermediate_information": {"type": "null"},
+                        "dependency_status": {"type": "null"},
+                        "proposed_parent_source_titles": {"maxItems": 0},
+                        "parent_source_titles": {"maxItems": 0},
+                        "official_support_path_references": {"maxItems": 0},
+                    }
+                },
+            },
+            {
+                "if": {
+                    "properties": {"pass3_decision": {"type": "null"}},
+                    "required": ["pass3_decision"],
+                },
+                "then": {
+                    "properties": {
+                        "pass3_timestamp": {"type": "null"},
+                        "pass3_round": {"type": "null"},
+                    }
+                },
+            },
+            {
+                "if": {
+                    "properties": {
+                        "pass3_decision": {"enum": ["LATENT_BRIDGE", "AMBIGUOUS"]}
+                    },
+                    "required": ["pass3_decision"],
+                },
+                "then": {
+                    "properties": {
+                        "pass2_decision": {"const": "NOT_YET_EXPLICIT"},
+                        "confidence": {"enum": ["HIGH", "MEDIUM", "LOW"]},
+                        "rationale": {"type": "string", "minLength": 1},
+                    }
+                },
+            },
+            {
+                "if": {
+                    "properties": {"pass3_decision": {"const": "LATENT_BRIDGE"}},
+                    "required": ["pass3_decision"],
+                },
+                "then": {
+                    "properties": {
+                        "source_role": {"const": "LATENT_BRIDGE"},
+                        "concrete_intermediate_information": {
+                            "type": "string",
+                            "minLength": 1,
+                        },
+                        "dependency_status": {
+                            "enum": [
+                                "CLEAR_DEPENDENCY",
+                                "MULTIPLE_PLAUSIBLE_PARENTS",
+                                "PARALLEL_OR_UNORDERED",
+                                "UNRESOLVED",
+                                "NOT_APPLICABLE",
+                            ]
+                        },
+                        "official_support_path_references": {"minItems": 1},
+                    }
+                },
+            },
+            {
+                "if": {
+                    "properties": {"pass3_decision": {"const": "AMBIGUOUS"}},
+                    "required": ["pass3_decision"],
+                },
+                "then": {"properties": {"source_role": {"const": "AMBIGUOUS"}}},
+            },
+            {
+                "if": {
+                    "properties": {
+                        "adjudicated_role": {
+                            "enum": ["EXPLICIT", "LATENT_BRIDGE", "AMBIGUOUS"]
+                        }
+                    },
+                    "required": ["adjudicated_role"],
+                },
+                "then": {
+                    "properties": {
+                        "adjudication_required": {"const": True},
+                        "adjudication_rationale": {"type": "string", "minLength": 1},
+                        "adjudication_changed_bridge_eligibility": {"type": "boolean"},
+                        "adjudicator_id": {"type": "string", "minLength": 1},
+                    },
+                    "anyOf": [
+                        {"properties": {"adjudication_timestamp": {"type": "string"}}},
+                        {"properties": {"adjudication_round": {"type": "integer"}}},
+                    ],
+                },
+            },
+            {
+                "if": {
+                    "properties": {"adjudication_required": {"const": False}},
+                    "required": ["adjudication_required"],
+                },
+                "then": {
+                    "properties": {
+                        "adjudicated_role": {"type": "null"},
+                        "adjudication_rationale": {"type": "null"},
+                        "adjudication_changed_bridge_eligibility": {"type": "null"},
+                        "adjudicator_id": {"type": "null"},
+                        "adjudication_timestamp": {"type": "null"},
+                        "adjudication_round": {"type": "null"},
+                        "answer_inspection_exception_used": {"const": False},
+                    }
+                },
+            },
+            {
+                "if": {
+                    "properties": {"answer_inspection_exception_used": {"const": True}},
+                    "required": ["answer_inspection_exception_used"],
+                },
+                "then": {
+                    "properties": {
+                        "adjudication_required": {"const": True},
+                        "answer_inspection_exceptions": {"minItems": 1},
+                    }
+                },
+            },
+            {
+                "if": {
+                    "properties": {
+                        "answer_inspection_exception_used": {"enum": [None, False]}
+                    },
+                    "required": ["answer_inspection_exception_used"],
+                },
+                "then": {"properties": {"answer_inspection_exceptions": {"maxItems": 0}}},
+            },
         ],
-        "properties": {
-            "source_instance_id": {"type": "string", "pattern": "^s0-[0-9a-f]{64}$"},
-            "annotator_id": {"type": "string", "minLength": 1},
-            "blind_discovery_candidates": {"type": "array", "items": {"type": "string"}},
-            "source_role": {"enum": [None, "EXPLICIT", "LATENT_BRIDGE", "AMBIGUOUS"]},
-            "explicit_relation_type": {
-                "enum": [
-                    None,
-                    "DIRECT_MENTION",
-                    "TRANSLITERATION",
-                    "COMMON_ALIAS_OR_ABBREVIATION",
-                    "MORPHOLOGICAL_OR_DEMONYM",
-                    "DIRECT_SPECIFIC_CONCEPT",
-                ]
-            },
-            "urdu_span_if_explicit": nullable_string,
-            "confidence": {"enum": [None, "HIGH", "MEDIUM", "LOW"]},
-            "rationale": nullable_string,
-            "concrete_intermediate_information": nullable_string,
-            "dependency_status": {
-                "enum": [
-                    None,
-                    "CLEAR_DEPENDENCY",
-                    "MULTIPLE_PLAUSIBLE_PARENTS",
-                    "PARALLEL_OR_UNORDERED",
-                    "UNRESOLVED",
-                    "NOT_APPLICABLE",
-                ]
-            },
-            "proposed_parent_source_titles": {"type": "array", "items": {"type": "string"}},
-            "official_support_path_references": {"type": "array", "items": {"type": "string"}},
-            "annotation_timestamp": {"type": ["string", "null"], "format": "date-time"},
-            "round": {"type": ["integer", "null"], "minimum": 1},
-        },
     }
 
 
