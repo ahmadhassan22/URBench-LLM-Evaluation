@@ -26,6 +26,26 @@ Prompt-context evidence: all 150 prompts whose content exists before generation 
 
 **Post-activation change rule.** Any content-affecting change to prompts, cohort, targets, parsers, budgets, decoding, retrieval, statistics or interpretation creates a **new prospective version** with its own amendment, manifest and seals. No outcome produced under this version may be selectively reused, re-scored, or merged into a later version, and no frozen choice may be revised after any outcome is observed.
 
+## Software correction record
+
+This section records operational corrections only. It creates no new prospective version and revises no scientific choice. Each entry states what failed, what changed, and what was explicitly preserved.
+
+### Correction 1 — record filename validator rejected the P arm
+
+**Date:** 2026-09-06. **Class:** software / filename validation. **Not content-affecting.**
+
+**Observed failure.** The first activated parent stage, Slurm job `82277`, stopped after four seconds with `PilotError: RECORD_PASS_NAME` and exit code 2. It produced no state, query, retrieval result, prediction or score, loaded no model or index, and opened no scoring target. `experiment_state` remained `FROZEN_NOT_RUN` and `historical_global_lineage` remained `UNESTABLISHED`.
+
+**Cause.** `StageRoot.record_path` in `bridge_pilot_run.py` validated record filenames with `re.fullmatch(r"[a-z_]+_[A-E]", pass_name)`. The character class `[A-E]` enumerates `A B C D E` and omits `P`. The arms frozen by Amendment 2 are `A, P, B, C, D, E`, so the reviewed pass name `query_P` — and, latently, `prediction_P` in the retrieve stage — could never be validated. The stage failed during its pre-generation resume scan, before any model load.
+
+**Change.** One character class in one line, `[A-E]` to `[A-EP]`, admitting exactly the frozen arm set and nothing more. Regression tests were added asserting that `record_path` accepts every pass in `PARENT_PASSES` and every `prediction_*`/`query_*`/`state_*` name formed from `ARMS`, and continues to reject unknown arms, malformed names and path traversal.
+
+**Preserved without change.** Every prompt byte, parser rule, cohort member, scoring target, budget, decoding setting, model and encoder setting, retrieval setting, metric, statistical test, threshold, seed and interpretation rule. The preparation r3, preflight v2 and prompt preflight v1 seals are unchanged and remain in force. Amendment 2 and the governing Stage-0 freeze are not modified by this correction; its amendment rules require a new prospective version only for content-affecting changes, and this is not one.
+
+**Stage tag advanced v1 to v2.** The correction changes reviewed file hashes, so the activation manifest was reissued and `roots.stage_tag` advanced to `v2`; `roots.score_output_root` follows the tag as the manifest schema requires. The manifest's own SHA-256 therefore changes and must be supplied to every stage from the reviewed reissue.
+
+**Partial artifacts retained.** `outputs/efbpt/bridge_pilot_n25/v1/parent_v1/`, containing `STAGE_START.json` and an empty `records/` directory, is preserved byte-identical and is not reused, resumed, renamed or deleted. It is the permanent record that job `82277` stopped on a software fault having produced no outcome. Reuse is in any case refused by the runner, since the corrected code identity can no longer match that directory's recorded `STAGE_START.json`.
+
 ## 1. What this test answers
 
 Given the Urdu question and a supplied correct first source, does information taken only from that source help retrieve the next required source?

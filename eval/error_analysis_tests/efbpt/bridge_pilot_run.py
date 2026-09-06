@@ -508,7 +508,7 @@ class StageRoot:
         return resumed
 
     def record_path(self, pass_name, qid):
-        need(re.fullmatch(r"[a-z_]+_[A-E]", pass_name), "RECORD_PASS_NAME")
+        need(re.fullmatch(r"[a-z_]+_[A-EP]", pass_name), "RECORD_PASS_NAME")
         need(qid in CHILD_COUNTS and QID_PATTERN.fullmatch(qid), "RECORD_QID")
         return self.records / (pass_name + "__" + qid + ".json")
 

@@ -744,6 +744,63 @@ class StageRootTests(TreeCase):
         with self.assertRaises(PilotError):
             root.record_path("../escape_A", QIDS[0])
 
+    def test_record_path_accepts_every_parent_pass(self):
+        """Job 82277 stopped on RECORD_PASS_NAME at query_P: the validator's
+        character class omitted the P control arm that Amendment 2 adds. Every
+        pass the parent stage actually plans must be accepted."""
+        root, _ = self.root()
+        for pass_name in run.PARENT_PASSES:
+            path = root.record_path(pass_name, QIDS[0])
+            self.assertEqual(path.name, pass_name + "__" + QIDS[0] + ".json")
+            self.assertEqual(path.parent, root.records)
+
+    def test_record_path_accepts_every_frozen_arm(self):
+        """The validator must admit exactly the frozen arms, including P, for
+        every pass prefix the three stages construct from ARMS."""
+        root, _ = self.root()
+        self.assertEqual(list(ARMS), ["A", "P", "B", "C", "D", "E"])
+        for arm in ARMS:
+            for prefix in ("query_", "state_", "prediction_"):
+                name = prefix + arm
+                path = root.record_path(name, QIDS[0])
+                self.assertEqual(path.name, name + "__" + QIDS[0] + ".json")
+                self.assertEqual(path.parent, root.records)
+
+    def test_record_path_accepts_p_arm_by_name(self):
+        """Explicit non-parametrised guard for the exact names that failed."""
+        root, _ = self.root()
+        for name in ("query_P", "prediction_P", "state_P"):
+            self.assertEqual(root.record_path(name, QIDS[0]).name,
+                             name + "__" + QIDS[0] + ".json")
+
+    def test_record_path_rejects_arms_outside_the_frozen_set(self):
+        """Widening the class to admit P must not admit anything further."""
+        root, _ = self.root()
+        for bad in ("query_F", "query_Q", "query_Z", "prediction_F", "state_G"):
+            with self.assertRaises(PilotError):
+                root.record_path(bad, QIDS[0])
+
+    def test_record_path_rejects_malformed_names_and_traversal(self):
+        """Traversal, separators, case and arity guards all still hold."""
+        root, _ = self.root()
+        for bad in ("", "_A", "A", "query_", "query_AP", "query_PA", "query_a",
+                    "query_p", "Query_A", "query_A ", " query_A", "query-A",
+                    "query_A.json", "query_A__x", "1query_A",
+                    "../escape_P", "../../etc/passwd_P", "..__P", "/abs_P",
+                    "sub/dir_P", "query_P/../../escape_A", "query_P\n",
+                    "query_P\x00", "query_É"):
+            with self.assertRaises(PilotError):
+                root.record_path(bad, QIDS[0])
+
+    def test_record_path_containment_for_every_accepted_name(self):
+        """No accepted pass name may resolve outside the stage records dir."""
+        root, _ = self.root()
+        names = list(run.PARENT_PASSES) + ["query_E"] + [
+            "prediction_" + arm for arm in ARMS]
+        for name in names:
+            path = root.record_path(name, QIDS[0])
+            self.assertTrue(path.resolve().is_relative_to(root.records.resolve()))
+
     def test_archive_must_be_fresh(self):
         root, _ = self.root()
         root.archive.mkdir(parents=True)
