@@ -4833,3 +4833,92 @@ This run was diagnostic only: it creates no gate and does **not** change or
 reopen the frozen L0 gate. The authoritative production result remains
 **LINKABLE B = 45.64%**, **LINKABLE R@10 = 11.85%**, **delivered = 10.07%**,
 against a **51.64%** pass threshold: **GATE FAIL — DO NOT BUILD L1**.
+
+## EFBPT N25 BRIDGE PILOT, DIAGNOSES AND V2 QUERY DEVELOPMENT (recorded 2026-09-26)
+
+The frozen pilot result below is the authoritative result. Everything after it
+is **post-outcome, AI-assisted development evidence** on the same exposed
+cohort of **25 questions / 36 target titles**. No significance claim is made
+from any of it.
+
+### COMPLETED
+| Step | Job | Output under `outputs/efbpt/` | Seal / file SHA-256 |
+|---|---|---|---|
+| Frozen pilot: parent states and queries | 82585 | `bridge_pilot_n25/v1/parent_v2/` | `490f5a989f1c8bc7…` (STAGE_SEAL) |
+| Frozen pilot: oracle-E queries | 84199 | `bridge_pilot_n25/v1/oracle_e_v2/` | `cbba8b6eeec9a0fa…` (STAGE_SEAL) |
+| Frozen pilot: retrieval | 84227 | `bridge_pilot_n25/v1/retrieve_v2/` | `d3ef88f42a911dac…` (STAGE_SEAL) |
+| Frozen pilot: scoring | 84267 | `bridge_pilot_n25/v1/score_v2/` | `b62b09a07aaa7809…` (SCORING_SEAL) |
+| Target reachability diagnosis | 84408 | `bridge_pilot_n25/target_reachability_diagnostic_v1/` | `0c1a774dd9c44c52…` (DIAGNOSTIC_SEAL) |
+| Target-vector diagnosis | 92702 | `bridge_pilot_n25/target_vector_probe_v1/` | `c10050bbeb7e7ee3…` (DIAGNOSTIC_SEAL) |
+| V2 query development | 95080 | `bridge_v2_dev/queries_dev1/` | `20f6b90ac341280d…` (DEV_SEAL); scores `eff593c50d954204…` |
+| AI-assisted evidence review, 46 rows | none | `bridge_v2_dev/assisted_review_v1/evidence_relevance_completed.jsonl` | `14685a8676d46c81…` |
+| AI-assisted query review, 200 cells | none | `bridge_v2_dev/assisted_review_v1/rubric_review_completed.jsonl` | `08dce665178bde3b…` |
+| Paired score audit (read-only) | none | no file; numbers recorded here | worksheet key `01e508d3e4bcf566…` matches DEV_SEAL |
+
+Jobs 82277 (parent) and 92701 (target-vector) stopped at start-up with no
+result; 92701 failed because `git` was not on the job's PATH. All other jobs
+above completed with exit `0:0`. The pilot code is pinned in SCORING_SEAL; the
+probe and V2 script hashes recorded in their seals match the committed files.
+
+### POSITIVE FINDINGS
+- The pipeline ran end to end with its checks. Every stage sealed, the V2 run
+  left all pinned frozen inputs unchanged, and recomputing hits from the
+  sealed predictions and targets reproduced every stored score.
+- Reachability: all **36/36** target titles exist in the retrieval metadata.
+- Target vectors: all **1,046** target rows aligned with their stored vectors,
+  and **15,000** stored query-chunk scores were reproduced (maximum absolute
+  difference 2.5e-7 against a 1e-3 tolerance).
+- Some V2 queries improved. For example, in the BJJ question, arm D, the target
+  "Hélio Gracie" moved from title rank 15 to 8. It was already in the
+  candidate pool, so this was a ranking gain, and the question reached 2/2
+  targets in the top 10.
+
+### NEGATIVE FINDINGS
+- **The frozen full-method gate failed.** R@10, question-macro: D **28%**,
+  B **28%**, A **12%**. The primary contrast D versus A was **+16 percentage
+  points** and met the practical threshold, but the exact two-sided sign-flip
+  test gave **p = 0.09375** (needed < 0.05). D versus B was 0 points. Decision:
+  `INSUFFICIENT_EVIDENCE_FOR_FULL_BRIDGE_METHOD`.
+- The target-vector probe found that a target's own title retrieves that
+  target in the top 10 for only **25/36** targets (18/36 at rank 1).
+- V2 on the exposed set, frozen to revised, R@10:
+
+  | Arm | Question-macro R@10 | Target hits@10 (of 36) |
+  |---|---|---|
+  | A | 12% → 12% | 4 → 4 |
+  | P | 12% → 12% | 3 → 3 |
+  | B | 28% → 24% | 8 → 7 |
+  | D | 28% → 30% | 8 → 9 |
+
+  Question-macro recall weights each question equally; target hits weight each
+  of the 36 targets equally. Of **100 paired question-arm cells**, 96 were
+  unchanged at the top 10, 2 gained (BJJ D by ranking; the گو question D, where
+  the target newly entered the candidate pool) and 2 lost (Bactrian camel B and
+  D, by ranking).
+- Candidate@100 is a diagnostic, not a scorer metric. Its unit is a
+  **target-arm presence**: the target title appears anywhere among the 100
+  retrieved chunks, out of at most 144 (36 targets × 4 arms). The total fell
+  **44 → 39**: 3 target gains and 8 target losses, falling in 10 question-arm
+  cells (2 gain cells, one of which gained two targets, and 8 loss cells)
+  across 7 questions. The frozen counts match the target-vector probe's sealed
+  per-target records.
+- Urdu-to-English meaning errors persist in both versions. In the AI-assisted
+  review, 55 of 100 revised queries still altered the question's relation, for
+  example crane → named people, crustacean → Christian, squid → squad,
+  humps → mountains, Vegemite → veggie sandwich, and Lincoln Tunnel → other
+  tunnels. Paired R1a: 9 better, 6 worse, 83 unchanged, and 2 altered↔dropped.
+- Revised D′ versus revised B′ was **+6 percentage points** at R@10 (9 versus 7
+  target hits; D′ higher on 2 questions, lower on 0). This is descriptive only.
+  One of the two questions depends on a flagged query that replaced the
+  unresolved Urdu term گو with "Song dynasty". Frozen D and B were tied.
+- Evidence-term use (R2) remains unresolved. Of 68 applicable cells, 6 used a
+  contributed term (3 per version), 12 used other evidence terms and 7 were
+  uncertain.
+
+### DECISION AND DIRECTION
+V2 is post-outcome, AI-assisted development evidence, not a validated
+improvement. Do **not** lock it as the thesis method and do not claim
+significance. Next: diagnose the persistent meaning errors, specify one
+input-grounded repair, and test it first on a **fresh development cohort**.
+Only after that, run a separate, adequately sized held-out evaluation. Report
+question-macro recall and raw target-hit counts separately.
