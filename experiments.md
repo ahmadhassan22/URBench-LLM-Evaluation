@@ -4922,3 +4922,114 @@ significance. Next: diagnose the persistent meaning errors, specify one
 input-grounded repair, and test it first on a **fresh development cohort**.
 Only after that, run a separate, adequately sized held-out evaluation. Report
 question-macro recall and raw target-hit counts separately.
+
+## EFBPT QEA TRIAGE: GEMMA REVIEWER CALIBRATION AND AUDIT (recorded 2026-09-27)
+
+This is post-outcome, AI-assisted development of the QEA triage reviewer (R1). The records are in
+`docs/EFBPT_QEA_TRIAGE_EXEC_AMENDMENT_{1..4}.md`. No triage, QEA generation or retrieval has run.
+
+**Setup:**
+- Two Gemma smokes: job 96317 failed (float16 load and a missing `<end_of_turn>` stop), and job 96350 passed after
+  the bf16/stop correction.
+- Job 96416 compared two review prompts on 51 exposed cases, 102 calls: v1 (frozen) and v2 (quoting the Stage-0
+  definition in full).
+  - The cases were all 41 human-verified DEV200 pairs plus 10 AI-authored q1 controls.
+  - Seals: run `21ea719f…`, report `b988991c…`.
+
+**Results (all 102 calls valid, none length-stopped):**
+
+| | v1 | v2 |
+|---|---:|---:|
+| Historical parents judged directly identifiable (of 41) | 3 | 35 |
+| Exact Y, Y, Y, C on the 36 accepted pairs | 3 | 23 |
+| Human-rejected pairs accepted (of 5) | 0 | 2 (H03, H23) |
+
+**Audit findings:**
+- v1 answers q1 = N almost everywhere.
+- In 5 of v2's 11 q2 = N answers, the model's note contradicts the answer.
+- v2 sometimes draws q1 from fields outside the question (C03/C04), and missed plain transliterations (H06, H07,
+  H27, H35).
+- It misread کرسٹیشین ("crustacean") as "Christian", the same confusion seen in the V2 query review.
+- q3 answered Y in all 102 calls and flagged none of the five historical negatives; q4 returned O for H06 under both
+  versions.
+- Historical packets carry a template, not an intermediate fact, and step references (`#n`) are unresolved.
+
+**Decision and direction:**
+- Neither review prompt is deployed.
+- Next: a calibration-only, isolated title-identification check (amendment 4): 81 exact (question, title) items,
+  mapped to q1/q2 outside the model, prepared offline and not yet run.
+- Separately, the q3/q4 packet adequacy and step references remain blockers before full triage.
+
+**Update, job 96485: isolated title identification (amendment 4).**
+- **Run:** 81 exact (question, title) items, all 81 outputs valid (34 Y, 47 N, 0 U). Seals: run `62dd0f96…`,
+  report `008ae920…`.
+- **Parents:** 17 of 30 judged directly identifiable, against 24 of 30 plus 1 mixed under the job-96416 v2 prompt.
+- **Children:** 12 of 41 were falsely identified, against 10 (v2) and 0 (v1).
+- **Controls:** the N controls held at 4 of 4. NASA was lost. Both ambiguous Mercury titles were judged Y.
+- **Role reversals:** in 5 questions the parent was rejected while the child was accepted.
+- **Notes:** they no longer contradict the answers, but they misread Urdu and claim names that are absent from the
+  question.
+- **Decision:** not adopted.
+- **Direction:** across three prompt formats (v1, v2 and isolated), Gemma's Urdu identity judgments remain
+  unreliable, which now points to reviewer capability rather than prompt format. Adopting any reviewer and changing
+  the q3/q4 packets remain separate decisions.
+
+**Correction to the job-96485 update:**
+- **Parents versus v2:** 3 clear gains, 11 losses, and 1 MIXED → Y resolution.
+- **Controls versus v2:** 1 clear gain and 1 clear loss, plus 2 ambiguity regressions (C07/C08 moved from the
+  defensible N to Y).
+- **Scope:** the results establish poor performance of the tested Gemma configuration. They do not isolate model
+  capability as the sole cause.
+
+## CURRENT STATUS: EFBPT BRIDGE AND QEA TRIAGE (recorded 2026-09-27): PAUSED_BY_USER
+
+This is a status summary. Details are in the two entries above and in `docs/`; nothing here is a new result. All
+work since the frozen pilot is post-outcome, AI-assisted development on exposed items. The QEA protocol revision 0.2
+(`docs/EFBPT_QEA_DEV_PROTOCOL.md`) stays frozen, and it predates the runs below; its header still says no inference
+has run. Amendments 1–4 record every run that followed.
+
+| Thread | State | Record |
+|---|---|---|
+| N25 bridge pilot (frozen) | Gate failed: D − A = +16 pp, but exact sign-flip p = 0.09375 (needed < 0.05). Decision: `INSUFFICIENT_EVIDENCE_FOR_FULL_BRIDGE_METHOD` | N25 entry above |
+| Retrieval and vector diagnosis | All 36 targets are present in the metadata, but a target's own title retrieves it in the top 10 for only 25 of 36 | N25 entry above |
+| V2 query development | Descriptive changes only; persistent Urdu meaning errors; not locked | N25 entry; `docs/EFBPT_BRIDGE_V2_DEV_NOTE.md` |
+| Llama T1/T2 smokes | 96120 failed at start-up (not enough KV cache at 0.90). 96136, unconstrained: 4 of 6 parser-valid. 96151, constrained: 6 of 6 on those six requests. T1/T2 now use 0.95, 4 sequences and per-request schemas. T1/T2 have not run | Amendment 1 |
+| Gemma R1 smokes | 96317 gave empty outputs (float16 load, no `<end_of_turn>` stop). 96350 passed after the bf16 and stop correction | Amendment 2 |
+| Review calibration 96416 | Neither prompt deployed | QEA entry above; amendment 3 |
+| Identification calibration 96485 | Not adopted (corrected findings below) | QEA entry above; amendment 4 |
+| Claude identification calibration | `STOPPED_BEFORE_INFERENCE`: zero Claude calls, no collection code, no results | Amendment 4 §9 |
+
+**Job 96485, corrected summary:**
+- All 81 responses were valid.
+- Historical parents: 17 of 30 recognized.
+- Historical children: 29 of 41 correctly non-explicit, 12 of 41 incorrectly explicit.
+- Parents versus v2: 3 clear gains, 11 losses, and 1 MIXED → Y resolution.
+- Controls: 1 clear gain, 1 clear loss, and 2 ambiguity regressions.
+- Poor performance applies to the tested Gemma configuration. Model capability alone has **not** been established as
+  the cause, and the earlier "points to reviewer capability" wording is superseded.
+
+**Claude calibration:** none of the available routes could verify the specified isolation: one fresh reviewer per
+item, receiving only the pinned prompt and one payload.
+- **Existing R2 channel:** a manual batch in which every item shares one session.
+- **Anthropic SDK:** installed, but there is no API key.
+- **CLI `--bare`:** requires an API key.
+- **Normal-mode CLI:** its memory exclusion, output cap and request contents can't be verified.
+- **Subagents:** they carry the Claude Code prompt and tools.
+
+**Remaining issues:**
+- In the historical calibration, the q3/q4 packets carry a template, not concrete bridge information.
+- Referenced decomposition steps (`#n`) may be missing from packets, and step numbering (0-based labels against
+  1-based references) needs correcting.
+- Production Pass-3 intermediate sentences remain unverified claims.
+- Historical reference labels have exposure and anchoring limitations: the verifiers saw the generator's claims.
+- QEA retrieval improvement, novelty and statistical significance remain unestablished. The QEA runner is not
+  implemented, and no QEA generation or retrieval has run.
+
+**Possible future work (pending a decision; not authorized):**
+- choose a reviewer access route whose isolation can be verified;
+- decide whether to repeat the identification calibration with it;
+- amend the q3/q4 packet contents and step references;
+- only then T0–T5 triage;
+- only after that, QEA on a fresh cohort with a held-out evaluation.
+
+**Status: `PAUSED_BY_USER`** (2026-09-27). No jobs are queued. No further work is authorized.
