@@ -4,7 +4,10 @@ d8_reachable_ceiling.py
 
 D8 — Reachable-page ceiling and English self-knowledge.
 Contract: docs/EFBPT_D8_REACHABLE_CEILING_FREEZE.md (FROZEN 2026-10-27) as
-amended by docs/EFBPT_D8_AMENDMENT_1.md (pre-run, 2026-10-27).
+amended by docs/EFBPT_D8_AMENDMENT_1.md (pre-run, 2026-10-27) and
+docs/EFBPT_D8_AMENDMENT_2.md (pre-result, 2026-10-29: a verbatim gold-fact
+substring in a pass-2 prompt of Xp/GEN/X1u is counted and reported as V6,
+not fatal; V2b compares A_r with the archived A_r of failed job 107156).
 Implements the freeze exactly; nothing here is tunable after numbers exist.
 
 Arms (freeze §5, Amendment 1 A1), all paired with A_r on the same qids:
@@ -79,7 +82,9 @@ from d5_balanced_extract import mcnemar   # noqa: E402  paired exact, two-sided
 # ----------------------------------------------------------------------------
 
 FREEZE_PATH = "docs/EFBPT_D8_REACHABLE_CEILING_FREEZE.md"
-AMENDMENT_PATH = "docs/EFBPT_D8_AMENDMENT_1.md"
+AMENDMENT_PATH = ["docs/EFBPT_D8_AMENDMENT_1.md",     # pre-run, 2026-10-27
+                  "docs/EFBPT_D8_AMENDMENT_2.md"]     # pre-result, 2026-10-29
+ARCHIVED_AR_PATH = "outputs/efbpt/d8_job107156_failed/d8_armA_r.jsonl"  # read-only (A2.3)
 TRACE_PATH = "data/strategyqa_official/efbpt/stage0/lexical_trace_instances.jsonl"
 TRACE_MD5 = "5b361d60b33a64ab5c8935b40a3550e1"
 TRACE_COUNTS = OrderedDict([("total", 636), ("EXACT", 256),
@@ -336,21 +341,36 @@ def load_leak_needles():
             "evidence_re": ev_re}
 
 
-def leak_guard(label, prompts, needles):
+def leak_guard(label, prompts, needles, fatal_gold_facts=True):
+    """question_en and evidence-id matches are always fatal. A gold-fact
+    substring is fatal when fatal_gold_facts is True (every pass-1 prompt,
+    A_r pass 2); otherwise (Amendment 2 A2.2: Xp/GEN/X1u pass 2, where the
+    model's own pass-1 extraction may restate a page fact verbatim) it is
+    collected and returned as a list of (prompt index, matched fact)."""
+    hits = []
     for i, p in enumerate(prompts):
         for s in needles["question_en"]:
             if s in p:
                 die("LEAK in %s prompt %d: contains question_en %r" % (label, i, s))
         for s in needles["facts"]:
             if s in p:
-                die("LEAK in %s prompt %d: contains gold fact %r" % (label, i, s))
+                if fatal_gold_facts:
+                    die("LEAK in %s prompt %d: contains gold fact %r" % (label, i, s))
+                hits.append((i, s))
         m = needles["evidence_re"].search(p)
         if m:
             die("LEAK in %s prompt %d: contains evidence id %r" % (label, i, m.group(0)))
-    print("[leak-guard] %-9s %4d prompts clean (%d question_en, %d gold facts, "
-          "%d evidence ids checked)"
-          % (label, len(prompts), len(needles["question_en"]),
-             len(needles["facts"]), len(needles["evidence_ids"])), flush=True)
+    if hits:
+        print("[leak-guard] %-9s %4d prompts: question_en and evidence ids clean; "
+              "%d verbatim gold-fact substring(s) in %d prompt(s), reported as V6 "
+              "(Amendment 2 A2.2, not fatal)"
+              % (label, len(prompts), len(hits), len({i for i, _ in hits})), flush=True)
+    else:
+        print("[leak-guard] %-9s %4d prompts clean (%d question_en, %d gold facts, "
+              "%d evidence ids checked)"
+              % (label, len(prompts), len(needles["question_en"]),
+                 len(needles["facts"]), len(needles["evidence_ids"])), flush=True)
+    return hits
 
 
 # ----------------------------------------------------------------------------
@@ -382,13 +402,15 @@ def preflight():
 
     if not os.path.exists(FREEZE_PATH):
         die("freeze file missing: " + FREEZE_PATH)
-    if not os.path.exists(AMENDMENT_PATH):
-        die("amendment file missing: " + AMENDMENT_PATH)
+    for ap in AMENDMENT_PATH:
+        if not os.path.exists(ap):
+            die("amendment file missing: " + ap)
     freeze_md5 = md5_file(FREEZE_PATH)
-    amendment_md5 = md5_file(AMENDMENT_PATH)
+    amendment_md5s = [md5_file(ap) for ap in AMENDMENT_PATH]
     script_md5 = md5_file(os.path.abspath(__file__))
     print("[md5] freeze    %s  %s" % (freeze_md5, FREEZE_PATH))
-    print("[md5] amendment %s  %s" % (amendment_md5, AMENDMENT_PATH))
+    for ap, am in zip(AMENDMENT_PATH, amendment_md5s):
+        print("[md5] amendment %s  %s" % (am, ap))
     print("[md5] script    %s  %s" % (script_md5, os.path.relpath(__file__)))
 
     instruction = load_instruction()             # MD5 asserted inside
@@ -493,7 +515,8 @@ def preflight():
 
     meta = OrderedDict([
         ("freeze", OrderedDict([("path", FREEZE_PATH), ("md5", freeze_md5)])),
-        ("amendment", OrderedDict([("path", AMENDMENT_PATH), ("md5", amendment_md5)])),
+        ("amendments", [OrderedDict([("path", ap), ("md5", am)])
+                        for ap, am in zip(AMENDMENT_PATH, amendment_md5s)]),
         ("script", OrderedDict([("path", os.path.relpath(__file__)),
                                 ("md5", script_md5)])),
         ("pass1_instructions", OrderedDict([
@@ -767,6 +790,7 @@ def main():
             facts_for[arm][e["qid"]] = e["facts"]
     had_pass1 = {e["qid"] for e in extractions["Xp"]}
     results = OrderedDict()
+    gold_fact_hits = OrderedDict()      # Amendment 2 A2.2: arm -> qid -> matched facts
 
     def run_pass2(arm, prs):
         print("\n" + "=" * 70)
@@ -776,9 +800,14 @@ def main():
         if not prs:
             print("  (no rows)")
             results[arm] = []
+            gold_fact_hits[arm] = OrderedDict()
             return
         prompts = [answer_prompt(r, facts_for[arm][r["qid"]]) for r in prs]
-        leak_guard("%s/pass2" % arm, prompts, needles)
+        hits = leak_guard("%s/pass2" % arm, prompts, needles,
+                          fatal_gold_facts=(arm == "A_r"))
+        gold_fact_hits[arm] = OrderedDict()
+        for i, s in hits:
+            gold_fact_hits[arm].setdefault(prs[i]["qid"], []).append(s)
         log_full_prompt("%s pass 2, row 0, qid %s" % (arm, prs[0]["qid"]), prompts[0])
         gens = generate_all(model, tok, prompts, args.batch_size, eos_ids, MAX_NEW_TOKENS)
         recs = []
@@ -879,6 +908,30 @@ def main():
           % (acc(results["A_r"]), acc(d1a), v2_diff, agree, len(d1a), agree_pct,
              "PASS" if v2_ok else "NONDETERMINISM FLAG (readings use A_r only)"))
 
+    # V2b (Amendment 2 A2.3, reported, not a gate): this A_r vs the archived
+    # A_r of failed job 107156 (same stack, same batch size)
+    if os.path.exists(ARCHIVED_AR_PATH):
+        arch = [r for r in read_jsonl(ARCHIVED_AR_PATH) if r["qid"] in ar_by]
+        agree_b = sum(1 for r in arch if ar_by[r["qid"]]["pred"] == r["pred"])
+        agree_b_pct = 100.0 * agree_b / len(arch) if arch else 0.0
+        v2b_diff = (acc(results["A_r"]) - acc(arch)) if arch else None
+        summary["V2b_Ar_vs_archived_Ar"] = OrderedDict([
+            ("archived_path", ARCHIVED_AR_PATH), ("gate", False),
+            ("acc_A_r", acc(results["A_r"])), ("acc_archived_A_r", acc(arch)),
+            ("acc_diff_pp", round(v2b_diff, 2) if v2b_diff is not None else None),
+            ("rows_agree", agree_b), ("n", len(arch)),
+            ("row_agreement_pct", round(agree_b_pct, 2))])
+        print("V2b A_r %.2f%% vs archived A_r (job 107156) %.2f%% (diff %.2f pp); "
+              "row agreement %d/%d = %.2f%% (reported, not a gate)"
+              % (acc(results["A_r"]), acc(arch) if arch else 0.0,
+                 v2b_diff if v2b_diff is not None else 0.0,
+                 agree_b, len(arch), agree_b_pct))
+    else:
+        summary["V2b_Ar_vs_archived_Ar"] = OrderedDict([
+            ("archived_path", ARCHIVED_AR_PATH), ("gate", False),
+            ("note", "skipped: archived A_r file absent")])
+        print("V2b skipped: archived A_r file absent (%s)" % ARCHIVED_AR_PATH)
+
     # V3
     v3_ok = v3_frac >= V3_LATIN_MIN
     summary["V3_GEN_latin_fraction"] = OrderedDict([
@@ -916,6 +969,25 @@ def main():
         ("facts", [OrderedDict([("qid", q), ("titles_corpus", t), ("fact", f)]) for q, t, f in v5])])
     print("V5 %d random Xp facts listed in the summary for hand checking (seed %d)"
           % (len(v5), V5_SEED))
+
+    # V6 (Amendment 2 A2.2, reported, not a gate): verbatim gold-fact
+    # substrings in the pass-2 prompts of Xp / GEN / X1u, per arm
+    v6_arms = OrderedDict()
+    for arm in ("Xp", "GEN", "X1u"):
+        hits_by_qid = gold_fact_hits.get(arm, OrderedDict())
+        v6_arms[arm] = OrderedDict([
+            ("count", sum(len(v) for v in hits_by_qid.values())),
+            ("qids", len(hits_by_qid)),
+            ("matches", [OrderedDict([("qid", q), ("fact", f)])
+                         for q, fs in hits_by_qid.items() for f in fs])])
+    summary["V6_gold_fact_verbatim_pass2"] = OrderedDict([
+        ("gate", False),
+        ("note", "model-restated page facts byte-identical to a gold fact; "
+                 "pass-1 prompts and A_r pass 2 stay gated (Amendment 2 A2.2)"),
+        ("arms", v6_arms)])
+    print("V6 verbatim gold-fact substrings in pass-2 prompts (reported, not a gate): %s"
+          % ", ".join("%s %d in %d qid(s)" % (a, v["count"], v["qids"])
+                      for a, v in v6_arms.items()))
 
     # ---- readings ----
     print("\n" + hdr)
@@ -1039,7 +1111,7 @@ def main():
         ("mode", "TEST" if is_test else "FULL"), ("slurm_job_id", job_id),
         ("end_time", time.strftime("%Y-%m-%d %H:%M:%S")),
         ("script_md5", meta["script"]["md5"]), ("freeze_md5", meta["freeze"]["md5"]),
-        ("amendment_md5", meta["amendment"]["md5"]),
+        ("amendment_md5s", [a["md5"] for a in meta["amendments"]]),
         ("files", files)])
     write_json(os.path.join(OUT_DIR, "d8_SEAL%s.json" % suffix), seal)
     if is_test:
