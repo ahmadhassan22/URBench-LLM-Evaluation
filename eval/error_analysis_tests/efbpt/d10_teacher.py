@@ -15,6 +15,10 @@ under vLLM 0.13.0 on one L20:
   T3  t_direct.jsonl   teacher answers the student's exact no-facts prompt
                        (build_user arm "A" + SYSTEM_MESSAGE), scored with the
                        frozen primary and secondary extractors
+  T3F t_direct_f.jsonl Amendment 1 (docs/EFBPT_D10_AMENDMENT_1.md, A1.1): the
+                       T3 prompt with ONE line appended after a blank line that
+                       asks for a final "<MARKER>: yes/no" line; the marker and
+                       the yes/no words are the extractor's own constants
   T4  derangement.json qid -> donor qid, seed 1010, no fixed point
   T5  leak guard       question_en / gold facts / evidence ids in ANY teacher
                        prompt: FATAL (d8_reachable_ceiling.leak_guard)
@@ -59,6 +63,7 @@ if _HERE not in sys.path:
 
 from efbpt_eval_dev200 import (          # noqa: E402
     SYSTEM_MESSAGE, MAX_NEW_TOKENS, INSTRUCTION_PATH, INSTRUCTION_MD5,
+    MARKER, HAAN, NAHIN,                  # Rule-2 constants, for the A1.1 line
     extract_answer, load_instruction, die,
 )
 from d1_eval_arms import build_user       # noqa: E402  arm "A" layout
@@ -126,6 +131,13 @@ YESNO_RE = re.compile(r"^(yes|no)[,.:]", re.IGNORECASE)
 
 # §3 T3
 T3_MAX_TOKENS = MAX_NEW_TOKENS        # 1024, the student's frozen value
+
+# Amendment 1, A1.1 — T-direct-F: ONE line appended to the T3 user message after
+# a blank line. The marker (Rule 2 of extract_answer) and the yes/no words are
+# the extractor's constants imported above, never retyped; only the surrounding
+# Urdu is typed here, from the amendment text. Same max_tokens as T3.
+TDF_LINE = ("آخر میں ایک الگ سطر پر لکھیں: " + MARKER + ": " + HAAN
+            + " یا " + MARKER + ": " + NAHIN)
 
 # §3 T4
 DERANGE_SEED = 1010
@@ -343,9 +355,15 @@ def preflight(limit):
                for r in sub]
     p_direct = [render(SYSTEM_MESSAGE, build_user(instruction, r, None, "A"))
                 for r in sub]
+    # A1.1: the same user message + blank line + the final-answer line
+    if MARKER not in TDF_LINE or HAAN not in TDF_LINE or NAHIN not in TDF_LINE:
+        die("T-direct-F line does not contain the extractor's marker / yes / no constants")
+    p_direct_f = [render(SYSTEM_MESSAGE, build_user(instruction, r, None, "A") + "\n\n" + TDF_LINE)
+                  for r in sub]
 
     for label, ps, mx in (("T1/facts", p_facts, T1_MAX_TOKENS),
-                          ("T3/direct", p_direct, T3_MAX_TOKENS)):
+                          ("T3/direct", p_direct, T3_MAX_TOKENS),
+                          ("T3F/direct-F", p_direct_f, T3_MAX_TOKENS)):
         tl = sorted(len(ids) for _, ids in ps)
         print("[len] %-10s n=%d tokens min=%d median=%d max=%d (+%d new <= %d)"
               % (label, len(ps), tl[0], tl[len(tl) // 2], tl[-1], mx,
@@ -357,6 +375,7 @@ def preflight(limit):
     needles = load_leak_needles()
     leak_guard("T1/facts", [t for t, _ in p_facts], needles, fatal_gold_facts=True)
     leak_guard("T3/direct", [t for t, _ in p_direct], needles, fatal_gold_facts=True)
+    leak_guard("T3F/direct-F", [t for t, _ in p_direct_f], needles, fatal_gold_facts=True)
 
     # ---- T4 ----
     dmap, tries = derangement(sub_qids, DERANGE_SEED)
@@ -365,6 +384,7 @@ def preflight(limit):
 
     log_full_prompt("T1 facts, row 0, qid %s" % sub[0]["qid"], p_facts[0][0])
     log_full_prompt("T3 direct, row 0, qid %s" % sub[0]["qid"], p_direct[0][0])
+    log_full_prompt("T3F direct-F, row 0, qid %s" % sub[0]["qid"], p_direct_f[0][0])
 
     meta = OrderedDict([
         ("freeze", OrderedDict([("path", FREEZE_PATH), ("md5", freeze_md5)])),
@@ -376,6 +396,11 @@ def preflight(limit):
             ("t_user_template_md5", md5_text(T_USER_TEMPLATE)),
             ("student_system_message_md5", md5_text(SYSTEM_MESSAGE)),
             ("t1_max_tokens", T1_MAX_TOKENS), ("t3_max_tokens", T3_MAX_TOKENS),
+            # Amendment 1, A1.1
+            ("t_direct_f_line", TDF_LINE),
+            ("t_direct_f_line_md5", md5_text(TDF_LINE)),
+            ("t_direct_f_marker_md5", md5_text(MARKER)),
+            ("t3f_max_tokens", T3_MAX_TOKENS),
         ])),
         ("verdict_filter", OrderedDict([("regex", VERDICT_RE.pattern),
                                         ("yes_no_regex", YESNO_RE.pattern),
@@ -383,11 +408,11 @@ def preflight(limit):
                                         ("max_facts", MAX_FACTS)])),
         ("derangement", OrderedDict([("seed", DERANGE_SEED), ("n", len(dmap)),
                                      ("shuffles", tries)])),
-        ("leak_guard", OrderedDict([("prompts_checked", len(p_facts) + len(p_direct)),
+        ("leak_guard", OrderedDict([("prompts_checked", len(p_facts) + len(p_direct) + len(p_direct_f)),
                                     ("fatal_hits", 0)])),
     ])
     print("[preflight] PASS", flush=True)
-    return sub, p_facts, p_direct, dmap, meta
+    return sub, p_facts, p_direct, p_direct_f, dmap, meta
 
 
 # ----------------------------------------------------------------------------
@@ -410,7 +435,7 @@ def main():
     is_test = args.limit is not None
     OUT_DIR = OUT_DIR_TEST if is_test else OUT_DIR_FULL
 
-    sub, p_facts, p_direct, dmap, meta = preflight(args.limit)
+    sub, p_facts, p_direct, p_direct_f, dmap, meta = preflight(args.limit)
 
     if args.preflight_only:
         print("\n[preflight-only] done. No files written.")
@@ -503,23 +528,30 @@ def main():
     print("  Latin fraction of kept facts %.4f (%d/%d letters)" % (frac, latin, letters))
     write_jsonl(os.path.join(OUT_DIR, "t_facts.jsonl"), t_facts, expect_n=len(sub))
 
-    # ---------------- T3 ----------------
-    g3 = generate([ids for _, ids in p_direct], T3_MAX_TOKENS, "T3 — teacher direct (student prompt)")
-    t_direct = []
-    for r, (text, ids), (raw, n_new, fin) in zip(sub, p_direct, g3):
-        t_direct.append(OrderedDict([
-            ("qid", r["qid"]), ("arm", "T_direct"), ("gold", r["gold"]),
-            ("pred", extract_answer(raw)),
-            ("pred_secondary", extract_answer_secondary(raw)),
-            ("truncated", fin == "length"), ("finish_reason", fin),
-            ("n_gen_tokens", n_new), ("n_facts_given", 0),
-            ("prompt", text), ("generation", raw),
-        ]))
-    s = score(t_direct, "pred")
-    print("  T-direct accuracy %.2f%%  unparsed %.2f%%  (%d/%d correct)  pred-yes %.2f%%"
-          % (s["accuracy"], s["unparsed_rate"], s["correct"], s["n"], s["predicted_yes_rate"]))
-    print("  sample generation (row 0, first 300 chars): %r" % t_direct[0]["generation"][:300])
-    write_jsonl(os.path.join(OUT_DIR, "t_direct.jsonl"), t_direct, expect_n=len(sub))
+    # ---------------- T3 and T3F (A1.1) ----------------
+    def direct_arm(prompts_, label, arm_name, fname):
+        g = generate([ids for _, ids in prompts_], T3_MAX_TOKENS, label)
+        recs = []
+        for r, (text, ids), (raw, n_new, fin) in zip(sub, prompts_, g):
+            recs.append(OrderedDict([
+                ("qid", r["qid"]), ("arm", arm_name), ("gold", r["gold"]),
+                ("pred", extract_answer(raw)),
+                ("pred_secondary", extract_answer_secondary(raw)),
+                ("truncated", fin == "length"), ("finish_reason", fin),
+                ("n_gen_tokens", n_new), ("n_facts_given", 0),
+                ("prompt", text), ("generation", raw),
+            ]))
+        s = score(recs, "pred")
+        print("  %s accuracy %.2f%%  unparsed %.2f%%  (%d/%d correct)  pred-yes %.2f%%"
+              % (arm_name, s["accuracy"], s["unparsed_rate"], s["correct"], s["n"], s["predicted_yes_rate"]))
+        print("  sample generation (row 0, first 300 chars): %r" % recs[0]["generation"][:300])
+        write_jsonl(os.path.join(OUT_DIR, fname), recs, expect_n=len(sub))
+        return recs
+
+    t_direct = direct_arm(p_direct, "T3 — teacher direct (student prompt)",
+                          "T_direct", "t_direct.jsonl")
+    t_direct_f = direct_arm(p_direct_f, "T3F — teacher direct-F (student prompt + final-answer line, A1.1)",
+                            "T_direct_F", "t_direct_f.jsonl")
 
     # ---------------- T4 ----------------
     write_json(os.path.join(OUT_DIR, "derangement.json"),

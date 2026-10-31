@@ -14,6 +14,11 @@ Arms (freeze §4), n=200 each, same job, same row order, batch size 1:
 TF / TF_wrong with an empty fact list -> arm "A" prompt; TF_noq with an empty
 fact list -> arm "G" layout with an empty block. All kept, scored, counted.
 
+Amendment 1 (docs/EFBPT_D10_AMENDMENT_1.md): the teacher seal also holds
+t_direct_f.jsonl (T-direct-F, A1.1); R2 compares TF with T-best = the
+teacher-direct arm with the higher primary accuracy, tie -> T_direct (A1.2);
+the V8 checker cuts the user text at <|im_end|> before reading fact lines (A1.6).
+
 Everything frozen is IMPORTED, never re-implemented:
   model path, SYSTEM_MESSAGE, instruction (+MD5), extractor  <- efbpt_eval_dev200
   user layouts arm "A"/"B"/"G", facts header                 <- d1_eval_arms
@@ -104,7 +109,8 @@ GATE_PP = 8.0
 COND_PP = 5.0
 HARM_PP = -3.0
 ALPHA = 0.05
-R2_TDIRECT_UNPARSED_MAX = 10.0     # T3: above this, R2 also on parsed rows
+R2_TDIRECT_UNPARSED_MAX = 10.0     # T3 / A1.2: any teacher-direct arm above this -> also parsed-only
+TDIRECT_ARMS = ("T_direct", "T_direct_F")   # A1.1; T-best picked by A1.2, tie -> T_direct
 R3_FORMAT_PP = 4.0
 R4_MECHANISM_MIN_PCT = 30.0
 D1_ARM_G_OVERALL = 42.0            # reference, D1 arm G
@@ -203,7 +209,7 @@ def verify_teacher_seal(t_dir):
         if got["md5"] != want["md5"] or got["bytes"] != want["bytes"] or got["lines"] != want["lines"]:
             die("V7: %s differs from T_SEAL: sealed %s, on disk %s" % (p, dict(want), dict(got)))
         checked[p] = got["md5"]
-    need = {"t_facts.jsonl", "t_direct.jsonl", "derangement.json", "T_START.json"}
+    need = {"t_facts.jsonl", "t_direct.jsonl", "t_direct_f.jsonl", "derangement.json", "T_START.json"}
     have = {os.path.basename(p) for p in checked}
     if not need <= have:
         die("V7: T_SEAL does not cover %s" % sorted(need - have))
@@ -219,12 +225,15 @@ def verify_teacher_seal(t_dir):
 def facts_in_prompt(prompt):
     """Returns (n_header, fact lines). The header is the frozen Urdu facts
     header followed by ':' and a newline; the lines are the consecutive
-    '- ' lines after it (d1_eval_arms.facts_block)."""
+    '- ' lines after it (d1_eval_arms.facts_block).
+    A1.6: the user text is cut at the chat template's <|im_end|> first. In the
+    arm-G layout the block ends the user turn, so the token follows the last
+    fact with no newline and would otherwise be read as part of it."""
     key = FACTS_HEADER + ":\n"
     n = prompt.count(key)
     if n == 0:
         return 0, []
-    rest = prompt[prompt.index(key) + len(key):].split("\n")
+    rest = prompt[prompt.index(key) + len(key):].split("<|im_end|>")[0].split("\n")
     out = []
     for line in rest:
         if line.startswith("- "):
@@ -276,6 +285,7 @@ def preflight(limit, t_dir):
         die("T_START instruction md5 differs")
     t_facts = read_jsonl(os.path.join(t_dir, "t_facts.jsonl"))
     t_direct = read_jsonl(os.path.join(t_dir, "t_direct.jsonl"))
+    t_direct_f = read_jsonl(os.path.join(t_dir, "t_direct_f.jsonl"))     # A1.1
     der = json.load(open(os.path.join(t_dir, "derangement.json"), encoding="utf-8"))
     dmap = OrderedDict(der["map"])
     tf_q = [e["qid"] for e in t_facts]
@@ -284,6 +294,10 @@ def preflight(limit, t_dir):
             % (len(tf_q), len(sub_qids)))
     if [e["qid"] for e in t_direct] != sub_qids:
         die("t_direct.jsonl qids != this run's rows")
+    if [e["qid"] for e in t_direct_f] != sub_qids:
+        die("t_direct_f.jsonl qids != this run's rows")
+    if any(e["arm"] != "T_direct" for e in t_direct) or any(e["arm"] != "T_direct_F" for e in t_direct_f):
+        die("teacher-direct files carry an unexpected arm label")
     if list(dmap.keys()) != sub_qids or sorted(dmap.values()) != sorted(sub_qids) \
             or any(k == v for k, v in dmap.items()):
         die("derangement.json is not a fixed-point-free permutation of these qids")
@@ -294,8 +308,8 @@ def preflight(limit, t_dir):
             die("t_facts qid %s: facts are not <= 6 clean non-empty strings" % q)
         if teacher_by[q]["parse_ok"] is False and fl:
             die("t_facts qid %s: parse_ok false but facts present" % q)
-    print("[ok] teacher outputs: %d t_facts rows, %d t_direct rows, derangement of %d"
-          % (len(t_facts), len(t_direct), len(dmap)))
+    print("[ok] teacher outputs: %d t_facts rows, %d t_direct rows, %d t_direct_f rows, derangement of %d"
+          % (len(t_facts), len(t_direct), len(t_direct_f), len(dmap)))
 
     # ---- V4, V5 from the sealed teacher file ----
     n_parse_ok = sum(1 for e in t_facts if e["parse_ok"])
@@ -470,7 +484,7 @@ def preflight(limit, t_dir):
             ("empty_facts", sum(1 for _, _, fl, _ in prompts[arm] if not fl))])) for arm in ARMS)),
     ])
     print("[preflight] PASS", flush=True)
-    return (instruction, sub, prompts, facts_by, teacher_by, dmap, t_direct, tok,
+    return (instruction, sub, prompts, facts_by, teacher_by, dmap, t_direct, t_direct_f, tok,
             pre, r4a_rows, r4b_rows)
 
 
@@ -496,7 +510,7 @@ def main():
     OUT_DIR = OUT_DIR_TEST if is_test else OUT_DIR_FULL
     t_dir = T_DIR_TEST if is_test else T_DIR_FULL
 
-    (instruction, sub, prompts, facts_by, teacher_by, dmap, t_direct, tok,
+    (instruction, sub, prompts, facts_by, teacher_by, dmap, t_direct, t_direct_f, tok,
      pre, r4a_rows, r4b_rows) = preflight(args.limit, t_dir)
 
     if args.preflight_only:
@@ -698,28 +712,53 @@ def main():
     print("R1 TF - A_r2 = %s pp, wins %s losses %s, p = %s -> %s"
           % (d1, r1p.get("wins_TF"), r1p.get("losses_TF"), p1, r1["verdict"]))
 
-    # R2 (T-direct from the sealed teacher file)
-    td = [OrderedDict([("qid", r["qid"]), ("gold", r["gold"]), ("pred", r["pred"])]) for r in t_direct]
-    r2p = pair(results["TF"], td, "TF", "T_direct")
-    a_tf, a_td, a_ar = acc(results["TF"]), acc(td), acc(results["A_r2"])
-    if a_tf >= a_td:
-        r2o = "(a) TF >= T-direct: combination beats both parts"
-    elif a_ar + GATE_PP <= a_tf < a_td:
-        r2o = "(b) A_r2+8 <= TF < T-direct: injection works, teacher is the ceiling -> D11 distillation"
+    # R2 (Amendment 1, A1.2): TF vs T-best. T-best = the teacher-direct arm with the
+    # higher primary accuracy on these rows; a tie goes to T_direct (the exact
+    # student prompt). Both teacher-direct arms are reported in full, and any arm
+    # with unparsed > 10% is also compared on its parsed rows (freeze T3 clause).
+    def slim(recs):
+        return [OrderedDict([("qid", r["qid"]), ("gold", r["gold"]), ("pred", r["pred"])]) for r in recs]
+    tdirect = OrderedDict([("T_direct", slim(t_direct)), ("T_direct_F", slim(t_direct_f))])
+    a_tf, a_ar = acc(results["TF"]), acc(results["A_r2"])
+    r2_arms = OrderedDict()
+    for name in TDIRECT_ARMS:
+        td = tdirect[name]
+        s_td = score(td, "pred")
+        e = OrderedDict([
+            ("n", s_td["n"]), ("accuracy", s_td["accuracy"]), ("correct", s_td["correct"]),
+            ("unparsed_rate", s_td["unparsed_rate"]), ("predicted_yes_rate", s_td["predicted_yes_rate"]),
+            ("TF_vs_this", pair(results["TF"], td, "TF", name))])
+        if s_td["unparsed_rate"] > R2_TDIRECT_UNPARSED_MAX:
+            pq = {r["qid"] for r in td if r["pred"] is not None}
+            e["parsed_only"] = pair([r for r in results["TF"] if r["qid"] in pq],
+                                    [r for r in td if r["qid"] in pq], "TF", name)
+            e["parsed_only"]["note"] = ("%s unparsed > %.0f%%: also compared on the rows %s parsed"
+                                        % (name, R2_TDIRECT_UNPARSED_MAX, name))
+        r2_arms[name] = e
+    tbest = "T_direct" if r2_arms["T_direct"]["accuracy"] >= r2_arms["T_direct_F"]["accuracy"] else "T_direct_F"
+    a_tb = r2_arms[tbest]["accuracy"]
+    r2p = r2_arms[tbest]["TF_vs_this"]
+    if a_tf >= a_tb:
+        r2o = "(a) TF >= T-best: combination beats both parts"
+    elif a_ar + GATE_PP <= a_tf < a_tb:
+        r2o = "(b) A_r2+8 <= TF < T-best: injection works, teacher is the ceiling -> D11 distillation"
     else:
         r2o = "(c) TF below gate: see §7"
-    r2 = OrderedDict(r2p)
-    r2["T_direct_unparsed_rate"] = score(td, "pred")["unparsed_rate"]
-    r2["outcome"] = r2o if not is_test else na
-    if r2["T_direct_unparsed_rate"] > R2_TDIRECT_UNPARSED_MAX:
-        pq = {r["qid"] for r in td if r["pred"] is not None}
-        r2["parsed_only"] = pair([r for r in results["TF"] if r["qid"] in pq],
-                                 [r for r in td if r["qid"] in pq], "TF", "T_direct")
-        r2["parsed_only"]["note"] = "T-direct unparsed > %.0f%%: R2 also on rows T-direct parsed" % R2_TDIRECT_UNPARSED_MAX
-    summary["R2_TF_vs_T_direct"] = r2
-    print("R2 TF %s%% vs T-direct %s%% (delta %s pp), wins %s losses %s, p = %s -> %s"
-          % (a_tf, a_td, r2p.get("delta_pp"), r2p.get("wins_TF"), r2p.get("losses_TF"),
-             r2p.get("p_mcnemar_exact_two_sided"), r2["outcome"]))
+    r2 = OrderedDict([
+        ("rule", "A1.2: T-best = teacher-direct arm with the higher primary accuracy; tie -> T_direct"),
+        ("T_best", tbest), ("TF_vs_T_best", r2p),
+        ("teacher_direct_arms", r2_arms),
+        ("outcome", r2o if not is_test else na)])
+    summary["R2_TF_vs_T_best"] = r2
+    for name, e in r2_arms.items():
+        print("R2 %-10s acc %s%%  unparsed %s%%  pred-yes %s%%  | TF - %s = %s pp, wins %s losses %s, p = %s%s"
+              % (name, e["accuracy"], e["unparsed_rate"], e["predicted_yes_rate"], name,
+                 e["TF_vs_this"].get("delta_pp"), e["TF_vs_this"].get("wins_TF"),
+                 e["TF_vs_this"].get("losses_TF"), e["TF_vs_this"].get("p_mcnemar_exact_two_sided"),
+                 "  [parsed-only: TF %s%% vs %s %s%%, n=%s]" % (
+                     e["parsed_only"].get("acc_TF"), name, e["parsed_only"].get("acc_%s" % name),
+                     e["parsed_only"].get("n")) if "parsed_only" in e else ""))
+    print("R2 T-best = %s (%s%%); TF %s%% -> %s" % (tbest, a_tb, a_tf, r2["outcome"]))
 
     # R3 controls
     r3w = pair(results["TF_wrong"], results["A_r2"], "TF_wrong", "A_r2")
@@ -825,8 +864,9 @@ def main():
     print("%-10s %-36s %5s %8s %9s %9s %8s" % ("arm", "facts", "n", "acc%", "unpars%", "SEC acc%", "yes%"))
     label = {"A_r2": "none (re-run, floor)", "TF": "teacher facts, own qid",
              "TF_wrong": "teacher facts, derangement(qid)", "TF_noq": "teacher facts, no question",
-             "T_direct": "teacher alone on the student prompt"}
-    for arm, recs in list(results.items()) + [("T_direct", t_direct)]:
+             "T_direct": "teacher alone on the student prompt",
+             "T_direct_F": "teacher alone + final-answer line (A1.1)"}
+    for arm, recs in list(results.items()) + [("T_direct", t_direct), ("T_direct_F", t_direct_f)]:
         pri = score(recs, "pred")
         se = score(recs, "pred_secondary")
         table[arm] = OrderedDict([
