@@ -5033,3 +5033,93 @@ item, receiving only the pinned prompt and one payload.
 - only after that, QEA on a fresh cohort with a held-out evaluation.
 
 **Status: `PAUSED_BY_USER`** (2026-09-27). No jobs are queued. No further work is authorized.
+
+## EFBPT D8: REACHABLE-PAGE CEILING AND ENGLISH SELF-KNOWLEDGE, FULL JOB 108196 (recorded 2026-10-31)
+
+This is the frozen D8 run. Every number below comes from `docs/handoff/D8_FULL_READOUT_108196.md` and the sealed
+outputs in `outputs/efbpt/d8/` (`d8_SEAL.json`, `d8_START.json`, `d8_summary.json`). Paired readings use the
+rerun arm A_r only.
+
+**Setup:**
+- Job 108196, mode FULL, node L20001: `COMPLETED`, exit `0:0`, elapsed `02:17:43` (2026-10-30 00:13:51 to
+  02:31:34). 10 files sealed under `outputs/efbpt/d8/`; all 10 MD5s, byte counts and line counts were recomputed
+  and match.
+- n = 200 (DEV200); X1u uses the D4 subset, n = 68. Floor 56.50%.
+- Model: Qwen3-14B, NF4 double-quant with bf16 compute, greedy decoding, thinking off, batch size 8.
+- Frozen documents and script (MD5 in the seal, recomputed and matching):
+
+| File | MD5 |
+|---|---|
+| `docs/EFBPT_D8_REACHABLE_CEILING_FREEZE.md` | `d95438fac2cb097d38cccdf5db6a3d35` |
+| `docs/EFBPT_D8_AMENDMENT_1.md` | `dfde668db216e66ad6a0d13c3d6a5858` |
+| `docs/EFBPT_D8_AMENDMENT_2.md` | `19a46f5ee03cb5895bb6e7fe4b07f9ff` |
+| `eval/error_analysis_tests/efbpt/d8_reachable_ceiling.py` | `6e5479d9b36d90d5e6ffe79ea7dd886f` |
+| `outputs/efbpt/d8/d8_summary.json` (sealed output) | `b2d31ea72df8f55b6d16f1d37ac05e40` |
+
+**Arms:**
+
+| Arm | Facts given | n | Correct | Acc | Unparsed |
+|---|---|---:|---:|---:|---:|
+| A_r | none (re-run) | 200 | 124 | 62.00% | 2.50% |
+| Xp | reachable gold pages, extracted | 200 | 117 | 58.50% | 3.50% |
+| GEN | self-generated English facts | 200 | 116 | 58.00% | 2.50% |
+| X1u | all gold pages, no question_en | 68 | 52 | 76.47% | 1.47% |
+| D1_A_ref | none (D1, reused) | 200 | 115 | 57.50% | 4.00% |
+| D4_X1_ref | all gold pages + question_en (D4) | 68 | 52 | 76.47% | 0.00% |
+
+Xp had at least one reachable page for 124 of 200 qids (pages per qid: 0 → 76, 1 → 96, 2 → 24, 3 → 4). On the
+76 no-page qids, Xp had no pass 1 and its pass-2 prompt is identical to A_r's.
+
+**Validity checks:**
+- V1 unparsed spread A_r/Xp/GEN (2.5/3.5/2.5): 1.00 pp, PASS.
+- V2 A_r vs D1 arm A: 62.00% vs 57.50%, row agreement 155/200 = 77.50%: `NONDETERMINISM FLAG`, so readings use
+  A_r only.
+- V2b A_r vs archived A_r of job 107156 (report, not a gate): 200/200 rows agree; the two files are byte-identical.
+- V3 GEN Latin fraction 0.9972, PASS. V4 Xp page counts match the expected histogram, PASS.
+- V5: 30 Xp facts sampled (seed 8); hand check `PENDING`.
+- V6 verbatim gold-fact substrings in pass-2 prompts (report, not a gate): Xp 1, GEN 3, X1u 0.
+- Log grep for `WARNING|Traceback|FATAL|LEAK|VOID`: no matches.
+
+**Readings (exact two-sided McNemar on discordant pairs; wins = first arm right, A_r wrong):**
+
+| Reading | Comparison | n | First arm | A_r | Δ | Wins | Losses | p | Verdict |
+|---|---|---:|---:|---:|---:|---:|---:|---:|---|
+| R1 | X1u vs A_r (D4-68) | 68 | 52 (76.47%) | 42 (61.76%) | +14.71 pp | 17 | 7 | 0.0639 | `D4 STANDS`: 52/68 against threshold 49/68 |
+| R2 | Xp vs A_r | 200 | 117 (58.50%) | 124 (62.00%) | −3.5 pp | 26 | 33 | 0.4350 | `NO-GO for the reachable-page route` |
+| R3 | GEN vs A_r | 200 | 116 (58.00%) | 124 (62.00%) | −4.0 pp | 36 | 44 | 0.4340 | `HARM: self-generated facts hurt; never used` |
+
+Pre-declared fields in `d8_summary.json`: R2 `gate_pp` 8.0, `conditional_pp` 5.0; R3 `gate_pp` 8.0, `harm_pp`
+−3.0; alpha 0.05 for both.
+
+Secondary (descriptive):
+- Xp vs A_r on the 124 page qids: 77 (62.10%) vs 78 (62.90%), 23 wins, 24 losses, p = 1.0.
+- Xp vs X1u on D4-68: 45 (66.18%) vs 52 (76.47%), 5 wins, 12 losses, p = 0.1435.
+- GEN predicted yes on 26.00% of rows (A_r 47.00%). Of its 44 losses, 33 are gold yes → GEN no. The sampled
+  losses show facts about the wrong entity (for example, Marvel characters for a question about sables).
+
+**Batch nondeterminism finding:**
+- The A_r re-run agrees with D1 arm A on only 155/200 predictions, and only 27/200 generations are identical;
+  A_r wins 26 and loses 17 (p = 0.2221).
+- The A_r outputs of jobs 107156 and 108196 are byte-identical (MD5 `14fdfa23a512a537f30e022be1b9f8dd`).
+- On the 76 Xp no-page rows the prompts are identical to A_r's, yet only 24/76 generations are identical and 64/76
+  predictions agree. Xp wins 3 and loses 9 there (p = 0.1460).
+- Of R2's net −7 (26 wins, 33 losses), −6 falls on these identical-prompt rows and −1 on the 124 page rows. Most
+  of the R2 deficit therefore does not come from the facts.
+- Inference, not tested: outputs depend on batch composition (`generate_all` groups prompts by length).
+
+**Aborted run: job 107156.**
+- The first FULL D8 job aborted when the leak guard found a verbatim gold-fact substring in an Xp pass-2 prompt.
+  The string was the model restating a page fact in its own pass-1 extraction, not gold data placed in a prompt.
+  The job produced no paired reading, summary or seal (Amendment 2, A2.1).
+- Fix: Amendment 2 (A2.2) made a gold-fact substring in the Xp, GEN and X1u pass-2 prompts a report (V6) rather
+  than fatal. question_en and evidence-id matches, and gold-fact matches in pass-1 prompts and the A_r pass-2
+  prompt, stay fatal.
+- Its outputs are archived under `outputs/efbpt/d8_job107156_failed/` and are not used for any reading; its A_r
+  file is used only for V2b. Readout: `docs/handoff/D8_FULL_READOUT.md`.
+
+**Decision and direction:**
+- R2 closed: the reachable-page route is NO-GO.
+- R3 closed: self-generated English facts are not used.
+- R1: D4 stands; X1u (52/68, 76.47%) is the honest number for extraction from all gold pages without question_en.
+- Next: the teacher route, D10. Model, GPU and API inventory: `docs/handoff/TEACHER_INVENTORY.md`.
+- Open: the V5 hand check of 30 Xp facts.
