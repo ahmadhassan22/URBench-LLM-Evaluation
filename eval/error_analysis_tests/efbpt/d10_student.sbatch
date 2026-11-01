@@ -4,7 +4,7 @@
 #SBATCH --gres=gpu:1
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=32G
-#SBATCH --time=08:00:00
+#SBATCH --time=12:00:00
 #SBATCH --output=logs/d10_student_%j.log
 #SBATCH --error=logs/d10_student_%j.log
 #
@@ -35,7 +35,7 @@ esac
 cd /mnt/home/user41/URBench
 
 if [ -z "${SLURM_JOB_ID:-}" ]; then
-  if [ "$MODE" = "TEST" ]; then LIMIT=02:00:00; else LIMIT=08:00:00; fi
+  if [ "$MODE" = "TEST" ]; then LIMIT=02:00:00; else LIMIT=12:00:00; fi
   exec sbatch --job-name="d10_student_${MODE}" --time="$LIMIT" \
        --output="logs/d10_student_${MODE}_%j.log" \
        --error="logs/d10_student_${MODE}_%j.log" \
