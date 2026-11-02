@@ -5,7 +5,11 @@ d10v2_teacher.py  —  D10 v2 Job T (teacher, vLLM): the one fix iteration
 Contract: docs/EFBPT_D10_TEACHER_FREEZE.md (FROZEN, MD5
 b3a822d8199034c7fe58d76cf5cc428f) §2, §3, §5, §8, as amended by
 docs/EFBPT_D10_AMENDMENT_3.md (A3.1 T1-v2 decomposition prompt, A3.2 jobs,
-A3.3 descriptives). Copy of d10_teacher.py with ONLY the A3 changes.
+A3.3 descriptives) and docs/EFBPT_D10_AMENDMENT_4.md (A4.1 JSON parse repair:
+a reply with no balanced {...} block is retried once with "}" appended, then
+once with "]}" appended; the row records repaired = "brace" /
+"bracket_brace" / false; repaired rows are counted in the log, T_START and
+T_SEAL). Copy of d10_teacher.py with ONLY the A3 and A4 changes.
 
 Job T v2 produces, for the DEV200 rows, with Meta-Llama-3.1-70B-Instruct-AWQ-INT4
 under vLLM 0.13.0 on one L20:
@@ -76,6 +80,10 @@ FREEZE_PATH = "docs/EFBPT_D10_TEACHER_FREEZE.md"
 FREEZE_MD5 = "b3a822d8199034c7fe58d76cf5cc428f"
 AMEND3_PATH = "docs/EFBPT_D10_AMENDMENT_3.md"
 AMEND3_MD5 = "eb097415ba4fa254c96300e6e3d7755e"
+AMEND4_PATH = "docs/EFBPT_D10_AMENDMENT_4.md"
+AMEND4_MD5 = "28a39b3d2adea6eca309b40fc15a00e5"
+# A4.1: repair attempts, in this order, only when no balanced block is found
+REPAIR_ATTEMPTS = OrderedDict([("brace", "}"), ("bracket_brace", "]}")])
 
 # A3.2: the v1 derangement (seed 1010) is sealed; the v2 file must equal it
 V1_DERANGEMENT_PATH = "outputs/efbpt/d10/teacher/derangement.json"
@@ -258,23 +266,43 @@ def first_json_object(text):
     return None
 
 
-_EMPTY = (False, "", [], [], [], [])
+_EMPTY = (False, "", [], [], [], [], False)
+
+
+def _load_object(text):
+    """The first balanced {...} block of text, json-loaded, if it is a dict."""
+    block = first_json_object(text)
+    if block is None:
+        return None
+    try:
+        obj = json.loads(block)
+    except Exception:
+        return None
+    return obj if isinstance(obj, dict) else None
 
 
 def parse_teacher_json(raw):
     """T1-v2 (A3.1): strip code fences, take the first {...} block, json.loads.
     All five keys must be present with the right types (question_en a string,
     the other four lists of strings); otherwise parse_ok=False, question_en ""
-    and four empty lists. Returns (ok, question_en, unknown_terms,
-    sub_questions, entities, facts)."""
-    block = first_json_object(FENCE_RE.sub("", raw))
-    if block is None:
-        return _EMPTY
-    try:
-        obj = json.loads(block)
-    except Exception:
-        return _EMPTY
-    if not isinstance(obj, dict):
+    and four empty lists.
+    A4.1: if no balanced block is found, the text is retried with "}" appended
+    (repaired = "brace"), then with "]}" appended (repaired = "bracket_brace");
+    at most these two attempts, in that order. The five-key rule is unchanged.
+    Returns (ok, question_en, unknown_terms, sub_questions, entities, facts,
+    repaired), repaired being False when no repair was used."""
+    text = FENCE_RE.sub("", raw)
+    repaired = False
+    obj = None
+    if first_json_object(text) is None:
+        for tag, suffix in REPAIR_ATTEMPTS.items():
+            obj = _load_object(text + suffix)
+            if obj is not None:
+                repaired = tag
+                break
+    else:
+        obj = _load_object(text)
+    if obj is None:
         return _EMPTY
     vals = []
     for key, typ in T1_KEYS.items():
@@ -289,7 +317,7 @@ def parse_teacher_json(raw):
             if not isinstance(v, list) or not all(isinstance(x, str) for x in v):
                 return _EMPTY
             vals.append([x.strip() for x in v if x.strip()])
-    return (True,) + tuple(vals)
+    return (True,) + tuple(vals) + (repaired,)
 
 
 def verdict_filter(facts):
@@ -347,9 +375,15 @@ def preflight(limit):
     amend3_md5 = md5_file(AMEND3_PATH)
     if amend3_md5 != AMEND3_MD5:
         die("Amendment 3 MD5 mismatch: expected %s, got %s" % (AMEND3_MD5, amend3_md5))
+    if not os.path.exists(AMEND4_PATH):
+        die("Amendment 4 file missing: " + AMEND4_PATH)
+    amend4_md5 = md5_file(AMEND4_PATH)
+    if amend4_md5 != AMEND4_MD5:
+        die("Amendment 4 MD5 mismatch: expected %s, got %s" % (AMEND4_MD5, amend4_md5))
     script_md5 = md5_file(os.path.abspath(__file__))
     print("[md5] freeze  %s  %s" % (freeze_md5, FREEZE_PATH))
     print("[md5] amend3  %s  %s" % (amend3_md5, AMEND3_PATH))
+    print("[md5] amend4  %s  %s" % (amend4_md5, AMEND4_PATH))
     print("[md5] script  %s  %s" % (script_md5, os.path.relpath(__file__)))
 
     instruction = load_instruction()              # MD5 asserted inside
@@ -426,6 +460,9 @@ def preflight(limit):
     meta = OrderedDict([
         ("freeze", OrderedDict([("path", FREEZE_PATH), ("md5", freeze_md5)])),
         ("amendment_3", OrderedDict([("path", AMEND3_PATH), ("md5", amend3_md5)])),
+        ("amendment_4", OrderedDict([("path", AMEND4_PATH), ("md5", amend4_md5),
+                                     ("parse_repair", OrderedDict((k, v) for k, v in REPAIR_ATTEMPTS.items())),
+                                     ("t1_repaired_rows", "filled after T1")])),
         ("script", OrderedDict([("path", os.path.relpath(__file__)), ("md5", script_md5)])),
         ("git", git_state()),
         ("urdu_instruction", OrderedDict([("path", INSTRUCTION_PATH), ("md5", INSTRUCTION_MD5)])),
@@ -496,7 +533,7 @@ def main():
     versions["vllm"] = vllm.__version__
 
     start = OrderedDict([
-        ("job", "T"), ("version", "v2 (Amendment 3)"), ("mode", "TEST" if is_test else "FULL"),
+        ("job", "T"), ("version", "v2 (Amendments 3, 4)"), ("mode", "TEST" if is_test else "FULL"),
         ("args", vars(args)),
         ("start_time", time.strftime("%Y-%m-%d %H:%M:%S")),
         ("hostname", socket.gethostname()), ("slurm_job_id", job_id),
@@ -537,16 +574,17 @@ def main():
     # ---------------- T1 + T2 ----------------
     g1 = generate([ids for _, ids in p_facts], T1_MAX_TOKENS, "T1-v2 — teacher decomposition + facts (A3.1)")
     t_facts = []
-    n_parse_ok = n_removed_total = 0
+    n_parse_ok = n_removed_total = n_repaired = 0
     for r, (text, ids), (raw, n_new, fin) in zip(sub, p_facts, g1):
-        ok, q_en, unknown, subqs, ents, facts_raw = parse_teacher_json(raw)
+        ok, q_en, unknown, subqs, ents, facts_raw, repaired = parse_teacher_json(raw)
         kept, removed = verdict_filter(facts_raw) if ok else ([], [])
         n_parse_ok += int(ok)
+        n_repaired += int(bool(repaired))
         n_removed_total += len(removed)
         t_facts.append(OrderedDict([
             ("qid", r["qid"]), ("arm", "T_facts_v2"),
             ("prompt", text), ("raw", raw),
-            ("parse_ok", ok),
+            ("parse_ok", ok), ("repaired", repaired),          # A4.1
             # A3.1: stored for audit only; never enter any student prompt
             ("question_en", q_en), ("unknown_terms", unknown), ("sub_questions", subqs),
             ("entities", ents),
@@ -563,6 +601,11 @@ def main():
           % (n_parse_ok, len(t_facts), 100.0 * n_parse_ok / len(t_facts),
              nf[0], nf[len(nf) // 2], nf[-1], sum(1 for x in nf if x == 0),
              n_removed_total, sum(1 for e in t_facts if e["truncated"])))
+    print("  [A4.1] repaired rows %d/%d %s"
+          % (n_repaired, len(t_facts), dict(Counter(e["repaired"] for e in t_facts if e["repaired"]))))
+    # A4.1: the repaired count also goes into T_START (re-written, then sealed)
+    start["amendment_4"]["t1_repaired_rows"] = n_repaired
+    write_json(os.path.join(OUT_DIR, "T_START.json"), start)
     # A3.3 descriptives (never gates)
     print("  [A3.3] facts-per-row distribution %s" % dict(sorted(Counter(nf).items())))
     print("  [A3.3] rows with empty facts %d; rows with >=1 unknown_term %d; unknown_terms per row %s"
@@ -607,19 +650,21 @@ def main():
 
     # ---------------- SEAL ----------------
     files = OrderedDict()
-    for p in WRITTEN:
+    for p in OrderedDict.fromkeys(WRITTEN):      # T_START.json is written twice (A4.1)
         with open(p, "rb") as f:
             b = f.read()
         files[p] = OrderedDict([("md5", md5_bytes(b)), ("bytes", len(b)),
                                 ("lines", b.count(b"\n"))])
     seal = OrderedDict([
-        ("job", "T"), ("version", "v2 (Amendment 3)"), ("mode", "TEST" if is_test else "FULL"),
+        ("job", "T"), ("version", "v2 (Amendments 3, 4)"), ("mode", "TEST" if is_test else "FULL"),
         ("slurm_job_id", job_id),
         ("end_time", time.strftime("%Y-%m-%d %H:%M:%S")),
         ("script_md5", meta["script"]["md5"]), ("freeze_md5", meta["freeze"]["md5"]),
         ("amendment3_md5", meta["amendment_3"]["md5"]),
+        ("amendment4_md5", meta["amendment_4"]["md5"]),
         ("n_rows", len(sub)),
-        ("t1_parse_ok", n_parse_ok), ("t2_removed_total", n_removed_total),
+        ("t1_parse_ok", n_parse_ok), ("t1_repaired_rows", n_repaired),
+        ("t2_removed_total", n_removed_total),
         ("files", files)])
     write_json(os.path.join(OUT_DIR, "T_SEAL.json"), seal)
     if is_test:
