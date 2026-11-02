@@ -9,7 +9,9 @@ A3.3 descriptives) and docs/EFBPT_D10_AMENDMENT_4.md (A4.1 JSON parse repair:
 a reply with no balanced {...} block is retried once with "}" appended, then
 once with "]}" appended; the row records repaired = "brace" /
 "bracket_brace" / false; repaired rows are counted in the log, T_START and
-T_SEAL). Copy of d10_teacher.py with ONLY the A3 and A4 changes.
+T_SEAL) and docs/EFBPT_D10_AMENDMENT_5.md (A5.1: a balanced block that fails
+json.loads is retried once with "]" inserted before its final "}"; repaired =
+"bracket"). Copy of d10_teacher.py with ONLY the A3, A4 and A5 changes.
 
 Job T v2 produces, for the DEV200 rows, with Meta-Llama-3.1-70B-Instruct-AWQ-INT4
 under vLLM 0.13.0 on one L20:
@@ -26,7 +28,7 @@ under vLLM 0.13.0 on one L20:
                        must be byte-identical to the sealed v1 file (A3.2)
   T5  leak guard       question_en / gold facts / evidence ids in ANY teacher
                        prompt: FATAL (d8_reachable_ceiling.leak_guard)
-  T6  T_START.json, T_SEAL.json (both carry the freeze AND the Amendment 3 MD5)
+  T6  T_START.json, T_SEAL.json (both carry the freeze AND the Amendment 3, 4, 5 MD5s)
 
 Everything frozen is IMPORTED, never re-implemented:
   Urdu instruction (+MD5), die                             <- efbpt_eval_dev200
@@ -82,8 +84,13 @@ AMEND3_PATH = "docs/EFBPT_D10_AMENDMENT_3.md"
 AMEND3_MD5 = "eb097415ba4fa254c96300e6e3d7755e"
 AMEND4_PATH = "docs/EFBPT_D10_AMENDMENT_4.md"
 AMEND4_MD5 = "28a39b3d2adea6eca309b40fc15a00e5"
+AMEND5_PATH = "docs/EFBPT_D10_AMENDMENT_5.md"
+AMEND5_MD5 = "53026e77e67a08124a4ee42aa38c556f"
 # A4.1: repair attempts, in this order, only when no balanced block is found
 REPAIR_ATTEMPTS = OrderedDict([("brace", "}"), ("bracket_brace", "]}")])
+# A5.1 (Amendment 5): a balanced block that fails json.loads is retried once
+# with "]" inserted before its final "}"; tag "bracket".
+BLOCK_REPAIR = OrderedDict([("bracket", 'insert "]" before the final "}"')])
 
 # A3.2: the v1 derangement (seed 1010) is sealed; the v2 file must equal it
 V1_DERANGEMENT_PATH = "outputs/efbpt/d10/teacher/derangement.json"
@@ -269,16 +276,21 @@ def first_json_object(text):
 _EMPTY = (False, "", [], [], [], [], False)
 
 
-def _load_object(text):
-    """The first balanced {...} block of text, json-loaded, if it is a dict."""
-    block = first_json_object(text)
-    if block is None:
-        return None
+def _load_block(block):
+    """A balanced {...} block, json-loaded, if it is a dict; else None."""
     try:
         obj = json.loads(block)
     except Exception:
         return None
     return obj if isinstance(obj, dict) else None
+
+
+def _load_object(text):
+    """The first balanced {...} block of text, json-loaded, if it is a dict."""
+    block = first_json_object(text)
+    if block is None:
+        return None
+    return _load_block(block)
 
 
 def parse_teacher_json(raw):
@@ -288,20 +300,28 @@ def parse_teacher_json(raw):
     and four empty lists.
     A4.1: if no balanced block is found, the text is retried with "}" appended
     (repaired = "brace"), then with "]}" appended (repaired = "bracket_brace");
-    at most these two attempts, in that order. The five-key rule is unchanged.
+    at most these two attempts, in that order.
+    A5.1: if a balanced block is found but fails json.loads, it is retried once
+    with "]" inserted before its final "}" (repaired = "bracket").
+    The five-key rule is unchanged.
     Returns (ok, question_en, unknown_terms, sub_questions, entities, facts,
     repaired), repaired being False when no repair was used."""
     text = FENCE_RE.sub("", raw)
     repaired = False
     obj = None
-    if first_json_object(text) is None:
-        for tag, suffix in REPAIR_ATTEMPTS.items():
+    block = first_json_object(text)
+    if block is None:
+        for tag, suffix in REPAIR_ATTEMPTS.items():          # A4.1
             obj = _load_object(text + suffix)
             if obj is not None:
                 repaired = tag
                 break
     else:
-        obj = _load_object(text)
+        obj = _load_block(block)
+        if obj is None:                                        # A5.1
+            obj = _load_block(block[:-1] + "]}")
+            if obj is not None:
+                repaired = "bracket"
     if obj is None:
         return _EMPTY
     vals = []
@@ -380,10 +400,14 @@ def preflight(limit):
     amend4_md5 = md5_file(AMEND4_PATH)
     if amend4_md5 != AMEND4_MD5:
         die("Amendment 4 MD5 mismatch: expected %s, got %s" % (AMEND4_MD5, amend4_md5))
+    amend5_md5 = md5_file(AMEND5_PATH)
+    if amend5_md5 != AMEND5_MD5:
+        die("Amendment 5 MD5 mismatch: expected %s, got %s" % (AMEND5_MD5, amend5_md5))
     script_md5 = md5_file(os.path.abspath(__file__))
     print("[md5] freeze  %s  %s" % (freeze_md5, FREEZE_PATH))
     print("[md5] amend3  %s  %s" % (amend3_md5, AMEND3_PATH))
     print("[md5] amend4  %s  %s" % (amend4_md5, AMEND4_PATH))
+    print("[md5] amend5  %s  %s" % (amend5_md5, AMEND5_PATH))
     print("[md5] script  %s  %s" % (script_md5, os.path.relpath(__file__)))
 
     instruction = load_instruction()              # MD5 asserted inside
@@ -463,6 +487,8 @@ def preflight(limit):
         ("amendment_4", OrderedDict([("path", AMEND4_PATH), ("md5", amend4_md5),
                                      ("parse_repair", OrderedDict((k, v) for k, v in REPAIR_ATTEMPTS.items())),
                                      ("t1_repaired_rows", "filled after T1")])),
+        ("amendment_5", OrderedDict([("path", AMEND5_PATH), ("md5", amend5_md5),
+                                     ("block_repair", OrderedDict((k, v) for k, v in BLOCK_REPAIR.items()))])),
         ("script", OrderedDict([("path", os.path.relpath(__file__)), ("md5", script_md5)])),
         ("git", git_state()),
         ("urdu_instruction", OrderedDict([("path", INSTRUCTION_PATH), ("md5", INSTRUCTION_MD5)])),
@@ -533,7 +559,7 @@ def main():
     versions["vllm"] = vllm.__version__
 
     start = OrderedDict([
-        ("job", "T"), ("version", "v2 (Amendments 3, 4)"), ("mode", "TEST" if is_test else "FULL"),
+        ("job", "T"), ("version", "v2 (Amendments 3, 4, 5)"), ("mode", "TEST" if is_test else "FULL"),
         ("args", vars(args)),
         ("start_time", time.strftime("%Y-%m-%d %H:%M:%S")),
         ("hostname", socket.gethostname()), ("slurm_job_id", job_id),
@@ -601,7 +627,7 @@ def main():
           % (n_parse_ok, len(t_facts), 100.0 * n_parse_ok / len(t_facts),
              nf[0], nf[len(nf) // 2], nf[-1], sum(1 for x in nf if x == 0),
              n_removed_total, sum(1 for e in t_facts if e["truncated"])))
-    print("  [A4.1] repaired rows %d/%d %s"
+    print("  [A4.1/A5.1] repaired rows %d/%d %s"
           % (n_repaired, len(t_facts), dict(Counter(e["repaired"] for e in t_facts if e["repaired"]))))
     # A4.1: the repaired count also goes into T_START (re-written, then sealed)
     start["amendment_4"]["t1_repaired_rows"] = n_repaired
@@ -656,12 +682,13 @@ def main():
         files[p] = OrderedDict([("md5", md5_bytes(b)), ("bytes", len(b)),
                                 ("lines", b.count(b"\n"))])
     seal = OrderedDict([
-        ("job", "T"), ("version", "v2 (Amendments 3, 4)"), ("mode", "TEST" if is_test else "FULL"),
+        ("job", "T"), ("version", "v2 (Amendments 3, 4, 5)"), ("mode", "TEST" if is_test else "FULL"),
         ("slurm_job_id", job_id),
         ("end_time", time.strftime("%Y-%m-%d %H:%M:%S")),
         ("script_md5", meta["script"]["md5"]), ("freeze_md5", meta["freeze"]["md5"]),
         ("amendment3_md5", meta["amendment_3"]["md5"]),
         ("amendment4_md5", meta["amendment_4"]["md5"]),
+        ("amendment5_md5", meta["amendment_5"]["md5"]),
         ("n_rows", len(sub)),
         ("t1_parse_ok", n_parse_ok), ("t1_repaired_rows", n_repaired),
         ("t2_removed_total", n_removed_total),
