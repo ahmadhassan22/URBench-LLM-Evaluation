@@ -3,7 +3,8 @@
 d11o_student.py  —  D11-O Job S (student, HF transformers, nf4, batch size 1)
 
 Contract: docs/EFBPT_D11O_ORACLE_READING_FREEZE.md (FROZEN, MD5
-ebd638eb4b4e48cde00202c8488df124) §2, §4, §5, §6, §7, on top of the D10
+ebd638eb4b4e48cde00202c8488df124) §2, §4, §5, §6, §7, as amended by
+docs/EFBPT_D11O_AMENDMENT_1.md (A1.1), on top of the D10
 teacher freeze docs/EFBPT_D10_TEACHER_FREEZE.md §2, §4 (student model,
 decoding, layouts; unchanged). Copy of d10v2_student.py with ONLY the D11-O
 changes:
@@ -19,9 +20,11 @@ changes:
             TF_v1, TF_v2  sealed D10 / D10v2 TF files, references only
   V2'       20 A_r2 prompts generated once at batch size 1 must equal the 20
             sealed A_r2 generations byte for byte
-  leak      question_en and evidence ids FATAL in every arm; gold facts FATAL
-            in TO1/TO2 (all hits are printed first, then the job dies);
-            PERMITTED in GF and recorded (the ceiling arm)
+  leak      question_en and evidence ids FATAL in every arm; gold facts
+            PERMITTED in GF and recorded (the ceiling arm); in TO1/TO2 a
+            verbatim gold-fact substring is REPORTED as V6 (count per arm and
+            qid list), not fatal — Amendment 1 A1.1 (the teacher never sees
+            gold facts, so a match is a restatement; D10 A2.2 rule)
   V7        both teacher seals; V8 on GF, TO1, TO2
   readings  O1–O6 (freeze §5), descriptive, no GO gate; the §6 design branch
             is printed from max(O2)
@@ -85,6 +88,8 @@ D11O_FREEZE_PATH = "docs/EFBPT_D11O_ORACLE_READING_FREEZE.md"
 D11O_FREEZE_MD5 = "ebd638eb4b4e48cde00202c8488df124"
 FREEZE_PATH = "docs/EFBPT_D10_TEACHER_FREEZE.md"
 FREEZE_MD5 = "b3a822d8199034c7fe58d76cf5cc428f"
+AMEND1_PATH = "docs/EFBPT_D11O_AMENDMENT_1.md"            # A1.1: TO1/TO2 gold-fact hits reported, not fatal
+AMEND1_MD5 = "137cfb384e5edde0a41590fef992dcac"
 
 T_DIRS_FULL = OrderedDict([("v1", "outputs/efbpt/d11o/teacher_v1"), ("v2", "outputs/efbpt/d11o/teacher_v2")])
 T_DIRS_TEST = OrderedDict([("v1", "outputs/efbpt/d11o/_test/teacher_v1"), ("v2", "outputs/efbpt/d11o/_test/teacher_v2")])
@@ -268,12 +273,13 @@ def preflight(limit, t_dirs):
     print("D11-O JOB S PREFLIGHT (freeze §2, §4; D10 freeze §4)")
     print("=" * 78, flush=True)
 
-    for label, path, want in (("d11o", D11O_FREEZE_PATH, D11O_FREEZE_MD5), ("d10", FREEZE_PATH, FREEZE_MD5)):
+    for label, path, want in (("d11o", D11O_FREEZE_PATH, D11O_FREEZE_MD5), ("d10", FREEZE_PATH, FREEZE_MD5),
+                              ("amend1", AMEND1_PATH, AMEND1_MD5)):
         if not os.path.exists(path):
-            die("freeze file missing: " + path)
+            die("freeze / amendment file missing: " + path)
         got = md5_file(path)
         if got != want:
-            die("%s freeze MD5 mismatch: expected %s, got %s" % (label, want, got))
+            die("%s MD5 mismatch: expected %s, got %s" % (label, want, got))
         print("[md5] %-7s %s  %s" % (label, got, path))
     script_md5 = md5_file(os.path.abspath(__file__))
     print("[md5] script  %s  %s" % (script_md5, os.path.relpath(__file__)))
@@ -418,22 +424,21 @@ def preflight(limit, t_dirs):
                               ("n_prompts", len(sub))])
     print("[leak-guard] GF: %d gold-fact substrings in %d/%d prompts — PERMITTED, recorded (ceiling arm)"
           % (len(gf_hits), len({i for i, _ in gf_hits}), len(sub)))
-    # TO1 / TO2: gold facts FATAL (the teacher never saw them). All hits are
-    # collected and printed first (O5 V6 report), then the job dies on any hit.
+    # TO1 / TO2 (Amendment 1 A1.1): question_en and evidence ids fatal; a
+    # verbatim gold-fact substring is a teacher restatement (the teacher never
+    # saw the gold facts) and is REPORTED as V6 (count per arm, qid list), not fatal.
     for arm in TEACHER_OF:
         hits = leak_guard(arm, [p for p, _, _, _ in prompts[arm]], needles, fatal_gold_facts=False)
         by_q = OrderedDict()
         for i, s in hits:
             by_q.setdefault(sub[i]["qid"], []).append(s)
-        leak[arm] = OrderedDict([("gold_facts", "FATAL (freeze §4)"), ("count", len(hits)), ("qids", len(by_q)),
+        leak[arm] = OrderedDict([("gold_facts", "REPORTED as V6, not fatal (Amendment 1 A1.1)"),
+                                 ("count", len(hits)), ("qids", len(by_q)),
                                  ("matches", [OrderedDict([("qid", q), ("fact", f)]) for q, fs in by_q.items() for f in fs])])
-        print("[V6] %s verbatim gold-fact substrings: %d in %d qid(s)" % (arm, len(hits), len(by_q)))
+        print("[V6] %s verbatim gold-fact substrings: %d in %d qid(s) (reported, A1.1)" % (arm, len(hits), len(by_q)))
         for q, fs in by_q.items():
             for f in fs:
                 print("      %s  %r" % (q, f))
-        if hits:
-            die("LEAK (freeze §4): %s prompts contain %d verbatim gold urbench_facts (%d qids, listed above); "
-                "the teacher never saw them, so a verbatim match is fatal in TO1/TO2" % (arm, len(hits), len(by_q)))
 
     # ---- V8: fact lines in every facts prompt == their source list ----
     v8_checked = 0
@@ -527,6 +532,7 @@ def preflight(limit, t_dirs):
     pre = OrderedDict([
         ("d11o_freeze", OrderedDict([("path", D11O_FREEZE_PATH), ("md5", D11O_FREEZE_MD5)])),
         ("freeze", OrderedDict([("path", FREEZE_PATH), ("md5", FREEZE_MD5)])),
+        ("amendment_1", OrderedDict([("path", AMEND1_PATH), ("md5", AMEND1_MD5)])),
         ("script", OrderedDict([("path", os.path.relpath(__file__)), ("md5", script_md5)])),
         ("git", git_state()),
         ("urdu_instruction", OrderedDict([("path", INSTRUCTION_PATH), ("md5", INSTRUCTION_MD5)])),
@@ -607,8 +613,9 @@ def compute_readings(sub, results, sealed, pre, is_test):
           % (pre["leak_guard"]["GF"]["gold_fact_substrings"], pre["leak_guard"]["GF"]["prompts_with_gold_facts"]))
     for v, s in pre["teacher_seals"].items():
         print("V4/V5 teacher %s: parse_ok %s/%d, repaired %s, V5 removed %s" % (v, s["t1_parse_ok"], len(sub), s["t1_repaired_rows"], s["t2_removed_total"]))
-    print("V6 verbatim gold-fact substrings in TO1/TO2: %d / %d (FATAL rule; the job ran, so none)"
-          % (pre["leak_guard"]["TO1"]["count"], pre["leak_guard"]["TO2"]["count"]))
+    print("V6 verbatim gold-fact substrings in TO1/TO2: %d in %d qid(s) / %d in %d qid(s) (reported, Amendment 1 A1.1)"
+          % (pre["leak_guard"]["TO1"]["count"], pre["leak_guard"]["TO1"]["qids"],
+             pre["leak_guard"]["TO2"]["count"], pre["leak_guard"]["TO2"]["qids"]))
     print("V7 both T_SEALs verified (%d files) -> PASS" % pre["V7_T_SEAL_verified"]["n_files"])
     print("V8 prompt-content check: %d facts prompts -> PASS" % pre["V8_prompt_content"]["facts_prompts_checked"])
     print("V9 Latin fraction: %s" % ", ".join("%s %.4f" % (a, v["fraction"]) for a, v in pre["V9_latin_fraction"].items()))
@@ -879,6 +886,7 @@ def main():
         ("end_time", time.strftime("%Y-%m-%d %H:%M:%S")),
         ("script_md5", pre["script"]["md5"]),
         ("d11o_freeze_md5", pre["d11o_freeze"]["md5"]), ("freeze_md5", pre["freeze"]["md5"]),
+        ("amendment1_md5", pre["amendment_1"]["md5"]),
         ("teacher_seal_files", OrderedDict((v, pre["teacher_seals"][v]["files"]) for v in pre["teacher_seals"])),
         ("sealed_references", pre["sealed_references"]),
         ("A_r2_reused_sealed", v2_pass),

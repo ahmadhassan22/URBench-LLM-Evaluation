@@ -123,10 +123,10 @@ Verdicts for the 90 facts listed in `docs/handoff/FACT_CHECK_DUMP.md` (same samp
 | sample | T | U | F | R (relevant) | stated summary |
 |---|---|---|---|---|---|
 | D8-Xp | 29 | 1 | 0 | 7 | 29T/1U/0F, 7R |
-| D10-TF | 28 | 2 | 0 | 9 | 27T/2U/0F, 8R |
+| D10-TF | 28 | 2 | 0 | 9 | 28T/2U/0F, 9R (corrected, D11-O Amendment 1 A1.2; originally stated 27T/2U/0F, 8R) |
 | D10v2-TF | 27 | 0 | 3 | 14 | 27T/0U/3F, 14R |
 
-Counts in the T/U/F/R columns are recomputed from the row tables above. They equal the stated summary except for D10-TF: the rows as given carry 28 T and 2 U (the stated 27T/2U/0F sums to 29 of 30), and R on #1, #10, #12, #14, #16, #19, #20, #25, #27 (9 rows, of which 2 are U) while the stated summary says 8R. The row values were kept exactly as given; the stated figure is reproduced in the last column for the record.
+Counts in the T/U/F/R columns are recomputed from the row tables above. The D10-TF summary is 28T/2U/0F with 9R (R on #1, #10, #12, #14, #16, #19, #20, #25, #27, of which 2 are U), corrected by D11-O Amendment 1 A1.2 from the originally stated 27T/2U/0F, 8R; the row values stand as given.
 
 Reading: truth is high in all three samples (0–3 false of 30); relevance is the weak point, 7/30 and 9/30 for the v1-style teachers (D8 self-facts, D10 v1) and 14/30 for the D10v2 decomposition teacher, whose three false facts are all in relevant rows.
 
