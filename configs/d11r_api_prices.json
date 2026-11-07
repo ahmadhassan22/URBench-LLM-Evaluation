@@ -1,0 +1,7 @@
+{
+  "_note": "List prices per 1M tokens for the D11-R API readers (freeze §3 'cost at list price'). Filled from the provider price lists at scoring time; null = unknown, cost reported as n/a. reasoning_excluded_from_completion: true if the gateway's completion_tokens excludes reasoning tokens.",
+  "qwen3.8-max": {"input_per_1M": null, "output_per_1M": null, "currency": null, "reasoning_excluded_from_completion": false, "source": null},
+  "deepseek-v4-pro": {"input_per_1M": null, "output_per_1M": null, "currency": null, "reasoning_excluded_from_completion": false, "source": null},
+  "deepseek-v4-flash": {"input_per_1M": null, "output_per_1M": null, "currency": null, "reasoning_excluded_from_completion": false, "source": null},
+  "qwen3.7-flash": {"input_per_1M": null, "output_per_1M": null, "currency": null, "reasoning_excluded_from_completion": false, "source": null}
+}
