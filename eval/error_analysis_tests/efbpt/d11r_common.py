@@ -20,6 +20,10 @@ ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..")
 
 FREEZE_PATH = "docs/EFBPT_D11R_READER_FREEZE.md"
 FREEZE_MD5 = "ed260e0ea2373337e8a3fb850bebe963"
+# Amendment 1 (A1.1 thinking setting, A1.2 M1 denominator, A1.3 data force-add,
+# A1.4 prices): recorded in every R_START / R_SEAL
+AMEND1_PATH = "docs/EFBPT_D11R_AMENDMENT_1.md"
+AMEND1_MD5 = "fb7bc3c922bb28d667241a7dd75b6938"
 
 MAPPED_PATH = "data/strategyqa_official/strategyqa_official_mapped_urbench_qid.jsonl"
 MAPPED_MD5 = "bb982798279f5d519ddef01f5cb7ba8c"
@@ -126,7 +130,19 @@ def verify_freeze():
     got = md5_file(p)
     if got != FREEZE_MD5:
         die("freeze MD5 %s != pinned %s" % (got, FREEZE_MD5))
+    pa = os.path.join(ROOT, AMEND1_PATH)
+    if not os.path.exists(pa):
+        die("amendment missing: " + AMEND1_PATH)
+    got_a = md5_file(pa)
+    if got_a != AMEND1_MD5:
+        die("amendment 1 MD5 %s != pinned %s" % (got_a, AMEND1_MD5))
     return got
+
+
+def contracts():
+    """freeze + amendment identity, written into every R_START / R_SEAL."""
+    return OrderedDict([("freeze", OrderedDict([("path", FREEZE_PATH), ("md5", FREEZE_MD5)])),
+                        ("amendment_1", OrderedDict([("path", AMEND1_PATH), ("md5", AMEND1_MD5)]))])
 
 
 def _is_true(v):
@@ -315,12 +331,13 @@ def write_start(rdir, info):
                                                        ("slurm_job_id", info.get("slurm_job_id")),
                                                        ("sets", info.get("sets")),
                                                        ("script_md5", info.get("script_md5")),
-                                                       ("git", info.get("git"))]))
+                                                       ("git", info.get("git")),
+                                                       ("contracts", contracts())]))
         write_json(p, cur)
         print("  [verified] updated %s (run %d)" % (p, len(cur["runs"]) + 1), flush=True)
         return cur
     info = OrderedDict(info)
-    info["freeze"] = OrderedDict([("path", FREEZE_PATH), ("md5", FREEZE_MD5)])
+    info.update(contracts())
     info["item_sets"] = item_set_manifest()
     write_json(p, info)
     print("  [verified] wrote %s" % p, flush=True)
@@ -331,9 +348,12 @@ def update_seal(rdir, reader, set_name, path, n_expected, extra=None):
     """R_SEAL.json per reader: one entry per completed item set, rewritten each
     time a set completes. Verifies the line count against the item set."""
     p = os.path.join(rdir, "R_SEAL.json")
-    seal = json.load(open(p, encoding="utf-8"), object_pairs_hook=OrderedDict) if os.path.exists(p) else OrderedDict([
-        ("reader", reader), ("freeze", OrderedDict([("path", FREEZE_PATH), ("md5", FREEZE_MD5)])),
-        ("item_sets", item_set_manifest()), ("files", OrderedDict()), ("sets_complete", [])])
+    if os.path.exists(p):
+        seal = json.load(open(p, encoding="utf-8"), object_pairs_hook=OrderedDict)
+    else:
+        seal = OrderedDict([("reader", reader)])
+        seal.update(contracts())
+        seal.update([("item_sets", item_set_manifest()), ("files", OrderedDict()), ("sets_complete", [])])
     fe = file_entry(path)
     if fe["lines"] < n_expected:
         die("%s: %d lines < %d items; not sealing" % (path, fe["lines"], n_expected))

@@ -20,10 +20,12 @@
 #   bash eval/error_analysis_tests/efbpt/d11r_hf.sbatch FULL
 # Optional: SBATCH_DEP=<jobid> adds --dependency=afterok:<jobid>.
 # Run outside SLURM, the script submits itself (TEST 01:30:00, FULL 06:00:00).
+# `sbatch eval/error_analysis_tests/efbpt/d11r_hf.sbatch` (no argument) runs FULL under the
+# #SBATCH header above (log logs/d11r_hf_<jobid>.log).
 
 set -euo pipefail
 
-MODE="${1:-}"
+MODE="${1:-FULL}"
 case "$MODE" in
   TEST|FULL) ;;
   *) echo "usage: $0 TEST|FULL" >&2; exit 2 ;;
