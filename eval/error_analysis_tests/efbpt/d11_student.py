@@ -47,6 +47,13 @@ sampling and scoring are the functions above, unchanged):
                  Outputs under outputs/efbpt/d11/_regress/, never a result.
                  Every eval458 arm job refuses to start without a PASS record
                  produced by the same scripts.
+  Amendment 6 (docs/EFBPT_D11_RTG_AMENDMENT_6.md; ONLY the leak guard changes):
+                 on eval458, for TR / TR_wrong_eval / TR_L1_eval, an evidence-id
+                 needle with fewer than 3 letters is NON-SPECIFIC: a hit is not
+                 fatal when it lies inside a teacher fact, V8 holds for the
+                 prompt and the teacher prompt of the source qid passes its
+                 guard; every such hit is logged (S_START). question_en, gold
+                 facts and evidence ids with >= 3 letters are handled as before.
   --merge        CPU, no model, run by hand: verifies every per-arm seal and
                  the teacher seals, rebuilds every prompt, scores with the
                  frozen extractors, writes d11_arm<ARM>_scored.jsonl,
@@ -115,6 +122,11 @@ PREDICTIONS_EVAL = OrderedDict([                                    # A2.6
     ("A_r2_eval_accuracy", (55.0, 63.0)), ("TR_minus_A_r2_eval", (5.0, 10.0)), ("TR_wrong_eval_minus_A_r2_eval_le", -3.0),
     ("TR_L1_eval_minus_A_r2_eval", (4.0, 9.0)), ("gain_gold_no_gt_gain_gold_yes", True)])
 REGRESS_ARM = "TR"
+# ---- Amendment 6 (A6.3): non-specific evidence-id needles ----
+D11_AMEND6_PATH = "docs/EFBPT_D11_RTG_AMENDMENT_6.md"
+D11_AMEND6_MD5 = "bbc3d856ff9e9e7a745a90342d5b0519"
+A6_ARMS = ("TR", "TR_wrong_eval", "TR_L1_eval")                    # the eval458 facts arms the rule applies to
+A6_MIN_LETTERS = 3                                                  # an evidence id with fewer letters is NON-SPECIFIC
 REGRESS_SPLIT = 3                                                   # rows 0-2, then a resume for rows 3-4
 
 OUT_DIR = None
@@ -183,6 +195,63 @@ def verify_teacher_seal(t_dir, reader_key, set_name, contracts):
     return seal, checked
 
 
+def a6_split_needles(needles):
+    """A6.3: evidence ids (<title>-<paragraph index>) with fewer than 3 letters are NON-SPECIFIC.
+    Returns (the needles with the specific evidence ids only, for the frozen fatal guard;
+    the regex of the non-specific ids; the non-specific ids). The regex expression is the one
+    of d11_common.needles_for, so specific + non-specific matches = the matches of the full regex."""
+    import re
+    spec = [e for e in needles["evidence_ids"] if sum(1 for ch in e if ch.isalpha()) >= A6_MIN_LETTERS]
+    keep = set(spec)
+    non = [e for e in needles["evidence_ids"] if e not in keep]
+
+    def rx(ids):
+        return re.compile(r"(?<![0-9A-Za-z])(?:%s)(?![0-9])" % "|".join(re.escape(e) for e in ids)) if ids else re.compile(r"(?!x)x")
+    return dict(needles, evidence_ids=spec, evidence_re=rx(spec)), rx(non), non
+
+
+def a6_nonspecific_hits(arm, sub, rows, prompt_tuples, non_re, needles, readings, teacher):
+    """A6.3. Every non-specific evidence-id match in the prompts of one arm. A hit is not fatal only if
+    (i) it lies inside a teacher fact (the matches of the prompt are exactly the matches inside its facts),
+    (iii) the sealed teacher prompt of the source qid passes its guard (no evidence id of any kind, no gold
+    fact, no other row's question_en); (ii) V8 is fatal for every prompt and is checked right after.
+    Otherwise FATAL. Returns the hit records (logged, written to S_START)."""
+    row_of = {r["qid"]: j for j, r in enumerate(rows)}
+    hits = []
+    for i, (r, (p, lay, fl, src)) in enumerate(zip(sub, prompt_tuples)):
+        found = sorted(m.group(0) for m in non_re.finditer(p))
+        if not found:
+            continue
+        in_facts = [(m.group(0), f) for f in fl for m in non_re.finditer(f)]
+        if found != sorted(n for n, _ in in_facts):
+            die("LEAK in %s prompt %d (qid %s): non-specific evidence id %s occurs outside the teacher facts (A6.3 (i))" % (arm, i, r["qid"], found))
+        t = teacher[src]
+        tp = t["prompt"]
+        m = needles["evidence_re"].search(tp)
+        if m:
+            die("LEAK in %s prompt %d: the teacher prompt of source qid %s contains evidence id %r (A6.3 (iii))" % (arm, i, src, m.group(0)))
+        for s_ in needles["facts"]:
+            if s_ in tp:
+                die("LEAK in %s prompt %d: the teacher prompt of source qid %s contains gold fact %r (A6.3 (iii))" % (arm, i, src, s_))
+        for q in needles["question_en"]:
+            if q in tp and q != rows[row_of[src]]["question_en"]:
+                die("LEAK in %s prompt %d: the teacher prompt of source qid %s contains another row's question_en (A6.3 (iii))" % (arm, i, src))
+        if t.get("teacher_input_reading") != readings[src] or readings[src] not in tp:
+            die("%s prompt %d: the teacher prompt of source qid %s is not built on the sealed reading" % (arm, i, src))
+        for needle, fact in in_facts:
+            h = OrderedDict([
+                ("arm", arm), ("prompt_row", i), ("qid", r["qid"]), ("facts_source_row", row_of[src]), ("facts_source_qid", src),
+                ("needle", needle), ("needle_letters", sum(1 for ch in needle if ch.isalpha())),
+                ("owner_rows", [OrderedDict([("row", j), ("qid", x["qid"])]) for j, x in enumerate(rows) if needle in x["evidence_ids"]]),
+                ("fact", fact), ("needle_in_reading", any(m_.group(0) == needle for m_ in non_re.finditer(readings[src]))),
+                ("fatal", False), ("conditions", "(i) inside a teacher fact; (ii) V8 holds for this prompt; (iii) the teacher prompt of the source qid passes its guard")])
+            hits.append(h)
+            print("[A6.3] %s prompt row %d (qid %s; facts of row %d, qid %s): NON-SPECIFIC evidence-id needle %r (%d letters) inside a teacher fact -> not fatal; "
+                  "rows owning the evidence id: %s; needle in the reading: %s; fact: %r"
+                  % (arm, i, r["qid"], h["facts_source_row"], src, needle, h["needle_letters"], [o["row"] for o in h["owner_rows"]], h["needle_in_reading"], fact), flush=True)
+    return hits
+
+
 def dev200_best_from_summary(summary):
     """§7: DEV200-best of {TR, TR2, TR_L1} by accuracy; tie -> TR (then TR2)."""
     accs = [(summary["accuracy_table"][a]["accuracy"], -i, a) for i, a in enumerate(TR_ARMS)]
@@ -202,6 +271,11 @@ def preflight(set_name, limit, is_test, eval_arm, arms_req=None):
         die("D10 freeze MD5 %s != pinned %s" % (got, D10_FREEZE_MD5))
     contracts["d10_freeze"] = OrderedDict([("path", D10_FREEZE_PATH), ("md5", got)])
     print("[md5] %-18s %s  %s" % ("d10_freeze", got, D10_FREEZE_PATH))
+    got = md5_file(D11_AMEND6_PATH)
+    if got != D11_AMEND6_MD5:
+        die("%s MD5 %s != pinned %s" % (D11_AMEND6_PATH, got, D11_AMEND6_MD5))
+    contracts["d11_amendment_6"] = OrderedDict([("path", D11_AMEND6_PATH), ("md5", got)])
+    print("[md5] %-18s %s  %s" % ("d11_amendment_6", got, D11_AMEND6_PATH))
     scripts = OrderedDict([(os.path.relpath(__file__), md5_file(os.path.abspath(__file__))),
                            (os.path.relpath(os.path.join(_HERE, "d11_common.py")), md5_file(os.path.join(_HERE, "d11_common.py"))),
                            (os.path.relpath(S11O.__file__), md5_file(S11O.__file__))])
@@ -373,12 +447,29 @@ def preflight(set_name, limit, is_test, eval_arm, arms_req=None):
             leak_guard(arm, ps, needles, fatal_gold_facts=True)
             leak[arm] = OrderedDict([("gold_facts", "FATAL (no facts arm)"), ("count", 0), ("qids", 0), ("matches", [])])
         else:
-            hits = leak_guard(arm, ps, needles, fatal_gold_facts=False)
+            a6_hits = None
+            if set_name == "eval458" and arm in A6_ARMS:
+                # A6.3: question_en and evidence ids with >= 3 letters stay FATAL (the frozen guard on the specific needles);
+                # evidence ids with < 3 letters are non-specific and are checked by a6_nonspecific_hits
+                n_spec, non_re, non_ids = a6_split_needles(needles)
+                hits = leak_guard(arm, ps, n_spec, fatal_gold_facts=False)
+                a6_hits = a6_nonspecific_hits(arm, sub, rows, prompts[arm], non_re, needles, readings_all[reader_of[arm]], teacher_by[reader_of[arm]])
+                hit_rows = {h["prompt_row"] for h in a6_hits}
+                for i, p in enumerate(ps):
+                    m = needles["evidence_re"].search(p)
+                    if m and i not in hit_rows:
+                        die("LEAK in %s prompt %d: contains evidence id %r" % (arm, i, m.group(0)))
+                print("[A6.3] %s: %d evidence ids, %d specific (>= %d letters; FATAL, 0 hits), %d non-specific; non-specific hits inside teacher facts: %d in %d prompt(s) (logged, not fatal)"
+                      % (arm, len(needles["evidence_ids"]), len(n_spec["evidence_ids"]), A6_MIN_LETTERS, len(non_ids), len(a6_hits), len(hit_rows)), flush=True)
+            else:
+                hits = leak_guard(arm, ps, needles, fatal_gold_facts=False)
             by_q = OrderedDict()
             for i, s in hits:
                 by_q.setdefault(sub[i]["qid"], []).append(s)
             leak[arm] = OrderedDict([("gold_facts", "REPORTED as V6, not fatal (A1.1; D10 A2.2)"), ("count", len(hits)), ("qids", len(by_q)),
                                      ("matches", [OrderedDict([("qid", q), ("fact", f)]) for q, fs in by_q.items() for f in fs])])
+            if a6_hits is not None:
+                leak[arm]["A6_3_nonspecific_evidence_hits"] = a6_hits
             print("[V6] %s verbatim gold-fact substrings: %d in %d qid(s) (reported)" % (arm, len(hits), len(by_q)))
         for r, p in zip(sub, ps):
             for rd in all_readings:
