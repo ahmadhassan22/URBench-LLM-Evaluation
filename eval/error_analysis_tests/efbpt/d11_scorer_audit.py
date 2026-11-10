@@ -19,7 +19,7 @@ BUILD (default, runs once, refuses to overwrite):
       every extractor label per item. NEVER printed by this script.
   Only counts are printed.
 
-SCORE (--score LABELS; run only after the adjudication):
+SCORE (--score LABELS [--sensitivity]; run only after the adjudication):
   LABELS = a JSON object {"1": "yes", ...} or lines "<item> <label>" (space, tab,
   comma or colon separated); label in yes / no / none (none = no verdict, or
   both). Prints A4.3: for E0-E3 the agreement with the adjudicated labels in both
@@ -28,6 +28,10 @@ SCORE (--score LABELS; run only after the adjudication):
   and the VALIDATED scorer = highest mean of the two arms' stratified agreement
   (ties -> E2, then E3, then E1). Then A4.4 for DEV200: every sealed arm
   re-scored with the validated scorer (descriptive).
+  The extractor labels of every item are RECOMPUTED from the sealed generations
+  at score time (the key gives arm, qid and stratum); E0-E2 must equal the
+  labels stored in the key. --sensitivity (Amendment 4 note N3: the ALT label
+  file) prints the A4.3 table only: it selects nothing and runs no A4.4.
 
 Candidate extractors (A4.3), all on the frozen strings ہاں / نہیں / marker:
   E0  frozen (efbpt_eval_dev200.extract_answer).
@@ -38,11 +42,14 @@ Candidate extractors (A4.3), all on the frozen strings ہاں / نہیں / marke
       (Unicode category L* / M*, or ZWNJ / ZWJ); یہاں, وہاں, جہاں, کہاں, انہیں,
       جنہیں and other longer words do not count. Rule 1 (JSON) and Rule 3
       (English yes/no, last) stay as in E0 / E1.
-  E3  opening verdict: answer segment = the text after the last marker (the
-      whole text without a marker); the first whole-word ہاں / نہیں that starts
-      within the first 12 whitespace-separated words; else the LAST whole-word
-      mention of the segment; else unparsed. As written in A4.3, E3 has no JSON
-      rule and no English fallback.
+  E3  opening verdict, replacing Rule 2 ONLY (docs/EFBPT_D11_RTG_AMENDMENT_4_NOTE.md
+      N1): Rule 1 (JSON) first, as frozen; then, in the answer segment (the text
+      after the last marker; the whole text without a marker), the first
+      whole-word ہاں / نہیں that starts within the first 12 whitespace-separated
+      words; else the LAST whole-word mention of the segment; else Rule 3
+      (English yes/no, last), as frozen; else unparsed. (The key written at
+      build time holds E3 labels of the earlier reading without Rules 1 and 3;
+      they are not used: see SCORE.)
 """
 import argparse
 import json
@@ -65,6 +72,7 @@ import d11_dev200_supplement as SUPP  # noqa: E402  sealed DEV200 arm list (MD5-
 
 AMEND4_PATH = "docs/EFBPT_D11_RTG_AMENDMENT_4.md"
 AMEND4_MD5 = "605c56e95c05fcb05c0c248cbe7ccac1"
+AMEND4_NOTE_PATH = "docs/EFBPT_D11_RTG_AMENDMENT_4_NOTE.md"     # N1: E3 replaces Rule 2 only
 ITEMS_PATH = "docs/handoff/D11_SCORER_AUDIT_ITEMS.md"
 KEY_PATH = "outputs/efbpt/d11/_audit/scorer_audit_key.json"
 AUDIT_ARMS = ("A_r2", "TR")
@@ -150,11 +158,16 @@ def e2(text):
 
 
 def e3(text):
-    """Opening verdict: first whole-word mention starting within the first 12 words; else the last whole-word mention; else unparsed."""
+    """Opening verdict in place of Rule 2 only (note N1): Rule 1 (JSON) as frozen; then the first whole-word mention
+    starting within the first 12 words of the answer segment, else the last whole-word mention; then Rule 3 (English)
+    as frozen; else unparsed."""
+    r = _json_rule(text)
+    if r is not None:
+        return r
     seg = answer_segment(text)
     ms = whole_word_mentions(seg)
     if not ms:
-        return None
+        return _english_rule(text)
     toks = list(re.finditer(r"\S+", seg))
     end = toks[min(OPENING_WORDS, len(toks)) - 1].end()
     opening = [m for m in ms if m[0] < end]
@@ -176,8 +189,9 @@ def selftest():
         (yahan + " " + NAHIN, ("no", "yes", "no", "no")),
         (fill + " " + HAAN + " x " + NAHIN, ("no", "yes", "yes", "no")),          # no mention in the first 12 words -> E3 takes the last
         ("**" + NAHIN + "**۔ " + fill + " " + HAAN, ("yes", "no", "no", "no")),
-        ("Yes, it is.", ("yes", "yes", "yes", None)),                             # E3 has no English fallback
-        ('{"answer": "no"} ' + HAAN, ("no", "no", "no", "yes")),                  # E3 has no JSON rule
+        ("Yes, it is.", ("yes", "yes", "yes", "yes")),                            # Rule 3 (English) kept in every extractor
+        ('{"answer": "no"} ' + HAAN, ("no", "no", "no", "no")),                   # Rule 1 (JSON) kept in every extractor
+        ("x " + yahan + " x No.", ("yes", "yes", "no", "no")),                    # no whole-word mention -> Rule 3 for E2 / E3
         (NAHIN + " x " + MARKER + ": " + HAAN, ("yes", "yes", "yes", "yes")),     # marker cut
         ("x y z", (None, None, None, None)),
     ]
@@ -327,15 +341,33 @@ def read_labels(path, n_items):
     return labels
 
 
-def agreement_table(key, labels):
+def current_items(key):
+    """The key's items with every extractor label recomputed NOW from the sealed generation of (arm, qid).
+    E0-E2 must equal the labels stored in the key at build time; E3 is the note-N1 definition (the key's
+    E3 labels are of the earlier reading and are only counted against)."""
+    gens = {arm: {r["qid"]: r["generation"] for r in load_arm(arm)} for arm in AUDIT_ARMS}
+    items, e3_changed = [], 0
+    for it in key["items"]:
+        lab = OrderedDict((e, label_str(f(gens[it["arm"]][it["qid"]]))) for e, f in EXTRACTORS.items())
+        for e in ("E0", "E1", "E2"):
+            if lab[e] != it["labels"][e]:
+                die("item %d: %s recomputed differs from the key" % (it["item"], e))
+        if (lab["E0"] != lab["E1"]) != (it["stratum"] == "differ"):
+            die("item %d: stratum in the key does not match E0 vs E1" % it["item"])
+        e3_changed += int(lab["E3"] != it["labels"]["E3"])
+        items.append(OrderedDict([("item", it["item"]), ("arm", it["arm"]), ("stratum", it["stratum"]), ("labels", lab)]))
+    return items, e3_changed
+
+
+def agreement_table(strata, items, labels):
     """A4.3. Returns (per-arm table, mean stratified agreement per extractor as Fractions, validated extractor name)."""
     table, strat = OrderedDict(), OrderedDict((e, []) for e in EXTRACTORS)
-    for arm, s in key["strata"].items():
+    for arm, s in strata.items():
         table[arm] = OrderedDict()
         for e in EXTRACTORS:
             cell = OrderedDict()
             for stratum in ("differ", "agree"):
-                its = [it for it in key["items"] if it["arm"] == arm and it["stratum"] == stratum]
+                its = [it for it in items if it["arm"] == arm and it["stratum"] == stratum]
                 ok = sum(1 for it in its if it["labels"][e] == labels[it["item"]])
                 cell[stratum] = (ok, len(its))
             (od, nd), (oa, na) = cell["differ"], cell["agree"]
@@ -372,19 +404,28 @@ def rescore_dev200(name):
     return out
 
 
-def score_mode(labels_path):
+def score_mode(labels_path, sensitivity):
     if not os.path.exists(KEY_PATH) or not os.path.exists(ITEMS_PATH):
         die("build the items first")
+    if "eval458" in labels_path:
+        die("refusing an eval458 path")
+    if not os.path.exists(AMEND4_NOTE_PATH):
+        die("%s missing (N1 fixes the E3 rule scope used here)" % AMEND4_NOTE_PATH)
     key = json.load(open(KEY_PATH, encoding="utf-8"), object_pairs_hook=OrderedDict)
     if key["amendment4_md5"] != AMEND4_MD5 or md5_file(ITEMS_PATH) != key["items_file"]["md5"]:
         die("the items file or the amendment changed since the key was written")
     labels = read_labels(labels_path, len(key["items"]))
-    table, mean, validated = agreement_table(key, labels)
-    print("A4.3 — agreement of each candidate extractor with the adjudicated labels (labels file %s, md5 %s; %d items)"
-          % (labels_path, md5_file(labels_path), len(labels)))
+    items, e3_changed = current_items(key)
+    table, mean, validated = agreement_table(key["strata"], items, labels)
+    print("A4.3 — agreement of each candidate extractor with the adjudicated labels%s" % ("   [SENSITIVITY label set: selects nothing]" if sensitivity else ""))
+    print("labels %s (md5 %s; %d items: yes %d / no %d / none %d); key md5 %s; items md5 %s; script md5 %s; note md5 %s"
+          % (labels_path, md5_file(labels_path), len(labels), sum(1 for v in labels.values() if v == "yes"), sum(1 for v in labels.values() if v == "no"),
+             sum(1 for v in labels.values() if v == "none"), md5_file(KEY_PATH), md5_file(ITEMS_PATH), md5_file(os.path.abspath(__file__)), md5_file(AMEND4_NOTE_PATH)))
+    print("extractor labels recomputed from the sealed generations: E0-E2 equal the key on all %d items; E3 (note N1 scope) differs from the key's earlier-reading E3 on %d item(s)"
+          % (len(items), e3_changed))
     for arm in table:
         s = key["strata"][arm]
-        its = [it for it in key["items"] if it["arm"] == arm]
+        its = [it for it in items if it["arm"] == arm]
         print("\n%s: differ stratum %d rows (all audited), agree stratum %d of %d rows audited; adjudicated yes / no / none: differ %s, agree %s"
               % (arm, s["differ_total"], N_AGREE, s["agree_total"],
                  " / ".join(str(sum(1 for it in its if it["stratum"] == "differ" and labels[it["item"]] == l)) for l in LABELS),
@@ -393,7 +434,16 @@ def score_mode(labels_path):
         for e, cell in table[arm].items():
             (od, nd), (oa, na) = cell["differ"], cell["agree"]
             print("  %-4s %15d / %-4d %15d / %-4d %23.2f%%" % (e, od, nd, oa, na, 100.0 * float(cell["stratified"])))
+    print("\nitems right, both arms together:")
+    print("  %-4s %22s %22s %16s" % ("", "of the 65 differ items", "of the 40 agree items", "of all 105"))
+    for e in EXTRACTORS:
+        d = sum(table[arm][e]["differ"][0] for arm in table)
+        a = sum(table[arm][e]["agree"][0] for arm in table)
+        print("  %-4s %22d %22d %16d" % (e, d, a, d + a))
     print("\nmean of the two arms' stratified agreement: " + "; ".join("%s %.2f%%" % (e, 100.0 * float(v)) for e, v in mean.items()))
+    if sensitivity:
+        print("highest mean under this SENSITIVITY label set (ties -> E2, E3, E1): %s — it selects nothing (note N3); no A4.4 table is run from it" % validated)
+        return
     print("VALIDATED scorer (A4.3: highest mean; ties -> E2, then E3, then E1): %s" % validated)
     rescore_dev200(validated)
 
@@ -401,11 +451,14 @@ def score_mode(labels_path):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--score", metavar="LABELS", default=None, help="A4.3 / A4.4 from an adjudicated labels file; run only after the adjudication")
+    ap.add_argument("--sensitivity", action="store_true", help="with --score: a sensitivity label set (note N3): A4.3 table only, selects nothing")
     args = ap.parse_args()
     check_contract()
     selftest()
+    if args.sensitivity and not args.score:
+        ap.error("--sensitivity needs --score")
     if args.score:
-        score_mode(args.score)
+        score_mode(args.score, args.sensitivity)
     else:
         build()
 
