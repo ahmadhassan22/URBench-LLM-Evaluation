@@ -4,7 +4,7 @@ Agreement only: these labels select nothing; the validated scorer is the one cho
 
 | adjudicator | yes | no | none | invalid | strict one-word replies | lenient | retried with enable_thinking=false | raw replies (sealed) |
 |---|---|---|---|---|---|---|---|---|
-| PRIMARY (human) | 61 | 33 | 11 | 0 | — | — | — | `docs/handoff/D11_SCORER_AUDIT_LABELS_PRIMARY.json` |
+| PRIMARY (adjudicator A) | 61 | 33 | 11 | 0 | — | — | — | `docs/handoff/D11_SCORER_AUDIT_LABELS_PRIMARY.json` |
 | qwen3.8-max | 60 | 32 | 13 | 0 | 105 | 0 | 0 | `outputs/efbpt/d11/_audit/adjudicators/qwen3.8-max/replies.jsonl` (MD5 `4a0b0017c0c5b01ed2f1e1c71139be4c`) |
 | deepseek-v4-pro | 58 | 34 | 13 | 0 | 105 | 0 | 0 | `outputs/efbpt/d11/_audit/adjudicators/deepseek-v4-pro/replies.jsonl` (MD5 `5c1c3ec6916d33373a86f5f07d2aecb1`) |
 | majority of the three | 60 | 33 | 12 | 0 | — | — | — | — |

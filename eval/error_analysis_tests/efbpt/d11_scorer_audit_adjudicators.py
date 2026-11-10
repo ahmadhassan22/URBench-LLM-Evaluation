@@ -391,7 +391,7 @@ def report():
     w("| adjudicator | yes | no | none | invalid | strict one-word replies | lenient | retried with enable_thinking=false | raw replies (sealed) |")
     w("|---|---|---|---|---|---|---|---|---|")
     c = Counter(lab["PRIMARY"])
-    w("| PRIMARY (human) | %d | %d | %d | %d | — | — | — | `%s` |" % (c["yes"], c["no"], c["none"], c["invalid"], PRIMARY_PATH))
+    w("| PRIMARY (adjudicator A) | %d | %d | %d | %d | — | — | — | `%s` |" % (c["yes"], c["no"], c["none"], c["invalid"], PRIMARY_PATH))
     for short, model in MODELS.items():
         c = Counter(lab[short])
         rs = list(recs[short].values())
