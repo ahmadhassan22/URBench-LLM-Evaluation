@@ -4,7 +4,9 @@ d11_common.py — shared constants and loaders for D11 RTG (read-then-ground).
 
 Contract: docs/EFBPT_D11_RTG_FREEZE.md (MD5 pinned below) as amended by
 docs/EFBPT_D11_RTG_AMENDMENT_1.md (A1.1 leak-guard reading rule, A1.2 V1 arm
-set, A1.3 jobs, A1.4 derangement, A1.5 eval458 mechanics, A1.6 API_direct_ur).
+set, A1.3 jobs, A1.4 derangement, A1.5 eval458 mechanics, A1.6 API_direct_ur)
+and docs/EFBPT_D11_RTG_AMENDMENT_2.md (eval458: A2.2 arms, A2.3 per-arm jobs
+and the DEV200 regression, A2.4 CPU preflight, A2.5 crash rule).
 
 Set-aware item loading (freeze §8: --set dev200|eval458) is built on the
 pinned D11-R item sets (d11r_common.load_items: file MD5 and n asserted) and,
@@ -34,6 +36,8 @@ D11_FREEZE_PATH = "docs/EFBPT_D11_RTG_FREEZE.md"
 D11_FREEZE_MD5 = "ce7d68801c302fa5a8d173bd3ee93eb7"
 D11_AMEND1_PATH = "docs/EFBPT_D11_RTG_AMENDMENT_1.md"
 D11_AMEND1_MD5 = "0b7202af45eac170ec2d8fe281269e9e"
+D11_AMEND2_PATH = "docs/EFBPT_D11_RTG_AMENDMENT_2.md"
+D11_AMEND2_MD5 = "4ea8b0e6406a8a7ea05e33b212215f96"
 D11R_AMEND2_PATH = "docs/EFBPT_D11R_AMENDMENT_2.md"
 D11R_AMEND2_MD5 = "6c466ab2d31bffd3bfe96f43c24678f3"
 GO_EVAL458_PATH = "docs/D11_GO_EVAL458.md"
@@ -59,6 +63,15 @@ DERANGE_SEED = 1010
 
 OUT_ROOT = "outputs/efbpt/d11"
 TEST_ROOT = os.path.join(OUT_ROOT, "_test")
+REGRESS_ROOT = os.path.join(OUT_ROOT, "_regress")   # Amendment 2 A2.3: DEV200 regression, never a result
+
+# Amendment 2 A2.2: the eval458 readers (R1 primary + control, R3 secondary); no other arm
+EVAL458_READERS = ("R1", "R3")
+# Amendment 2 A2.4: the eval458 item set as declared in freeze §8
+EVAL458_N, EVAL458_YES, EVAL458_NO = 458, 221, 237
+# Amendment 2 A2.3: the sealed DEV200 TR file the regression is compared with
+DEV200_TR_SEALED = ("outputs/efbpt/d11/student/dev200/d11_armTR.jsonl", "bab987cc492012f4e32dbcd348be9668")
+REGRESS_N = 5                                # rows 0-4
 FORBIDDEN_WRITE_DIRS = ("outputs/efbpt/d1", "outputs/efbpt/d4", "outputs/efbpt/d6", "outputs/efbpt/d8",
                         "outputs/efbpt/d10", "outputs/efbpt/d10v2", "outputs/efbpt/d11o", "outputs/efbpt/d11r")
 
@@ -74,11 +87,12 @@ def out_dir(job, set_name, test, sub=None):
 
 
 def verify_contracts():
-    """D11 freeze + Amendment 1 (and the D11-R contracts the reading files were
-    produced under), by pinned MD5; returned for every START / SEAL."""
+    """D11 freeze + Amendments 1 and 2 (and the D11-R contracts the reading
+    files were produced under), by pinned MD5; returned for every START / SEAL."""
     out = OrderedDict()
     for key, path, want in (("d11_freeze", D11_FREEZE_PATH, D11_FREEZE_MD5),
                             ("d11_amendment_1", D11_AMEND1_PATH, D11_AMEND1_MD5),
+                            ("d11_amendment_2", D11_AMEND2_PATH, D11_AMEND2_MD5),
                             ("d11r_freeze", D11R_FREEZE_PATH, D11R_FREEZE_MD5),
                             ("d11r_amendment_1", D11R_AMEND1_PATH, D11R_AMEND1_MD5),
                             ("d11r_amendment_2", D11R_AMEND2_PATH, D11R_AMEND2_MD5)):
@@ -137,6 +151,21 @@ def load_set_rows(set_name, limit=None):
     n_yes = sum(1 for r in rows if r["gold"] == "yes")
     print("[ok] %s: %d rows, gold yes %d / no %d, floor %.2f%%"
           % (set_name, len(rows), n_yes, len(rows) - n_yes, 100.0 * max(n_yes, len(rows) - n_yes) / len(rows)))
+    if set_name == "eval458":
+        # Amendment 2 A2.4 (freeze §8): 458 rows, 221 yes / 237 no, overlap 0 with DEV200 and RDEV300
+        if (len(rows), n_yes, len(rows) - n_yes) != (EVAL458_N, EVAL458_YES, EVAL458_NO):
+            die("eval458: %d rows, %d yes / %d no; expected %d, %d / %d (A2.4)"
+                % (len(rows), n_yes, len(rows) - n_yes, EVAL458_N, EVAL458_YES, EVAL458_NO))
+        mine = {r["qid"] for r in rows}
+        mine_ur = {r["question_ur"] for r in rows}
+        for other in ("dev200", "rdev300"):
+            o_items = load_items(other, with_gold=False)
+            ov = sorted(mine & {it["qid"] for it in o_items})
+            ov_ur = sorted(mine_ur & {it["question_ur"] for it in o_items})
+            if ov or ov_ur:
+                die("eval458 overlaps %s: %d qid(s) %s, %d question_ur string(s) (A2.4: overlap must be 0)"
+                    % (other, len(ov), ov[:5], len(ov_ur)))
+            print("[ok] eval458 overlap with %s (%d rows): 0 qids, 0 question_ur strings" % (other, len(o_items)))
     return rows[:limit] if limit else rows
 
 

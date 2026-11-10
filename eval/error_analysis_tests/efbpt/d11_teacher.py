@@ -3,7 +3,9 @@
 d11_teacher.py — D11 RTG Job T: v1 teacher facts from the sealed D11-R reading.
 
 Contract: docs/EFBPT_D11_RTG_FREEZE.md §3 (MD5 pinned in d11_common) as amended
-by docs/EFBPT_D11_RTG_AMENDMENT_1.md A1.1 / A1.3 / A1.5, on the D11-O v1 path
+by docs/EFBPT_D11_RTG_AMENDMENT_1.md A1.1 / A1.3 / A1.5 and
+docs/EFBPT_D11_RTG_AMENDMENT_2.md (eval458: one job per reader, R1 and R3 only,
+no TEST, CPU preflight only; A2.2-A2.4), on the D11-O v1 path
 (d11o_teacher.py: D10 T1 prompt pair with the two English-input edits, strict
 parser, T2 verdict filter, max_tokens 512, D10 §2 engine). Everything frozen is
 IMPORTED from d11o_teacher / d10_teacher, never re-implemented; the ONLY change
@@ -41,7 +43,7 @@ if _HERE not in sys.path:
 
 from d11_common import (  # noqa: E402
     READERS, SETS, TEST_N, out_dir, verify_contracts, require_eval458_gate, load_set_rows,
-    needles_for, load_readings, guard_out_path, file_entry, die, md5_file, git_state,
+    needles_for, load_readings, guard_out_path, file_entry, die, md5_file, git_state, EVAL458_READERS,
 )
 import d11o_teacher as O                  # noqa: E402  the frozen v1 oracle-reading path
 from efbpt_eval_dev200 import INSTRUCTION_PATH, INSTRUCTION_MD5, load_instruction  # noqa: E402
@@ -207,6 +209,11 @@ def main():
     is_test = args.mode == "TEST"
     limit = TEST_N if is_test else None
     require_eval458_gate(args.set)
+    if args.set == "eval458":
+        if is_test:
+            die("no TEST on eval458 rows (Amendment 2 A2.4): use --mode FULL [--preflight-only]")
+        if args.reader not in EVAL458_READERS:
+            die("eval458 teacher runs for %s only (Amendment 2 A2.2: no other arm); got %s" % ("/".join(EVAL458_READERS), args.reader))
     OUT_DIR = out_dir("teacher", args.set, is_test, args.reader)
 
     sub, p_facts, meta, readings = preflight(args.reader, args.set, limit)
@@ -300,6 +307,7 @@ def main():
         ("end_time", time.strftime("%Y-%m-%d %H:%M:%S")),
         ("script_md5", meta["scripts"][os.path.relpath(__file__)]),
         ("d11_freeze_md5", meta["contracts"]["d11_freeze"]["md5"]), ("d11_amendment1_md5", meta["contracts"]["d11_amendment_1"]["md5"]),
+        ("d11_amendment2_md5", meta["contracts"]["d11_amendment_2"]["md5"]),
         ("d11o_freeze_md5", meta["contracts"]["d11o_freeze"]["md5"]), ("d10_freeze_md5", meta["contracts"]["d10_freeze"]["md5"]),
         ("reading_file", OrderedDict([("path", meta["reader"]["file"]), ("md5", meta["reader"]["md5"])])),
         ("n_rows", len(sub)), ("t1_parse_ok", n_parse_ok), ("t1_repaired_rows", n_repaired), ("t2_removed_total", n_removed_total),
