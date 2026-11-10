@@ -200,7 +200,7 @@ The whole TR gain is on gold-no rows: 64.6 % → 80.5 % (+15.9 pp; 26 wins / 8 l
 
 **§7 decision line (TR vs A_r2, exact McNemar):** Δ = +8.5 pp (137 vs 120 of 200), b = 39, c = 22, p = 0.0396. +8.5 ≥ +8.0 and p < 0.05 → **GO → eval458 once (§8)**. DEV200-best of {TR 68.5, TR2 65.0, TR_L1 67.0} = **TR** (no tie). Recorded in `docs/D11_DECISION.md` (written with this readout). `docs/D11_GO_EVAL458.md` is not written here; it waits for the hand check of §8.
 
-Margin note (descriptive, not part of the rule): the GO gate is met by one discordant pair. With b = 38, c = 23 the delta would still be +8.0 but p = 0.072, so the verdict would be CONDITIONAL; the pre-registered band started at +9.
+Margin note (descriptive, not part of the rule): the GO gate is met by one discordant pair. With one win turned into a loss, b = 38, c = 23, the delta would be +7.5 pp (not +8.0) and p = 0.072, so the verdict would be CONDITIONAL; the pre-registered band started at +9.
 
 ---
 
