@@ -13,9 +13,9 @@ thinking switch in the request), max_tokens 4000; ONE retry with enable_thinking
 if the reply is empty. Transport errors (429 / 5xx / network) follow the D11-R retry
 policy. 2 concurrent calls. One item per call:
   system = the rubric of docs/EFBPT_D11_RTG_AMENDMENT_4_NOTE.md N2 (R1-R4) in English,
-           WITHOUT the item numbers the human adjudicator listed there;
+           WITHOUT the item numbers adjudicator A listed there;
   user   = the Urdu question + the text shown in docs/handoff/D11_SCORER_AUDIT_ITEMS.md
-           (whole text, or first 300 / last 250 characters), exactly as the human saw it.
+           (whole text, or first 300 / last 250 characters), exactly as adjudicator A saw it.
 The model never receives arm, gold, qid, any extractor label or any other label.
 Reply = one word: yes / no / none. Parsing: think tags removed; the reply stripped of
 non-letters must be yes / no / none ("strict"); else the first alphabetic word if it is
@@ -384,7 +384,7 @@ def report():
     w("Agreement only: these labels select nothing; the validated scorer is the one chosen by the PRIMARY labels (E3). "
       "Written by `eval/error_analysis_tests/efbpt/d11_scorer_audit_adjudicators.py` (MD5 `%s`). Items `%s` (MD5 `%s`), %d items; "
       "PRIMARY labels MD5 `%s`. Each model got the rubric N2 R1–R4 in English as the system message (MD5 `%s`; the item numbers of the note are not in it) "
-      "and one item per call (the Urdu question and the text shown to the human adjudicator); it did not receive arm, gold, qid or any label. "
+      "and one item per call (the Urdu question and the text shown to adjudicator A); it did not receive arm, gold, qid or any label. "
       "temperature %d, default thinking, max_tokens %d, one retry with enable_thinking=false on an empty reply."
       % (md5_file(os.path.abspath(__file__)), ITEMS_PATH, ITEMS_MD5, N_ITEMS, PRIMARY_MD5, md5_text(SYSTEM), TEMPERATURE, MAX_TOKENS))
     w("")
