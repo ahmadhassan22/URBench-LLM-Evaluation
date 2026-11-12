@@ -910,6 +910,18 @@ Total examples: 750
 > baseline is more moderate, making it interesting to see whether it maintains
 > performance across prompt types.
 
+### PIQA 3-shot
+- Used items:        750
+- Answered (0/1):    750 (100.00%)
+- Accuracy overall:  76.40% (573/750)
+- Accuracy answered: 76.40%
+- Output file:       outputs/piqa/llama3.1_70b_awq/piqa_three_shot_llama3.1_70b_awq.jsonl
+
+> Note: entry added 2026-11-12. The output file is dated 2026-04-13; the run
+> entry was missing here. The file was rescored on 2026-11-12 with the scorer of
+> the other PIQA entries (normalize_piqa_output in eval/eval_piqa_three_shot_vllm.py);
+> the rescoring equals the stored prediction on all 750 rows.
+
 ### PIQA Chain-of-Thought (CoT)
 - Used items:        750
 - Answered (0/1):    426 (56.80%)
