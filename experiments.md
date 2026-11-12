@@ -5123,3 +5123,231 @@ Secondary (descriptive):
 - R1: D4 stands; X1u (52/68, 76.47%) is the honest number for extraction from all gold pages without question_en.
 - Next: the teacher route, D10. Model, GPU and API inventory: `docs/handoff/TEACHER_INVENTORY.md`.
 - Open: the V5 hand check of 30 Xp facts.
+
+## EFBPT D10: TEACHER FACT INJECTION, FULL JOBS 109581 / 109582 (recorded 2026-11-12)
+
+Source of every number: `docs/handoff/D10_FULL_READOUT.md`. Contract: `docs/EFBPT_D10_TEACHER_FREEZE.md` with
+Amendments 1 and 2.
+
+**Design:** a teacher (Llama-3.1-70B-Instruct-AWQ-INT4, vLLM, greedy) reads the Urdu question and writes at most
+6 short English facts. The student (Qwen3-14B, nf4, greedy, thinking off, batch size 1) answers in Urdu with those
+facts in the facts block. DEV200, n = 200 (gold yes 87 / no 113), floor 56.50%. Teacher job 109581 and student job
+109582 both `COMPLETED` on 2026-11-01.
+
+| Arm | Facts given | Correct | Acc | Unparsed |
+|---|---|---:|---:|---:|
+| A_r2 | none (floor, batch size 1) | 120 | 60.00% | 8 |
+| TF | teacher facts of the same question | 130 | 65.00% | 1 |
+| TF_wrong | teacher facts of another question (derangement) | 109 | 54.50% | 10 |
+| TF_noq | teacher facts, no question | 88 | 44.00% | 43 |
+| T_direct | none; the teacher answers the student prompt | 54 | 27.00% | 119 |
+| T_direct_F | none; teacher alone with a final-answer line (Amendment 1 A1.1) | 111 | 55.50% | 1 |
+
+**Readings (exact two-sided McNemar; wins = first arm right, second wrong):**
+- R1, TF vs A_r2: +5.0 pp, wins 38, losses 28, p = 0.268 → `CONDITIONAL` (GO needed ≥ +8.0 pp and p < 0.05).
+- R2, TF vs T_direct_F: +9.5 pp, wins 58, losses 39, p = 0.067. T_direct_F answers "yes" on 149/200 rows.
+- R3, TF_wrong vs A_r2: −5.5 pp, wins 32, losses 43, p = 0.248. Under Amendment 2 A2.1 a negative excess is
+  `WRONG-FACTS HARM`, not a format effect. TF vs TF_wrong: +10.5 pp, wins 41, losses 20, p = 0.0099 (descriptive).
+- R3, TF_noq vs A_r2: −16.0 pp, wins 27, losses 59, p = 0.0007 → no leak flag.
+- R4, teacher entity reading: 34.0% on the D6-71 questions (reference 21.0%); 32.39% on all rows.
+- 17 of the 28 TF losses are gold-yes rows that TF turned to "no".
+
+**Decision:** R1 CONDITIONAL → exactly one fix iteration, declared in an amendment, then one FULL re-run (D10 v2).
+
+## EFBPT D10 v2: DECOMPOSITION TEACHER, FULL JOBS 110654 / 110655 (recorded 2026-11-12)
+
+Source of every number: `docs/handoff/D10V2_ANALYSIS_PACK.md`. Contract: the D10 freeze with Amendments 3, 4 and 5.
+
+**Design:** the one allowed fix (freeze §7 iii). The teacher prompt T1-v2 first restates the question in English,
+then writes sub-questions, then facts. Same student, same DEV200 rows. Jobs 110652–110655 ran as one chain; the
+FULL jobs are 110654 (teacher) and 110655 (student).
+
+- R1, TF vs A_r2: 64.50% (129) vs 60.00% (120), +4.5 pp, wins 41, losses 32, p = 0.3492 → below +5.0 pp →
+  `NO-GO` (Amendment 3 A3.5).
+- TF_wrong 52.00% (104) with 13 unparsed rows (6.5%): the unparsed spread is 6.00 pp (limit 5.0), so every
+  TF_wrong reading is `VOID` (A3.4). TF_noq 45.00% (90).
+- v2 against v1 on TF: 129 vs 130 correct; v2 wins 26, losses 27, p = 1.0000. The v2 teacher gives fewer facts
+  (median 3, v1 6). It fixes 13 of the 28 v1 TF losses and loses 10 of the 38 v1 TF wins.
+- R4 teacher entity reading: 36.00% on D6-71.
+- The A_r2 file is byte-identical to the v1 A_r2 file (200/200 generations), from two jobs on two nodes. At
+  batch size 1 the cross-job noise on this arm is zero.
+
+**Decision:** the route "teacher facts from the Urdu question" is closed; no further DEV200 iteration on it
+(A3.5). The cause was then measured in D11-O.
+
+## EFBPT D11-O: ORACLE-READING CEILING, JOBS 112301–112306 (recorded 2026-11-12)
+
+Source of every number: `docs/handoff/D11O_READOUT.md`. Contract: `docs/EFBPT_D11O_ORACLE_READING_FREEZE.md` with
+Amendment 1. D11-O is a diagnostic, not a method.
+
+**Question:** how much of the distance between teacher facts and gold facts is the teacher's reading of Urdu? In the
+oracle arms the teacher gets the gold English question; the student still reads only the Urdu question. DEV200,
+n = 200, same student, batch size 1.
+
+| Arm | Facts source | Correct | Acc |
+|---|---|---:|---:|
+| A_r2 | none (sealed D10 floor) | 120 | 60.0% |
+| GF | gold facts | 152 | 76.0% |
+| TO1 | v1 teacher, English input | 148 | 74.0% |
+| TO2 | v2 teacher, English input (`VOID`: teacher parse 8/200) | 122 | 61.0% |
+| TF_v1 | v1 teacher, Urdu input (sealed D10) | 130 | 65.0% |
+| TF_v2 | v2 teacher, Urdu input (sealed D10 v2) | 129 | 64.5% |
+
+- O1, GF − A_r2: +16.0 pp, wins 49, losses 17, p = 0.000101.
+- O2, TO1 − A_r2: +14.0 pp, wins 46, losses 18, p = 0.000617.
+- O3, TO1 − TF_v1 (same prompt, English against Urdu input): +9.0 pp, wins 34, losses 16, p = 0.0153.
+- O4, reading share (TO − TF) / (GF − TF) for v1: 0.818.
+- TO1 − GF: −2.0 pp, wins 20, losses 24, p = 0.652.
+- TO1 against A_r2 by gold label: +22.1 pp on gold-no rows, +3.4 pp on gold-yes rows.
+- TO2 is void as a reading arm: the v2 teacher parsed 8/200 rows, and the other 192 student prompts are
+  byte-identical to the A_r2 prompts.
+
+**Decision (freeze §6):** max(O2) = +14.0 pp ≥ +9.0 pp → reading is the main wall → D11 = reading-robust
+injection. eval458 stays reserved for the final D11 method.
+
+## EFBPT D11-R: URDU→ENGLISH READER BENCHMARK ON RDEV300 (recorded 2026-11-12)
+
+Source of every number: `docs/handoff/D11R_RDEV300_READOUT.md`. Contract: `docs/EFBPT_D11R_READER_FREEZE.md` with
+Amendments 1 and 2.
+
+**Design:** RDEV300 = 300 training-pool questions that are in neither DEV200 nor eval458. Every reader translates
+the Urdu question into one English line. M1 = proper-noun recall against the gold English question (macro, over
+the 233 rows with at least one gold proper noun); M2 = chrF. Selection uses RDEV300 only.
+
+| Reader | M1 macro % | M2 chrF |
+|---|---:|---:|
+| L1_llama70b_awq | 87.95 | 66.87 |
+| L2_gemma2_27b_nf4 | 82.29 | 65.39 |
+| L3_qwen3_14b_nf4 | 74.33 | 60.81 |
+| L4_nllb200_3.3b | 84.48 | 67.38 |
+| api_deepseek-v4-flash | 89.30 | 71.68 |
+| api_deepseek-v4-pro | 91.93 | 72.38 |
+| api_qwen3.7-flash | 83.45 | 67.27 |
+| api_qwen3.8-max | 91.55 | 73.16 |
+
+- Rule (freeze §4): best M1; if two readers are within 1.0 pp of M1, the higher M2 wins. api_deepseek-v4-pro and
+  api_qwen3.8-max differ by 0.38 pp on M1, and 73.16 > 72.38 on M2.
+- `SELECTED`: api_qwen3.8-max. `RUNNER-UP`: api_deepseek-v4-pro. Best local reader: L1_llama70b_awq.
+- Paired row-level M1 (233 rows): selected against runner-up 12 vs 11 rows, p = 1.00; selected against the best
+  local reader 31 vs 7 rows, p = 1.2 × 10⁻⁴.
+- The eval458 readings were sealed unread.
+
+## EFBPT D11 RTG (READ-THEN-GROUND) ON DEV200, JOBS 115172 / 115173 (recorded 2026-11-12)
+
+Sources: `docs/handoff/D11_FULL_READOUT.md` (every number, unless another file is named), `docs/D11_DECISION.md`,
+`docs/D11_GO_EVAL458.md`. RO ablation: the sealed file `outputs/efbpt/d11/ablate_ro/dev200/d11_ablate_ro_summary.json`
+(job 115548, MD5 `54d22ca19f094811bbaf919431c8d91c`); no readout file exists for it. Contract:
+`docs/EFBPT_D11_RTG_FREEZE.md` with Amendments 1 to 3.
+
+**Method:** Urdu question → reader → English question → teacher (Llama-3.1-70B-AWQ, D11-O v1 prompt) writes short
+English facts → student (Qwen3-14B, nf4, batch size 1) answers in Urdu with the facts in the facts block. Readers:
+R1 api_qwen3.8-max (selected), R2 api_deepseek-v4-pro, R3 L1_llama70b_awq (local). DEV200, n = 200, floor 56.50.
+Teacher job 115172, student job 115173.
+
+| Arm | What it is | Correct | Acc % | Δ vs A_r2 (pp) | b | c | p |
+|---|---|---:|---:|---:|---:|---:|---:|
+| A_r2 | no facts (sealed D10 floor) | 120 | 60.00 | | | | |
+| TR | R1 reading → teacher facts | 137 | 68.50 | +8.5 | 39 | 22 | 0.03962 |
+| TR2 | R2 reading → teacher facts | 130 | 65.00 | +5.0 | 35 | 25 | 0.2451 |
+| TR_L1 | R3 (local) reading → teacher facts | 134 | 67.00 | +7.0 | 45 | 31 | 0.1354 |
+| TR_wrong | TR facts of another question | 101 | 50.50 | -9.5 | 30 | 49 | 0.04217 |
+| TR_noq | TR facts, no question | 94 | 47.00 | -13.0 | 32 | 58 | 0.008046 |
+| API_direct_ur | qwen3.8-max answers the Urdu question alone | 138 | 69.00 | +9.0 | 46 | 28 | 0.04739 |
+| TF_v1 | D10 teacher facts (Urdu input) | 130 | 65.00 | +5.0 | 38 | 28 | 0.2678 |
+| TO1 | D11-O oracle reading | 148 | 74.00 | +14.0 | 46 | 18 | 0.0006174 |
+| GF | D11-O gold facts | 152 | 76.00 | +16.0 | 49 | 17 | 0.0001015 |
+
+- **Decision (freeze §7):** TR vs A_r2 = +8.5 pp, b 39 / c 22, p = 0.0396 → `GO` → eval458 once. DEV200-best of
+  {TR, TR2, TR_L1} = TR. The gate is met by one discordant pair.
+- TR against the other arms: vs TR_wrong +18.0 pp (b 53 / c 17, p = 1.92e-05); vs API_direct_ur −0.5 pp
+  (b 26 / c 27, p = 1); vs TF_v1 +3.5 pp (b 26 / c 19, p = 0.3713); vs TO1 −5.5 pp (b 11 / c 22, p = 0.08014);
+  vs GF −7.5 pp (b 17 / c 32, p = 0.04438).
+- The TR gain is on gold-no rows (A_r2 64.60% → TR 80.53%); gold-yes is flat (54.02% → 52.87%).
+- By reading quality: TR − A_r2 is +16.1 pp on the 124 rows whose R1 reading recovers every gold proper noun and
+  −6.5 pp on the 31 rows where it does not.
+- Reader quality on DEV200 (M1 macro): R1 89.69, R2 88.40, R3 82.84.
+- Predictions (freeze §6): 4 hit, 2 miss.
+- Hand check of the 22 TR losses (`docs/EFBPT_D11_RTG_AMENDMENT_2.md` A2.1): reader error 4, Urdu source item fault
+  3, teacher wrong or misleading fact 3, generic facts without the decisive hop 4, student reasoning 4, scoring or
+  polarity 4. No leak and no pipeline fault.
+- **RO ablation (Amendment 3 A3.6, descriptive; sealed summary named above).** RO = no facts, one extra line with
+  the R1 English translation: 57.5% (115); RO vs A_r2 −2.5 pp, b 29 / c 34, p = 0.6147; TR vs RO +11.0 pp,
+  b 41 / c 19, p = 0.0062. RO_gold = the same with the gold English question: 61.5% (123); vs A_r2 +1.5 pp,
+  b 40 / c 37, p = 0.8199; TO1 vs RO_gold +12.5 pp, b 42 / c 17, p = 0.0015. The translation alone does not
+  help; the facts do.
+
+## EFBPT D11 SCORER AUDIT ON DEV200 (recorded 2026-11-12)
+
+Sources: `docs/EFBPT_D11_RTG_AMENDMENT_4.md`, `docs/EFBPT_D11_RTG_AMENDMENT_5.md`,
+`docs/handoff/D11_DEV200_SUPPLEMENT.md` (S1), `docs/handoff/D11_SCORER_AUDIT_ADJUDICATORS.md`,
+`docs/handoff/D11_DEV200_READOUT_LINES.md`. Author labels: `docs/handoff/D11_SCORER_AUDIT_LABELS_AUTHOR.txt`,
+compared by `eval/error_analysis_tests/efbpt/d11_scorer_audit_author.py --labels` (it prints only; no readout file).
+
+- **Finding (supplement S1).** The frozen extractor E0 takes the last ہاں/نہیں substring, so a negation in the
+  explanation or a word such as یہاں can flip the label. A first-mention variant labels 27 (TR) and 38 (A_r2) rows
+  differently; TR vs A_r2 is +8.5 pp (p = 0.03962) under E0 and +17.0 pp (p = 0.0001831) under the variant.
+- **Audit (Amendment 4).** 105 DEV200 items from arms A_r2 and TR: the 65 rows where the two labels differ and 40
+  rows where they agree; arm, gold and labels hidden. Candidates fixed before labelling: E0 frozen, E1
+  first-mention, E2 whole-word first-mention, E3 opening verdict.
+
+| Extractor | Right on the 65 differ items | Right on the 40 agree items | Stratified agreement % (PRIMARY labels) | Same, majority label |
+|---|---:|---:|---:|---:|
+| E0 (frozen) | 9 | 40 | 86.00 | 83.97 |
+| E1 | 45 | 40 | 95.00 | 92.97 |
+| E2 | 46 | 40 | 95.25 | 93.23 |
+| E3 | 48 | 40 | 95.75 | 93.47 |
+
+- Validated scorer = E3 (Amendment 5 A5.1). E0 stays the pre-registered scorer of every gate.
+- Agreement of the labels: PRIMARY vs qwen3.8-max 101/105 (kappa 0.932); PRIMARY vs deepseek-v4-pro 100/105
+  (kappa 0.916); Fleiss' kappa 0.933. Author labels on 24 random items: 22/24 = 91.67% with PRIMARY (kappa 0.861).
+- DEV200 under E3: A_r2 55.00% (110), TR 71.50% (143), TR_L1 70.00% (140), TR_wrong 50.50% (101). TR vs A_r2
+  +16.50 pp, b 57 / c 24, p = 0.0003173. TR_wrong vs A_r2 is −4.50 pp (p = 0.38) under E3, so "wrong facts harm
+  the baseline" is not claimed under E3.
+- Limits (A5.6): one primary adjudicator, not fully blind; the order among E1–E3 rests on three items.
+
+## EFBPT D11 RTG ON eval458: THE HELD-OUT TEST (recorded 2026-11-12)
+
+Sources: `docs/handoff/D11_EVAL458_READOUT_LINES.md` (every number), `docs/handoff/D11_EVAL458_PROVENANCE.md`
+(jobs, seals). Contract: the D11 freeze §8 with Amendments 2 to 6. One run; no second eval458 run in any case (A2.7).
+
+**Setup:** eval458, n = 458 (gold yes 221 / no 237), floor 51.75%, overlap 0 with DEV200 and RDEV300. One SLURM
+job per arm at batch size 1: A_r2_eval 115529, TR 115575, TR_wrong_eval 115576, TR_L1_eval 115577; teacher jobs
+115528 (R1) and 115532 (R3). No job computed accuracy; the readout script was committed before scoring
+(Amendment 5). E0 = the frozen extractor (the gate); E3 = the validated scorer.
+
+| Arm | Scorer | Acc % (correct) | Unparsed | Predicted yes % | Acc gold-yes % | Acc gold-no % | Balanced acc % |
+|---|---|---:|---:|---:|---:|---:|---:|
+| A_r2_eval | E0 | 54.80 (251) | 15 | 45.63 | 52.04 | 57.38 | 54.71 |
+| A_r2_eval | E3 | 55.46 (254) | 19 | 59.61 | 67.42 | 44.30 | 55.86 |
+| TR | E0 | 68.78 (315) | 6 | 31.66 | 51.13 | 85.23 | 68.18 |
+| TR | E3 | 74.24 (340) | 8 | 44.32 | 70.14 | 78.06 | 74.10 |
+| TR_wrong_eval | E0 | 52.62 (241) | 22 | 23.14 | 27.60 | 75.95 | 51.78 |
+| TR_wrong_eval | E3 | 53.71 (246) | 26 | 32.10 | 38.46 | 67.93 | 53.20 |
+| TR_L1_eval | E0 | 64.63 (296) | 7 | 33.84 | 49.77 | 78.48 | 64.13 |
+| TR_L1_eval | E3 | 70.96 (325) | 10 | 46.29 | 69.68 | 72.15 | 70.92 |
+
+| Comparison | Line | Δ pp | b | c | p |
+|---|---|---:|---:|---:|---:|
+| TR vs A_r2_eval (primary, gate) | L1: E0, all rows | +13.97 | 117 | 53 | 1.021e-06 |
+| TR vs A_r2_eval | L2: E3, all rows | +18.78 | 133 | 47 | 1.042e-10 |
+| TR vs A_r2_eval | L3: E0, rows parsed in both arms (n 437) | +13.96 | 108 | 47 | 1.059e-06 |
+| TR vs TR_wrong_eval (content control) | L1 | +16.16 | 111 | 37 | 8.747e-10 |
+| TR vs TR_wrong_eval | L2 | +20.52 | 138 | 44 | 1.708e-12 |
+| TR_wrong_eval vs A_r2_eval | L1 | -2.18 | 94 | 104 | 0.5225 |
+| TR_L1_eval vs A_r2_eval (secondary) | L1 | +9.83 | 107 | 62 | 0.0006677 |
+| TR_L1_eval vs A_r2_eval | L2 | +15.50 | 126 | 55 | 1.37e-07 |
+
+- **Verdict: `CONFIRMED`.** Gate (≥ +5.0 pp and p < 0.05) on L1: +13.97 pp, b 117 / c 53, p = 1.021e-06. The
+  unparsed difference between TR and A_r2_eval is 1.97 pp (limit 5.0), so the gate is read on all rows (A3.1).
+- Secondary (local reader, no API): significant on L1.
+- Wrong facts do not help: TR_wrong_eval is at the floor arm's level (−2.18 pp, p = 0.5225).
+- Under E0 the gain is on gold-no rows (+27.85 pp) with gold-yes flat (−0.90 pp); under E3 gold-no +33.76 pp and
+  gold-yes +2.71 pp.
+- Predictions (A2.6) under E0: 1 hit of 5. A_r2_eval 54.80 (predicted 55 to 63); TR − A_r2_eval +13.97
+  (predicted +5 to +10); TR_wrong_eval − A_r2_eval −2.18 (predicted ≤ −3); TR_L1_eval − A_r2_eval +9.83
+  (predicted +4 to +9); gain on gold-no rows larger than on gold-yes rows: hit.
+- Event (Amendment 6): jobs 115530 and 115531 stopped in preflight before the model loaded; the string '8-1', an
+  evidence id, occurred inside "0.8-1.0 g/cm³" in a teacher fact. Nothing was generated. The guard rule for
+  evidence-id needles with fewer than 3 letters was amended, and the DEV200 regression was re-run (5/5 identical).
+- Not yet measured on eval458: the large models answering alone, traditional RAG, the translation-only
+  ablation, and other students.

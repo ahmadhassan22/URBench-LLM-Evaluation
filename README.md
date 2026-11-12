@@ -7,7 +7,7 @@
 
 ## Overview
 
-URBench provides the most comprehensive cross-architecture comparison of Urdu reasoning performance to date. It evaluates **9 general-purpose multilingual LLMs** and **2 Urdu-specialized models** across **5 reasoning datasets** using **3 prompting strategies**, plus method work on retrieval-augmented generation (RAG), cross-lingual prompting (XLT), and **SDFR-UR** (Similarity-Based Dynamic Few-Shot Retrieval for Urdu Reasoning).
+URBench provides the most comprehensive cross-architecture comparison of Urdu reasoning performance to date. It evaluates **9 general-purpose multilingual LLMs** and **2 Urdu-specialized models** across **5 reasoning datasets** using **3 prompting strategies**, plus method work on retrieval-augmented generation (RAG), cross-lingual prompting (XLT), **SDFR-UR** (Similarity-Based Dynamic Few-Shot Retrieval for Urdu Reasoning), and **Read-then-Ground (RTG)**, a reading-plus-facts pipeline for Urdu multi-hop questions that passed its pre-registered held-out test (see *Method: Read-then-Ground*).
 
 The benchmark addresses a critical gap: while Urdu has a large global speaker base, structured reasoning evaluation in Urdu remains severely underexplored compared to high-resource languages.
 
@@ -384,6 +384,10 @@ Official StrategyQA annotations were integrated to enable evidence-grounded diag
 
 - **eval458** — final evaluation set; untouched during method development.
 - **DEV50** (seed 42) — method-development set, drawn from non-evaluation rows with real paragraph evidence; **zero intersection with eval458**.
+- **DEV200** (seed 4242, n = 200) — development set of the EFBPT diagnostics and of Read-then-Ground; overlap with eval458: 0.
+- **RDEV300** (seed 2026, n = 300) — reader-selection set, sampled from the rows that are in neither DEV200 nor eval458.
+
+> **Disclosure (recorded in `docs/EFBPT_D8_REACHABLE_CEILING_FREEZE.md` §1).** Two early probes (`probe_strategyqa_genread_gate_test50.py`, `probe_strategyqa_factretrieval_test50.py`) used the first 50 rows of eval458 for answer-free probing (no tuning; 0 overlap with DEV200). eval458 stayed the final test set. It was run and scored once, for the Read-then-Ground held-out test (arms sealed 2026-11-10).
 - Gold `term`, `description`, `facts`, `decomposition`, and `evidence` are **never** method inputs. They are scorer-only fields used for offline diagnostics.
 
 ---
@@ -444,12 +448,63 @@ A causal counterfactual corrupted the entity block in the fine-tuning format: 22
 **14. Fact delivery fails at every automatic route except extraction.**
 On the matched 71-question subset: embedding retrieval recovers 23.15% of gold titles among pages that exist; whole correct Wikipedia pages as context are not significantly better than no facts (69.01% vs 59.15%, p=0.2295); the model's own generated facts add exactly zero (70.0% = 70.0%). Only two-pass extraction works — the model reading a correct article and writing short atomic English facts reaches **76.06% vs 59.15% (p=0.0290)**, recovering 71% of the achievable gap.
 
+> **Update (2026-11).** Finding 14 describes the routes tested up to D6. D8 then closed two more automatic routes (facts from reachable pages, and the 14B model's own English facts). A larger teacher model with an explicit reading stage did deliver facts that help: findings 16–19.
+
 **15. StrategyQA evidence titles are largely unrecoverable from the question text.**
 52.5% of gold evidence title-instances (334/636) have no lexical trace in the English question, and only 19.5% of DEV200 rows have all their gold titles lexically present. StrategyQA evidence pages are *justification* sources, not question entities — "Is SnapCap an example of a retail store?" requires the page *LendingTree*. This caps any retrieval- or linking-based method evaluated against gold evidence titles on this benchmark, independent of language. (The classifier used was lexical and produces false absents, so 52.5% is an upper bound.)
 
+**16. For an outside fact source, reading the Urdu question is the main wall.**
+A 70B teacher that reads the Urdu question and writes English facts for the 14B student gave +5.0 pp (p = 0.268) and, with a decomposition prompt, +4.5 pp (p = 0.3492) on DEV200. The same teacher given the gold English question gave **+14.0 pp (p = 0.000617)**, within noise of gold facts (−2.0 pp, p = 0.652). The knowledge is in the teacher; the Urdu reading is what fails.
+
+**17. Read-then-Ground passed its pre-registered held-out test.**
+On eval458 (n = 458, run once): **68.78% vs 54.80%, +13.97 pp, b 117 / c 53, exact McNemar p = 1.021e-06** under the frozen scorer, and 74.24% vs 55.46% (+18.78 pp, p = 1.042e-10) under the validated scorer. The gate was ≥ +5.0 pp and p < 0.05.
+
+**18. The gain comes from what the facts say.**
+With the facts of another question in the same layout, eval458 accuracy is 52.62%: 16.16 pp below the method (p = 8.747e-10) and not different from no facts (−2.18 pp, p = 0.5225). On DEV200, adding only the English translation of the question, without facts, does not help (−2.5 pp, p = 0.6147).
+
+**19. The pipeline also works with a local reader.**
+With Llama-3.1-70B as the reader (no API), eval458 accuracy is 64.63% vs 54.80%: +9.83 pp, b 107 / c 62, p = 0.0006677.
+
+**20. Under the frozen scorer, the facts help the student reject false premises.**
+On eval458 under the frozen scorer, accuracy on gold-no rows rises from 57.38% to 85.23%, while gold-yes rows stay flat (52.04% → 51.13%). Under the validated scorer both rise (gold-no 44.30% → 78.06%, gold-yes 67.42% → 70.14%).
+
+**21. The answer extractor can move a result as much as a method.**
+The frozen extractor takes the last ہاں/نہیں mention. In a labelled audit of 105 DEV200 generations it agrees with the adjudicated verdict at a stratified rate of 86.00%; an opening-verdict extractor (E3) reaches 95.75%. On DEV200 the same comparison reads +8.50 pp under the frozen extractor and +16.50 pp under E3. The frozen extractor stays the gate of every pre-registered test; E3 is reported beside it.
+
+**22. Batched generation is not reproducible; batch size 1 is.**
+At batch size 8 a re-run of the no-facts arm agreed with the earlier run on only 155/200 predictions. At batch size 1 the 200 generations are byte-identical across two jobs on two nodes. Every paired test since D10 runs the student at batch size 1.
+
+**23. Open limitation: a strong API model answering alone matches the pipeline on DEV200.**
+qwen3.8-max asked the Urdu question directly scores 69.00% on DEV200, against 68.50% for Read-then-Ground with the 14B student (b 26 / c 27, p = 1). The local 70B teacher answering alone scores 55.50%. These baselines, traditional RAG, and other students have not yet been measured on eval458.
+
 ---
 
-## Current Direction
+## Current State (2026-11-12)
+
+**Confirmed.** Read-then-Ground (RTG) passed its pre-registered held-out test on eval458: +13.97 pp over the no-facts student (p = 1.021e-06), with a wrong-facts control and a local-reader variant. See *Method: Read-then-Ground*.
+
+**Closed.** Each route below was tested against a gate declared in advance and is kept in this document as a result:
+
+| Route | Outcome | Record |
+|---|---|---|
+| SDFR-UR as a method win | Retracted (GSM8K leakage) / not significant (PIQA) | *Method: SDFR-UR* |
+| Inference-time RAG on StrategyQA | Rejected | *Method: RAG on StrategyQA* |
+| Entity-first dual-view retrieval | Rejected by gate (41.7% union, gate ≥ 80%) | *Entity-First Dual-View Retrieval* |
+| **EFBPT QLoRA (Plan A′)** | **Closed: failed its predeclared gate (2026-08-01)** | *EFBPT route history*; Key Finding 13 |
+| Constrained title linking (L0) | Gate fail: delivered 10.07%, required 51.64% | `experiments.md`, EFBPT L0 |
+| Bridge retrieval pilot (N25) and QEA triage | Pilot gate failed (D − A = +16 pp, p = 0.09375); work paused 2026-09-27 | `experiments.md` |
+| Facts from reachable gold pages; self-generated English facts (D8) | NO-GO; harm | *Diagnostics after D6* |
+| Teacher facts from the Urdu question (D10, D10 v2) | +5.0 pp and +4.5 pp, not significant; closed | *Diagnostics after D6* |
+
+**Open.**
+- Baselines on eval458: the large models answering alone, traditional RAG, the translation-only ablation, and transfer to other student models. Not yet run.
+- The scorer audit has one primary adjudicator and a small agree-stratum (20 rows per arm); both scorers are reported for every comparison.
+
+---
+
+## EFBPT route history (QLoRA route closed; record kept)
+
+*The text of this section was the "Current Direction" of this document until 2026-08. It is kept unchanged as the record of how the EFBPT QLoRA route was reasoned, tested and closed. The route is **closed**: Plan A′ failed its predeclared gate.*
 
 Two method branches have been designed, tested, and **formally rejected against predeclared gates** (inference-time RAG; entity-first dual-view retrieval). Both rejections were mechanism-verified and are documented above.
 
@@ -468,6 +523,8 @@ The evidence points to a specific missing capability: **stable bilingual entity 
 ---
 
 ## Method: EFBPT and the Knowledge-Delivery Diagnostics (D1–D6)
+
+> **Status: the EFBPT QLoRA route is closed.** Plan A′ failed its predeclared gate (2026-08-01). The record below is kept unchanged. The diagnostics that followed it led to Read-then-Ground (next two sections).
 
 Entity-Faithful Bilingual Plan Tuning (EFBPT) was built to repair the entity-corruption failure confirmed by the c-probe. Plan A′ (QLoRA, 9 adapters, 3 conditions × 3 seeds) **failed its predeclared gate**. Rather than abandon the branch, a causal counterfactual was run to establish *why* — the result is Key Finding 13 above.
 
@@ -503,6 +560,98 @@ A fuzzy-title-matching follow-up was **considered and rejected on arithmetic bef
 
 **Corpus defect.** The `AI-ModelScope/wikipedia 20231101.en` mirror used throughout has all 41 shards present and 6,407,814 unique page ids, yet central articles are absent in both title and text — "Douglas Noel Adams" appears 0 times across 23,963,971 chunks. Gold-evidence title coverage is 70.47%, which structurally caps every retrieval-based variant. `title_space_cache.txt` derived from the same source is likewise unreliable and is not used for validation.
 
+---
+
+## Diagnostics after D6 (D8, D10, D10 v2, D11-O, D11-R)
+
+Each diagnostic below has a freeze document in `docs/` written before the run, sealed outputs, and a readout in `docs/handoff/`. All use DEV200 (n = 200, floor 56.50%) with Qwen3-14B as the student, unless stated. p is the exact two-sided McNemar test.
+
+| | Question | Result | Verdict |
+|---|---|---|---|
+| **D8** | Do facts extracted from the gold pages a linker could reach, or English facts the 14B model writes itself, help? | Reachable pages 58.50% vs 62.00% (−3.5 pp, p = 0.4350); self-generated 58.00% vs 62.00% (−4.0 pp, p = 0.4340) | Both routes closed |
+| **D10** | Do English facts from a 70B teacher that reads the Urdu question help? | 65.00% vs 60.00%, +5.0 pp, p = 0.268 | Conditional; one fix allowed |
+| **D10 v2** | Does a decomposition prompt for the teacher fix it? | 64.50% vs 60.00%, +4.5 pp, p = 0.3492 | Route closed |
+| **D11-O** | How much is recovered if the teacher gets the gold English question? | 74.0% vs 60.0%, +14.0 pp, p = 0.000617; gold facts reach 76.0% | Reading is the main wall |
+| **D11-R** | Which Urdu→English reader recovers named entities best? (RDEV300, n = 300) | Proper-noun recall: qwen3.8-max 91.55%, deepseek-v4-pro 91.93%, best local reader (Llama-3.1-70B) 87.95% | qwen3.8-max selected by the pre-declared rule |
+
+- **D8** also re-tested D4 without the English question in the extraction prompt: 52/68 = 76.47% vs 61.76% (p = 0.0639), so D4 stands with this as the honest number. D8 corrected two earlier figures: D2 title coverage is 427/613 = 69.66%, not 70.47%; and three D4 questions had received wrong-article chunks, which leaves a clean subset of 68 questions.
+- **D8** found that batched generation depends on batch composition (Key Finding 22). From D10 on the student runs at batch size 1, where the no-facts arm scores 60.00% on DEV200.
+- **D10**: with the facts of another question the student falls to 54.50% (−5.5 pp), so wrong facts harm. The 70B teacher answering alone scores 55.50%; it answers "yes" on 149/200 rows.
+- **D11-O**: the reading effect itself (same teacher prompt, English against Urdu input) is +9.0 pp (p = 0.0153). A second oracle arm with the decomposition prompt is void: the teacher output parsed on 8/200 rows.
+- **D11-R**: the two best API readers differ by 0.38 pp in proper-noun recall; the pre-declared tie-break (chrF 73.16 against 72.38) selected qwen3.8-max.
+
+Sources: `docs/handoff/D8_FULL_READOUT_108196.md`, `D10_FULL_READOUT.md`, `D10V2_ANALYSIS_PACK.md`, `D11O_READOUT.md`, `D11R_RDEV300_READOUT.md`; records in `experiments.md`.
+
+---
+
+## Method: Read-then-Ground (RTG)
+
+**Pipeline.** A *reader* translates the Urdu question into one English question, writing named entities in their standard English spelling. A *teacher* (Llama-3.1-70B-Instruct, AWQ) sees only that English question and writes at most 6 short English facts about its entities; it is told not to answer. The *student* (Qwen3-14B, 4-bit, greedy, thinking off, batch size 1) then answers the original Urdu question in Urdu, with the facts placed in the facts block of its prompt. The student never sees the English question. No gold field (English question, gold facts, evidence ids) enters any prompt, and leak guards check every prompt. The reader was chosen on a separate set (RDEV300) before any answer run: qwen3.8-max through an API (reader R1); the best local reader is Llama-3.1-70B (reader R3). Arms, gates and predictions were frozen in `docs/EFBPT_D11_RTG_FREEZE.md` and its amendments before the runs.
+
+### DEV200 (development; n = 200, 87 yes / 113 no, floor 56.50%)
+
+Frozen scorer (E0). Δ, b, c and p are against A_r2; b = the arm is right and A_r2 wrong, c = the reverse.
+
+| Arm | What it is | Acc % (correct) | Δ pp | b / c | p |
+|---|---|---:|---:|---:|---:|
+| A_r2 | student alone, no facts | 60.00 (120) | | | |
+| RO | student + the English translation as one line, no facts | 57.5 (115) | -2.5 | 29 / 34 | 0.6147 |
+| TF_v1 | teacher reads the Urdu question (D10) | 65.00 (130) | +5.0 | 38 / 28 | 0.2678 |
+| **TR** | **RTG, reader R1** | **68.50 (137)** | **+8.5** | **39 / 22** | **0.03962** |
+| TR2 | RTG, reader R2 (deepseek-v4-pro) | 65.00 (130) | +5.0 | 35 / 25 | 0.2451 |
+| TR_L1 | RTG, local reader R3 | 67.00 (134) | +7.0 | 45 / 31 | 0.1354 |
+| TR_wrong | RTG with the facts of another question | 50.50 (101) | -9.5 | 30 / 49 | 0.04217 |
+| TO1 | oracle: the teacher gets the gold English question | 74.00 (148) | +14.0 | 46 / 18 | 0.0006174 |
+| GF | oracle: gold facts | 76.00 (152) | +16.0 | 49 / 17 | 0.0001015 |
+| API_direct_ur | qwen3.8-max answers the Urdu question alone | 69.00 (138) | +9.0 | 46 / 28 | 0.04739 |
+| T_direct_F | Llama-3.1-70B answers the Urdu question alone | 55.50 (111) | | | |
+
+TR passed the DEV200 gate (≥ +8.0 pp and p < 0.05), by one discordant pair, and eval458 was then run once. TR against API_direct_ur: −0.5 pp, b 26 / c 27, p = 1. Under the validated scorer E3: TR 71.50% vs A_r2 55.00%, +16.50 pp, b 57 / c 24, p = 0.0003173.
+
+### eval458 (held-out; n = 458, 221 yes / 237 no, floor 51.75%; run once)
+
+| Arm | E0 acc % (correct) | E3 acc % (correct) |
+|---|---:|---:|
+| A_r2_eval — student alone | 54.80 (251) | 55.46 (254) |
+| **TR — RTG, reader R1** | **68.78 (315)** | **74.24 (340)** |
+| TR_L1_eval — RTG, local reader R3 | 64.63 (296) | 70.96 (325) |
+| TR_wrong_eval — facts of another question | 52.62 (241) | 53.71 (246) |
+
+| Comparison | Scorer | Δ pp | b / c | p |
+|---|---|---:|---:|---:|
+| **TR vs A_r2_eval** (primary) | **E0 (the gate)** | **+13.97** | **117 / 53** | **1.021e-06** |
+| | E3 | +18.78 | 133 / 47 | 1.042e-10 |
+| TR_L1_eval vs A_r2_eval (secondary) | E0 | +9.83 | 107 / 62 | 0.0006677 |
+| | E3 | +15.50 | 126 / 55 | 1.37e-07 |
+| TR vs TR_wrong_eval (content control) | E0 | +16.16 | 111 / 37 | 8.747e-10 |
+| | E3 | +20.52 | 138 / 44 | 1.708e-12 |
+| TR_wrong_eval vs A_r2_eval | E0 | -2.18 | 94 / 104 | 0.5225 |
+| | E3 | -1.75 | 90 / 98 | 0.6098 |
+
+**Verdict: CONFIRMED.** The gate (≥ +5.0 pp and p < 0.05, frozen scorer, all rows) is passed. No second eval458 run is made in any case.
+
+**The two scorers.** E0 is the frozen extractor (it takes the last ہاں/نہیں mention) and decides every gate. E3 reads the opening verdict; it was selected by a labelled audit on DEV200 before eval458 was scored (Key Finding 21). Both are reported for every comparison.
+
+### The wrong-facts control
+
+TR_wrong gives the student real teacher facts in the same layout, but those of another question (a fixed derangement). If the gain came from the layout, or from having any English text, this arm would rise too. It does not: on eval458 it is 52.62%, 16.16 pp below TR (p = 8.747e-10) and −2.18 pp from the student alone (p = 0.5225). On DEV200 it is 50.50%, 18.0 pp below TR (p = 1.92e-05).
+
+### The local-reader variant
+
+TR_L1 replaces the API reader with Llama-3.1-70B, so the whole pipeline runs on local models. On eval458: 64.63% vs 54.80%, +9.83 pp, b 107 / c 62, p = 0.0006677 (E0); 70.96% vs 55.46%, +15.50 pp (E3). The local reader recovers fewer named entities than the API reader (RDEV300 proper-noun recall 87.95% against 91.55%).
+
+### Limits
+
+- **Baselines on eval458 are not yet measured.** On DEV200 the API model answering alone (69.00%) is level with RTG (68.50%). The large models alone, traditional RAG, and other students still have to be tested on eval458.
+- **RTG stays below the oracle arms on DEV200:** −5.5 pp against the oracle reading (p = 0.08014) and −7.5 pp against gold facts (p = 0.04438).
+- **Reading errors pass through.** On DEV200, TR is +16.1 pp over A_r2 on the 124 rows whose reading recovers every gold proper noun and −6.5 pp on the 31 rows where it does not.
+- **Under the frozen scorer the gain is on gold-no rows** (Key Finding 20).
+- **The pre-registered predictions were imprecise:** on eval458 the gain was predicted at +5 to +10 pp and came out at +13.97 pp; the no-facts arm was predicted at 55 to 63 and came out at 54.80.
+
+Sources: `docs/handoff/D11_FULL_READOUT.md`, `docs/handoff/D11_EVAL458_READOUT_LINES.md`, `docs/handoff/D11_DEV200_READOUT_LINES.md`, `docs/handoff/D10_FULL_READOUT.md` (T_direct_F), the sealed `outputs/efbpt/d11/ablate_ro/dev200/d11_ablate_ro_summary.json` (RO); records in `experiments.md`.
+
+---
+
 ## Repository Structure
 
 ```
@@ -519,15 +668,32 @@ URBench/
 │   │   ├── sdfr_*_fair.py             # Fair-regime method runs
 │   │   ├── integrate_official_strategyqa_v3.py
 │   │   ├── phase_r_generate_dev50_v3.py
-│   │   └── entity_first_ground_audit_v2.py
+│   │   ├── entity_first_ground_audit_v2.py
+│   │   └── efbpt/                     # EFBPT diagnostics and Read-then-Ground
+│   │       ├── efbpt_*.py · plan_a_*.sbatch   # Plan A′ data, QLoRA training, evaluation (closed route)
+│   │       ├── d1_* … d6_*            # Knowledge-delivery diagnostics D1–D6
+│   │       ├── l0_* · bridge_* · efbpt_qea_*  # L0 pre-test, bridge pilot, QEA triage (closed / paused)
+│   │       ├── d8_reachable_ceiling.py        # D8
+│   │       ├── d10_* · d10v2_*        # D10 / D10 v2: teacher facts (teacher + student jobs)
+│   │       ├── d11o_*                 # D11-O: oracle-reading diagnostic
+│   │       ├── d11r_*                 # D11-R: reader benchmark and scorer
+│   │       ├── d11_teacher.py · d11_student.py · d11_common.py   # Read-then-Ground
+│   │       ├── d11_api_direct.py · d11_ablate_ro.py              # DEV200 reference arms
+│   │       ├── d11_scorer_audit*.py   # Scorer audit (extractors E0–E3)
+│   │       └── d11_eval458_readout.py · d11_eval458_provenance.py  # Held-out readout
 │   ├── xlt_exploratory/               # XLT experiments
 │   └── sbatch_scripts/                # SLURM submission
 ├── rag/
 │   ├── build_index_full.py            # Full-Wikipedia FAISS index build
 │   ├── merge_shards.py                # Shard merge
 │   └── retrieve.py                    # Retrieval helper (byte-offset meta seek)
-├── prompts/                           # Per-dataset prompt variants (P1/P2/P3)
-├── data/                              # Datasets, splits, official annotations
+├── docs/                              # Freeze documents and amendments, written before each run
+│   ├── EFBPT_*_FREEZE.md · EFBPT_*_AMENDMENT_*.md
+│   ├── D11_DECISION.md · D11_GO_EVAL458.md
+│   └── handoff/                       # Readouts written from sealed outputs (D8, D10, D11-O, D11-R, D11)
+├── prompts/                           # Per-dataset prompt variants (P1/P2/P3); prompts/efbpt/ for EFBPT
+├── data/                              # Datasets, splits, official annotations (DEV200, RDEV300 item sets)
+├── outputs/                           # Sealed run outputs (not versioned; MD5s are pinned in docs and scripts)
 ├── configs/ · scripts/                # Configs and utilities
 ├── experiments.md                     # Full experiment log
 └── README.md
