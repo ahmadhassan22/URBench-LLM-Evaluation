@@ -126,7 +126,7 @@ def main():
             raw = R.read_jsonl(path)
             gens = [r["generation"] if "generation" in r else r["raw"] for r in raw]
         else:
-            scored, info = R.load_d13(arm, SET, rows)
+            scored, info = R.load_d13(arm, SET, rows)[:2]
             path = C.arm_paths(arm, SET, "FULL")["rows"]
             raw = C.read_rows(path)
             gens = [r["generation"] for r in raw]
