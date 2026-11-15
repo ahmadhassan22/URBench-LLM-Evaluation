@@ -1,0 +1,16 @@
+% written by eval/error_analysis_tests/efbpt/d13_tables.py from docs/handoff/D13_READOUT.md and docs/handoff/D11_EVAL458_READOUT_LINES.md
+\begin{table}[t]
+\centering
+\small
+\caption{Family F2: the same teacher facts with three other students. L1 is the frozen extractor on all rows; the deciding line follows the unparsed and truncation rules.}
+\label{tab:d13-transfer}
+\begin{tabular}{lrrrrrrlrrrrrr}
+\toprule
+Test & L1 acc with facts & L1 acc alone & L1 $\Delta$ pp & L1 b & L1 c & L1 p & Deciding line & n & $\Delta$ pp & b & c & Raw p & Holm p \\
+\midrule
+Llama8B\_TR vs Llama8B\_A & 49.34 & 30.79 & $+18.56$ & 136 & 51 & 4.067e-10 & L7 & 174 & $+12.64$ & 37 & 15 & 0.003185 & 0.005757 \\
+Gemma9B\_TR vs Gemma9B\_A & 51.97 & 47.60 & $+4.37$ & 100 & 80 & 0.1565 & L3 & 291 & $+10.31$ & 63 & 33 & 0.002879 & 0.005757 \\
+Qwen8B\_TR vs Qwen8B\_A & 64.63 & 52.62 & $+12.01$ & 121 & 66 & 7.027e-05 & L6 & 359 & $+11.70$ & 90 & 48 & 0.0004406 & 0.001322 \\
+\bottomrule
+\end{tabular}
+\end{table}

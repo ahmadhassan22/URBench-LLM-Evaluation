@@ -1,0 +1,17 @@
+% written by eval/error_analysis_tests/efbpt/d13_tables.py from docs/handoff/D13_READOUT.md and docs/handoff/D11_EVAL458_READOUT_LINES.md
+\begin{table}[t]
+\centering
+\small
+\caption{Each model on the Urdu question and on the English reading of the same question (accuracy in percent, all rows).}
+\label{tab:d13-reading-effect}
+\begin{tabular}{llrrlrr}
+\toprule
+Model & Arm, Urdu question & E0 acc \% & E3 acc \% & Arm, English reading & E0 acc \% & E3 acc \% \\
+\midrule
+API model & API\_direct\_ur\_eval & 67.47 & 67.47 & API\_tr\_R1 & 80.13 & 80.13 \\
+70B teacher & T\_direct\_F\_eval & 63.32 & 63.10 & T\_tr\_R1 & 75.11 & 75.11 \\
+70B teacher, own reading & T\_direct\_F\_eval & 63.32 & 63.10 & T\_tr\_L1 & 70.96 & 70.96 \\
+14B student, reading as one line & A\_r2\_eval & 54.80 & 55.46 & RO\_eval & 64.63 & 67.90 \\
+\bottomrule
+\end{tabular}
+\end{table}

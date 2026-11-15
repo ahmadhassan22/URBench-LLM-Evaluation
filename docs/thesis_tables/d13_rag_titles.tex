@@ -1,0 +1,17 @@
+% written by eval/error_analysis_tests/efbpt/d13_tables.py from docs/handoff/D13_READOUT.md and docs/handoff/D11_EVAL458_READOUT_LINES.md
+\begin{table}[t]
+\centering
+\small
+\caption{Share of gold evidence titles among the retrieved chunks.}
+\label{tab:d13-rag-titles}
+\begin{tabular}{lllrrr}
+\toprule
+Set & Arm & Query & Found / all gold titles & Found / gold titles in the corpus & Rows with at least one found / rows \\
+\midrule
+eval458 & RAG\_ur & question\_ur & 46 / 1393 (3.30 \%) & 46 / 995 (4.62 \%) & 41 / 458 (8.95 \%) \\
+eval458 & RAG\_en & R1 reading & 207 / 1393 (14.86 \%) & 207 / 995 (20.80 \%) & 188 / 458 (41.05 \%) \\
+dev200 & RAG\_ur & question\_ur & 24 / 636 (3.77 \%) & 24 / 439 (5.47 \%) & 23 / 200 (11.50 \%) \\
+dev200 & RAG\_en & R1 reading & 79 / 636 (12.42 \%) & 79 / 439 (18.00 \%) & 73 / 200 (36.50 \%) \\
+\bottomrule
+\end{tabular}
+\end{table}

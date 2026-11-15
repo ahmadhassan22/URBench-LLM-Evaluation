@@ -1,0 +1,4 @@
+Test,L1 acc with facts,L1 acc alone,L1 Δ pp,L1 b,L1 c,L1 p,Deciding line,n,Δ pp,b,c,Raw p,Holm p
+Llama8B_TR vs Llama8B_A,49.34,30.79,+18.56,136,51,4.067e-10,L7,174,+12.64,37,15,0.003185,0.005757
+Gemma9B_TR vs Gemma9B_A,51.97,47.60,+4.37,100,80,0.1565,L3,291,+10.31,63,33,0.002879,0.005757
+Qwen8B_TR vs Qwen8B_A,64.63,52.62,+12.01,121,66,7.027e-05,L6,359,+11.70,90,48,0.0004406,0.001322

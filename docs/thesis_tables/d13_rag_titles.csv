@@ -1,0 +1,5 @@
+Set,Arm,Query,Found / all gold titles,Found / gold titles in the corpus,Rows with at least one found / rows
+eval458,RAG_ur,question_ur,46 / 1393 (3.30 %),46 / 995 (4.62 %),41 / 458 (8.95 %)
+eval458,RAG_en,R1 reading,207 / 1393 (14.86 %),207 / 995 (20.80 %),188 / 458 (41.05 %)
+dev200,RAG_ur,question_ur,24 / 636 (3.77 %),24 / 439 (5.47 %),23 / 200 (11.50 %)
+dev200,RAG_en,R1 reading,79 / 636 (12.42 %),79 / 439 (18.00 %),73 / 200 (36.50 %)

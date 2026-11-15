@@ -1,0 +1,5 @@
+Model,"Arm, Urdu question",E0 acc %,E3 acc %,"Arm, English reading",E0 acc %,E3 acc %
+API model,API_direct_ur_eval,67.47,67.47,API_tr_R1,80.13,80.13
+70B teacher,T_direct_F_eval,63.32,63.10,T_tr_R1,75.11,75.11
+"70B teacher, own reading",T_direct_F_eval,63.32,63.10,T_tr_L1,70.96,70.96
+"14B student, reading as one line",A_r2_eval,54.80,55.46,RO_eval,64.63,67.90

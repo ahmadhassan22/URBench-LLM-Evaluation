@@ -1,0 +1,31 @@
+% written by eval/error_analysis_tests/efbpt/d13_tables.py from docs/handoff/D13_READOUT.md and docs/handoff/D11_EVAL458_READOUT_LINES.md
+\begin{table}[t]
+\centering
+\small
+\caption{All systems on the held-out set. E0 is the frozen extractor, E3 the validated scorer; unparsed answers count as wrong. TR\_wrong\_eval is from the first held-out readout, which records no truncation count.}
+\label{tab:d13-systems}
+\begin{tabular}{lrrrrrrrr}
+\toprule
+System & E0 acc \% & E0 correct & E3 acc \% & E3 correct & Unparsed (E0) & Unparsed \% & Truncated & Truncated \% \\
+\midrule
+A\_r2\_eval & 54.80 & 251 & 55.46 & 254 & 15 & 3.28 & 26 & 5.68 \\
+TR & 68.78 & 315 & 74.24 & 340 & 6 & 1.31 & 20 & 4.37 \\
+TR\_L1\_eval & 64.63 & 296 & 70.96 & 325 & 7 & 1.53 & 19 & 4.15 \\
+TR\_wrong\_eval & 52.62 & 241 & 53.71 & 246 & 22 & 4.80 &  &  \\
+T\_direct\_F\_eval & 63.32 & 290 & 63.10 & 289 & 9 & 1.97 & 5 & 1.09 \\
+T\_tr\_R1 & 75.11 & 344 & 75.11 & 344 & 18 & 3.93 & 7 & 1.53 \\
+T\_tr\_L1 & 70.96 & 325 & 70.96 & 325 & 25 & 5.46 & 6 & 1.31 \\
+API\_direct\_ur\_eval & 67.47 & 309 & 67.47 & 309 & 1 & 0.22 & 0 & 0.00 \\
+API\_tr\_R1 & 80.13 & 367 & 80.13 & 367 & 2 & 0.44 & 0 & 0.00 \\
+RAG\_ur & 53.93 & 247 & 51.97 & 238 & 21 & 4.59 & 50 & 10.92 \\
+RAG\_en & 53.93 & 247 & 54.37 & 249 & 23 & 5.02 & 61 & 13.32 \\
+RO\_eval & 64.63 & 296 & 67.90 & 311 & 6 & 1.31 & 21 & 4.59 \\
+Llama8B\_A & 30.79 & 141 & 24.02 & 110 & 188 & 41.05 & 70 & 15.28 \\
+Llama8B\_TR & 49.34 & 226 & 42.79 & 196 & 118 & 25.76 & 24 & 5.24 \\
+Gemma9B\_A & 47.60 & 218 & 45.41 & 208 & 81 & 17.69 & 7 & 1.53 \\
+Gemma9B\_TR & 51.97 & 238 & 50.66 & 232 & 108 & 23.58 & 0 & 0.00 \\
+Qwen8B\_A & 52.62 & 241 & 51.53 & 236 & 40 & 8.73 & 79 & 17.25 \\
+Qwen8B\_TR & 64.63 & 296 & 64.85 & 297 & 20 & 4.37 & 29 & 6.33 \\
+\bottomrule
+\end{tabular}
+\end{table}

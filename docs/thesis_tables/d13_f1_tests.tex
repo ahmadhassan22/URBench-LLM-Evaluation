@@ -1,0 +1,20 @@
+% written by eval/error_analysis_tests/efbpt/d13_tables.py from docs/handoff/D13_READOUT.md and docs/handoff/D11_EVAL458_READOUT_LINES.md
+\begin{table}[t]
+\centering
+\small
+\caption{Family F1: TR against the large model alone and against traditional RAG, on the deciding line of each test; exact two-sided McNemar, Holm step-down.}
+\label{tab:d13-f1-tests}
+\begin{tabular}{llrrrrrrl}
+\toprule
+Test & Line & n & $\Delta$ pp & b & c & Raw p & Holm p & Reading \\
+\midrule
+TR vs T\_direct\_F\_eval & L1 & 458 & $+5.46$ & 120 & 95 & 0.1015 & 0.3044 & not distinguishable \\
+TR vs T\_tr\_R1 & L1 & 458 & $-6.33$ & 55 & 84 & 0.01724 & 0.06895 & not distinguishable \\
+TR vs T\_tr\_L1 & L1 & 458 & $-2.18$ & 70 & 80 & 0.4625 & 0.9251 & not distinguishable \\
+TR vs API\_direct\_ur\_eval & L1 & 458 & $+1.31$ & 59 & 53 & 0.6368 & 0.9251 & not distinguishable \\
+TR vs API\_tr\_R1 & L1 & 458 & $-11.35$ & 31 & 83 & 1.18e-06 & 7.082e-06 & API\_tr\_R1 beats TR \\
+TR vs RAG\_ur & L6 & 391 & $+16.11$ & 101 & 38 & 8.818e-08 & 6.172e-07 & TR beats RAG\_ur \\
+TR vs RAG\_en & L6 & 383 & $+12.79$ & 85 & 36 & 9.815e-06 & 4.907e-05 & TR beats RAG\_en \\
+\bottomrule
+\end{tabular}
+\end{table}
