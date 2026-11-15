@@ -100,6 +100,7 @@ PINS = OrderedDict([   # freeze 9.1
     ("docs/KNOWN_DATA_ISSUES.md", "4168fcd9a0de984445adc560cb6fff0b"),
     ("docs/handoff/D14_PREP.md", "bc2480c98ed4c98bab18be22e5f9db8c"),
     ("docs/EFBPT_D13_AMENDMENT_2.md", "12809c115ae8b6fba6bf6afe7fb6c51c"),
+    ("docs/EFBPT_D14_AMENDMENT_1.md", "6153e4ead003bc4b183df9ec28be470b"),
 ])
 
 D14_SCRIPTS = ("d14_common.py", "d14_score.py", "d14_preflight.py", "d14_translate.py", "d14_api.py", "d14_balance.py",
@@ -928,6 +929,10 @@ def teacher_frozen():
             die("the D11 teacher user template does not hold exactly one {question_en} slot")
         args = OrderedDict(T.VLLM_ARGS)
         args["max_num_seqs"] = TEACHER_MAX_NUM_SEQS          # F4: the D10 engine with max_num_seqs 16
+        # Amendment 1 A1.2: with max_num_seqs above 1 vLLM 0.13.0 sizes its start-up run with max_num_batched_tokens
+        # 8192 and the engine does not start on an L20; the D10 engine (max_num_seqs 1) runs with 4096 = max_model_len.
+        # That value is set explicitly. It changes no prompt, model or decoding.
+        args["max_num_batched_tokens"] = args["max_model_len"]
         _CACHE["teacher"] = OrderedDict([
             ("path", T.TEACHER_PATH), ("vllm_version", T.VLLM_VERSION), ("vllm_args", args), ("sampling", OrderedDict(T.SAMPLING)),
             ("facts_system", system), ("facts_user_template", user_t), ("facts_max_tokens", T.T1_MAX_TOKENS),
