@@ -26,6 +26,9 @@ if _HERE not in sys.path:
 import d14_common as C  # noqa: E402
 
 
+UNLIMITED = 100000000      # the gateway's hard_limit_usd of a key without a limit
+
+
 def numbers(obj, prefix=""):
     """Numeric leaves of a JSON object as {path: number} (no strings are kept)."""
     out = OrderedDict()
@@ -72,20 +75,24 @@ def main():
     def num(name, key):
         return (seen.get(name, {}).get("numbers") or {}).get(key)
 
-    balance, how = None, None
+    balance, how, unlimited, used_units = None, None, None, None
     for sub, use in (("subscription", "usage"), ("subscription_root", "usage_root")):
         limit, used = num(sub, "hard_limit_usd"), num(use, "total_usage")
         if limit is not None and used is not None:
-            balance, how = limit - used / 100.0, "hard_limit_usd - total_usage / 100 (%s, %s)" % (sub, use)
+            if limit >= UNLIMITED:
+                unlimited = "the key has no limit at the gateway (hard_limit_usd %s): no balance is given; used so far by this key: %.4f (total_usage / 100)" % (limit, used / 100.0)
+                used_units = used / 100.0
+            else:
+                balance, how = limit - used / 100.0, "hard_limit_usd - total_usage / 100 (%s, %s)" % (sub, use)
             break
-    if balance is None:
+    if balance is None and unlimited is None:
         for name, key in (("credit_grants", "total_available"), ("user_balance", "balance"), ("user_balance", "data.balance"),
                           ("token_usage", "data.total_available")):
             if num(name, key) is not None:
                 balance, how = num(name, key), "%s: %s" % (name, key)
                 break
     rec = OrderedDict([("ts", time.strftime("%Y-%m-%d %H:%M:%S")), ("note", args.note), ("api_host", api.host),
-                       ("balance", balance), ("how", how), ("endpoints", seen)])
+                       ("balance", balance), ("how", how), ("unlimited_key", unlimited), ("used_by_key", used_units), ("endpoints", seen)])
 
     def fn(led):
         led["balance"].append(rec)
@@ -93,7 +100,8 @@ def main():
             led["stopped"] = "balance %.4f is below %.2f" % (balance, args.min)
     C._ledger_update(fn)
     if balance is None:
-        print("[balance] no balance query answered with a balance; recorded in the ledger")
+        print("[balance] %s" % (unlimited or "no balance query answered with a balance"))
+        print("[balance] no balance to compare with a minimum; the reading is recorded in the ledger")
         return
     print("[balance] %.4f  (%s)" % (balance, how))
     if args.min is not None and balance < args.min:
