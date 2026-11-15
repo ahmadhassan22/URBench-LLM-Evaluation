@@ -1,0 +1,42 @@
+% written by eval/error_analysis_tests/efbpt/d14_tables.py from docs/handoff/D14_READOUT.md
+\begin{table}[t]
+\centering
+\small
+\caption{D14: seconds and tokens per generated row.}
+\label{tab:d14-cost}
+\begin{tabular}{llrrrrr}
+\toprule
+Task & Arm & Rows generated & Seconds total & Seconds per row & Prompt tokens per row & New tokens per row \\
+\midrule
+CSQA & S\_ur & 1500 & 1208 & 0.81 & 244.6 & 452.3 \\
+CSQA & S\_ro & 1499 & 1211 & 0.81 & 297.6 & 416.7 \\
+CSQA & S\_og & 1500 & 1208 & 0.81 & 296.1 & 402.2 \\
+CSQA & S\_tr & 1499 & 1289 & 0.86 & 357.1 & 472.4 \\
+CSQA & T\_ur & 1500 & 1696 & 1.13 & 261.8 & 75.0 \\
+CSQA & T\_r1 & 1499 & 1931 & 1.29 & 138.0 & 202.6 \\
+CSQA & T\_og & 1500 & 1780 & 1.19 & 136.5 & 194.6 \\
+CSQA & M\_ur & 1500 & 7832 & 5.22 & 177.5 & 172.3 \\
+CSQA & M\_r1 & 1499 & 5220 & 3.48 & 119.9 & 99.2 \\
+CSQA & M\_og & 1500 & 5059 & 3.37 & 118.5 & 92.2 \\
+PIQA & S\_ur & 750 & 838 & 1.12 & 364.0 & 477.7 \\
+PIQA & S\_ro & 750 & 816 & 1.09 & 443.5 & 435.6 \\
+PIQA & S\_og & 750 & 838 & 1.12 & 444.8 & 422.1 \\
+PIQA & S\_tr & 750 & 1082 & 1.44 & 478.0 & 537.3 \\
+PIQA & T\_ur & 750 & 3178 & 4.24 & 396.3 & 407.8 \\
+PIQA & T\_r1 & 750 & 1177 & 1.57 & 171.3 & 262.7 \\
+PIQA & T\_og & 750 & 1184 & 1.58 & 172.4 & 259.6 \\
+PIQA & M\_ur & 750 & 8092 & 10.79 & 248.8 & 421.5 \\
+PIQA & M\_r1 & 750 & 4045 & 5.39 & 155.6 & 192.7 \\
+PIQA & M\_og & 750 & 4006 & 5.34 & 156.8 & 187.0 \\
+GSM8K & S\_ur & 700 & 1083 & 1.55 & 316.7 & 608.7 \\
+GSM8K & S\_ro & 700 & 1072 & 1.53 & 389.9 & 540.9 \\
+GSM8K & S\_og & 700 & 1069 & 1.53 & 389.1 & 520.6 \\
+GSM8K & T\_ur & 700 & 2098 & 3.00 & 338.9 & 280.9 \\
+GSM8K & T\_r1 & 700 & 852 & 1.22 & 148.9 & 183.4 \\
+GSM8K & T\_og & 700 & 821 & 1.17 & 148.1 & 175.2 \\
+GSM8K & M\_ur & 700 & 3543 & 5.06 & 218.7 & 207.8 \\
+GSM8K & M\_r1 & 700 & 2891 & 4.13 & 133.1 & 154.8 \\
+GSM8K & M\_og & 700 & 2638 & 3.77 & 132.3 & 142.5 \\
+\bottomrule
+\end{tabular}
+\end{table}

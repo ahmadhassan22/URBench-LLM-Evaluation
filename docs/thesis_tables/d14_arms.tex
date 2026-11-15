@@ -1,0 +1,42 @@
+% written by eval/error_analysis_tests/efbpt/d14_tables.py from docs/handoff/D14_READOUT.md
+\begin{table}[t]
+\centering
+\small
+\caption{D14: every arm of every task (accuracy in percent, all rows; unparsed and truncated in percent of all rows).}
+\label{tab:d14-arms}
+\begin{tabular}{lllrrrrr}
+\toprule
+Task & Arm & Model & Acc \% & Correct & Unparsed \% & Truncated \% & Reading failed \\
+\midrule
+CSQA & S\_ur & Qwen3-14B & 68.53 & 1028 & 0.00 & 5.53 & 0 \\
+CSQA & S\_ro & Qwen3-14B & 74.20 & 1113 & 0.13 & 3.60 & 1 \\
+CSQA & S\_og & Qwen3-14B & 78.93 & 1184 & 0.13 & 4.13 & 0 \\
+CSQA & S\_tr & Qwen3-14B & 70.00 & 1050 & 0.13 & 10.27 & 1 \\
+CSQA & T\_ur & Llama-3.1-70B & 56.93 & 854 & 15.20 & 0.60 & 0 \\
+CSQA & T\_r1 & Llama-3.1-70B & 74.20 & 1113 & 0.07 & 0.27 & 1 \\
+CSQA & T\_og & Llama-3.1-70B & 81.67 & 1225 & 0.00 & 0.07 & 0 \\
+CSQA & M\_ur & qwen3.8-max & 75.80 & 1137 & 0.00 & 0.00 & 0 \\
+CSQA & M\_r1 & qwen3.8-max & 80.33 & 1205 & 0.07 & 0.07 & 1 \\
+CSQA & M\_og & qwen3.8-max & 88.40 & 1326 & 0.00 & 0.00 & 0 \\
+PIQA & S\_ur & Qwen3-14B & 71.60 & 537 & 0.00 & 0.13 & 0 \\
+PIQA & S\_ro & Qwen3-14B & 77.33 & 580 & 0.00 & 0.27 & 0 \\
+PIQA & S\_og & Qwen3-14B & 78.40 & 588 & 0.00 & 0.13 & 0 \\
+PIQA & S\_tr & Qwen3-14B & 72.40 & 543 & 0.00 & 1.60 & 0 \\
+PIQA & T\_ur & Llama-3.1-70B & 78.93 & 592 & 0.93 & 1.60 & 0 \\
+PIQA & T\_r1 & Llama-3.1-70B & 86.80 & 651 & 0.13 & 0.00 & 0 \\
+PIQA & T\_og & Llama-3.1-70B & 88.13 & 661 & 0.13 & 0.00 & 0 \\
+PIQA & M\_ur & qwen3.8-max & 92.40 & 693 & 0.00 & 0.00 & 0 \\
+PIQA & M\_r1 & qwen3.8-max & 93.07 & 698 & 0.00 & 0.27 & 0 \\
+PIQA & M\_og & qwen3.8-max & 95.73 & 718 & 0.00 & 0.00 & 0 \\
+GSM8K & S\_ur & Qwen3-14B & 87.43 & 612 & 3.14 & 6.00 & 0 \\
+GSM8K & S\_ro & Qwen3-14B & 91.14 & 638 & 1.57 & 4.14 & 0 \\
+GSM8K & S\_og & Qwen3-14B & 93.29 & 653 & 1.71 & 3.43 & 0 \\
+GSM8K & T\_ur & Llama-3.1-70B & 86.14 & 603 & 0.14 & 2.29 & 0 \\
+GSM8K & T\_r1 & Llama-3.1-70B & 94.43 & 661 & 0.14 & 0.57 & 0 \\
+GSM8K & T\_og & Llama-3.1-70B & 97.86 & 685 & 0.00 & 0.14 & 0 \\
+GSM8K & M\_ur & qwen3.8-max & 94.57 & 662 & 0.00 & 0.43 & 0 \\
+GSM8K & M\_r1 & qwen3.8-max & 94.43 & 661 & 0.29 & 1.00 & 0 \\
+GSM8K & M\_og & qwen3.8-max & 97.57 & 683 & 0.00 & 0.29 & 0 \\
+\bottomrule
+\end{tabular}
+\end{table}

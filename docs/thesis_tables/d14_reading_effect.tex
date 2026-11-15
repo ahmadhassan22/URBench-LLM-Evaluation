@@ -1,0 +1,22 @@
+% written by eval/error_analysis_tests/efbpt/d14_tables.py from docs/handoff/D14_READOUT.md
+\begin{table}[t]
+\centering
+\small
+\caption{D14 family G1: each model with the English translation R1 (first arm) against the same model on the Urdu item (second arm). Delta, n and the two percentages beside it are on the deciding line; Holm over the 9 tests.}
+\label{tab:d14-reading-effect}
+\begin{tabular}{lllrlrlrrrrrrl}
+\toprule
+Task & Model & Second arm & Acc \% (all rows) & First arm & Acc \% (all rows) & Deciding line & n & First \% & Second \% & Delta pp & Raw p & Holm p & Wording \\
+\midrule
+CSQA & Qwen3-14B & S\_ur & 68.53 & S\_ro & 74.20 & LA & 1500 & 74.20 & 68.53 & +5.67 & 1.40e-07 & 1.06e-06 & helps \\
+CSQA & Llama-3.1-70B & T\_ur & 56.93 & T\_r1 & 74.20 & LP & 1271 & 74.35 & 67.11 & +7.24 & 1.32e-07 & 1.06e-06 & helps \\
+CSQA & qwen3.8-max & M\_ur & 75.80 & M\_r1 & 80.33 & LA & 1500 & 80.33 & 75.80 & +4.53 & 2.49e-06 & 1.46e-05 & helps \\
+PIQA & Qwen3-14B & S\_ur & 71.60 & S\_ro & 77.33 & LA & 750 & 77.33 & 71.60 & +5.73 & 0.0019 & 0.0058 & helps \\
+PIQA & Llama-3.1-70B & T\_ur & 78.93 & T\_r1 & 86.80 & LA & 750 & 86.80 & 78.93 & +7.87 & 2.44e-06 & 1.46e-05 & helps \\
+PIQA & qwen3.8-max & M\_ur & 92.40 & M\_r1 & 93.07 & LA & 750 & 93.07 & 92.40 & +0.67 & 0.5966 & 1.0000 & no clear effect \\
+GSM8K & Qwen3-14B & S\_ur & 87.43 & S\_ro & 91.14 & LA & 700 & 91.14 & 87.43 & +3.71 & 0.0013 & 0.0052 & helps \\
+GSM8K & Llama-3.1-70B & T\_ur & 86.14 & T\_r1 & 94.43 & LA & 700 & 94.43 & 86.14 & +8.29 & 1.86e-09 & 1.68e-08 & helps \\
+GSM8K & qwen3.8-max & M\_ur & 94.57 & M\_r1 & 94.43 & LA & 700 & 94.43 & 94.57 & -0.14 & 1.0000 & 1.0000 & no clear effect \\
+\bottomrule
+\end{tabular}
+\end{table}

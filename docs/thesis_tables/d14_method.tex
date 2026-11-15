@@ -1,0 +1,15 @@
+% written by eval/error_analysis_tests/efbpt/d14_tables.py from docs/handoff/D14_READOUT.md
+\begin{table}[t]
+\centering
+\small
+\caption{D14 family G2: Qwen3-14B with teacher facts (first arm) against Qwen3-14B on the Urdu item alone (second arm). Holm over the 2 tests.}
+\label{tab:d14-method}
+\begin{tabular}{lllrlrlrrrrrrl}
+\toprule
+Task & Model & Second arm & Acc \% (all rows) & First arm & Acc \% (all rows) & Deciding line & n & First \% & Second \% & Delta pp & Raw p & Holm p & Wording \\
+\midrule
+CSQA & Qwen3-14B & S\_ur & 68.53 & S\_tr & 70.00 & LA & 1500 & 70.00 & 68.53 & +1.47 & 0.2143 & 0.4285 & no clear effect \\
+PIQA & Qwen3-14B & S\_ur & 71.60 & S\_tr & 72.40 & LA & 750 & 72.40 & 71.60 & +0.80 & 0.7277 & 0.7277 & no clear effect \\
+\bottomrule
+\end{tabular}
+\end{table}

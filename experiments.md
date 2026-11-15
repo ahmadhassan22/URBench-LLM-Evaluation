@@ -5474,3 +5474,177 @@ Stated plainly:
   116804 failed before writing output (no git on the node) and was resubmitted as job 117476. No arm was scored before the readout.
 - What this record does not say: it gives no claim beyond the readout wording above. TR is beaten by one baseline, beats two, and is
   not distinguishable from four.
+
+## EFBPT D14: READING EFFECT AND TEACHER FACTS ON CSQA, PIQA AND GSM8K (recorded 2026-11-16)
+
+Sources: `docs/handoff/D14_READOUT.md` (every number, unless another file is named), the freeze
+`docs/EFBPT_D14_MORE_TASKS_FREEZE.md`, `docs/EFBPT_D14_AMENDMENT_1.md` (teacher engine arguments). Analysis pack: `docs/handoff/D14_ANALYSIS.md`.
+
+**Purpose (freeze):** measure, on three more URBench tasks, (1) the reading effect: the same model on the Urdu item against an English
+translation of it, and (2) the teacher-facts method with the Qwen3-14B student. D14 selects nothing and tunes nothing. No arm is run again after it is scored.
+
+**Setup:** all rows of the Urdu source files (CSQA 1500, PIQA 750, GSM8K 700), each with the original English row at the same position. No demonstrations, no pool.
+Arms per task: S = Qwen3-14B (student), T = Llama-3.1-70B-AWQ (teacher), M = qwen3.8-max (commercial). `_ur` = the fair baseline prompt in Urdu;
+R1 = an English translation of the item by qwen3.8-max (one call per row, the gold answer never sent); `_og` = the original English item.
+All 29 arm files were sealed before scoring. No job computed accuracy. The readout script was committed and pushed before it read any D14 arm and was run once.
+Scoring: each task's `extract_answer` and gold rule from its fair script, unchanged; unparsed = wrong; truncated = reached max_tokens.
+Lines: LA = all rows; LP = rows parsed in both arms; LT = rows truncated in neither arm; LPT = both. A test is read on LA unless the unparsed
+rates (then LP), the truncated rates (then LT) or both (then LPT) of its two arms differ by more than 5.0 pp. b = the first-named arm right and
+the second wrong; p = exact two-sided McNemar. Wording fixed before the run: "helps" only if Δ > 0 and Holm p < 0.05; "hurts" only if Δ < 0 and
+Holm p < 0.05; otherwise "no clear effect".
+
+**CSQA** (n = 1500):
+
+| Arm | What it is | Acc % (correct) | Unparsed (%) | Truncated (%) |
+|---|---|---:|---:|---:|
+| S_ur | Qwen3-14B, Urdu prompt (the fair baseline prompt) | 68.53 (1028) | 0 (0.00) | 83 (5.53) |
+| S_ro | Qwen3-14B, Urdu prompt + the R1 English translation | 74.20 (1113) | 2 (0.13) | 54 (3.60) |
+| S_og | Qwen3-14B, Urdu prompt + the original English item | 78.93 (1184) | 2 (0.13) | 62 (4.13) |
+| S_tr | Qwen3-14B, Urdu prompt + teacher facts made from the R1 translation | 70.00 (1050) | 2 (0.13) | 154 (10.27) |
+| T_ur | Llama-3.1-70B, Urdu prompt | 56.93 (854) | 228 (15.20) | 9 (0.60) |
+| T_r1 | Llama-3.1-70B, English prompt with the R1 translation | 74.20 (1113) | 1 (0.07) | 4 (0.27) |
+| T_og | Llama-3.1-70B, English prompt with the original English item | 81.67 (1225) | 0 (0.00) | 1 (0.07) |
+| M_ur | qwen3.8-max, Urdu prompt | 75.80 (1137) | 0 (0.00) | 0 (0.00) |
+| M_r1 | qwen3.8-max, English prompt with the R1 translation | 80.33 (1205) | 1 (0.07) | 1 (0.07) |
+| M_og | qwen3.8-max, English prompt with the original English item | 88.40 (1326) | 0 (0.00) | 0 (0.00) |
+
+**PIQA** (n = 750):
+
+| Arm | What it is | Acc % (correct) | Unparsed (%) | Truncated (%) |
+|---|---|---:|---:|---:|
+| S_ur | Qwen3-14B, Urdu prompt (the fair baseline prompt) | 71.60 (537) | 0 (0.00) | 1 (0.13) |
+| S_ro | Qwen3-14B, Urdu prompt + the R1 English translation | 77.33 (580) | 0 (0.00) | 2 (0.27) |
+| S_og | Qwen3-14B, Urdu prompt + the original English item | 78.40 (588) | 0 (0.00) | 1 (0.13) |
+| S_tr | Qwen3-14B, Urdu prompt + teacher facts made from the R1 translation | 72.40 (543) | 0 (0.00) | 12 (1.60) |
+| T_ur | Llama-3.1-70B, Urdu prompt | 78.93 (592) | 7 (0.93) | 12 (1.60) |
+| T_r1 | Llama-3.1-70B, English prompt with the R1 translation | 86.80 (651) | 1 (0.13) | 0 (0.00) |
+| T_og | Llama-3.1-70B, English prompt with the original English item | 88.13 (661) | 1 (0.13) | 0 (0.00) |
+| M_ur | qwen3.8-max, Urdu prompt | 92.40 (693) | 0 (0.00) | 0 (0.00) |
+| M_r1 | qwen3.8-max, English prompt with the R1 translation | 93.07 (698) | 0 (0.00) | 2 (0.27) |
+| M_og | qwen3.8-max, English prompt with the original English item | 95.73 (718) | 0 (0.00) | 0 (0.00) |
+
+**GSM8K** (n = 700):
+
+| Arm | What it is | Acc % (correct) | Unparsed (%) | Truncated (%) |
+|---|---|---:|---:|---:|
+| S_ur | Qwen3-14B, Urdu prompt (the fair baseline prompt) | 87.43 (612) | 22 (3.14) | 42 (6.00) |
+| S_ro | Qwen3-14B, Urdu prompt + the R1 English translation | 91.14 (638) | 11 (1.57) | 29 (4.14) |
+| S_og | Qwen3-14B, Urdu prompt + the original English item | 93.29 (653) | 12 (1.71) | 24 (3.43) |
+| T_ur | Llama-3.1-70B, Urdu prompt | 86.14 (603) | 1 (0.14) | 16 (2.29) |
+| T_r1 | Llama-3.1-70B, English prompt with the R1 translation | 94.43 (661) | 1 (0.14) | 4 (0.57) |
+| T_og | Llama-3.1-70B, English prompt with the original English item | 97.86 (685) | 0 (0.00) | 1 (0.14) |
+| M_ur | qwen3.8-max, Urdu prompt | 94.57 (662) | 0 (0.00) | 3 (0.43) |
+| M_r1 | qwen3.8-max, English prompt with the R1 translation | 94.43 (661) | 2 (0.29) | 7 (1.00) |
+| M_og | qwen3.8-max, English prompt with the original English item | 97.57 (683) | 0 (0.00) | 2 (0.29) |
+
+**Family G1** (reading effect: the model with the R1 translation vs the same model on the Urdu item; 9 tests, Holm over the deciding lines):
+
+| Task | Test | Deciding line | n | Δ pp | b | c | Raw p | Holm p | All rows (LA): Δ pp, b / c, raw p | Readout wording |
+|---|---|---|---:|---:|---:|---:|---:|---:|---|---|
+| CSQA | S_ro vs S_ur | LA | 1500 | +5.67 | 172 | 87 | 1.40e-07 | 1.06e-06 | +5.67, 172 / 87, 1.40e-07 | helps |
+| CSQA | T_r1 vs T_ur | LP | 1271 | +7.24 | 197 | 105 | 1.32e-07 | 1.06e-06 | +17.27, 365 / 106, 2.40e-34 | helps |
+| CSQA | M_r1 vs M_ur | LA | 1500 | +4.53 | 137 | 69 | 2.49e-06 | 1.46e-05 | +4.53, 137 / 69, 2.49e-06 | helps |
+| PIQA | S_ro vs S_ur | LA | 750 | +5.73 | 114 | 71 | 0.0019 | 0.0058 | +5.73, 114 / 71, 0.0019 | helps |
+| PIQA | T_r1 vs T_ur | LA | 750 | +7.87 | 107 | 48 | 2.44e-06 | 1.46e-05 | +7.87, 107 / 48, 2.44e-06 | helps |
+| PIQA | M_r1 vs M_ur | LA | 750 | +0.67 | 31 | 26 | 0.5966 | 1.0000 | +0.67, 31 / 26, 0.5966 | no clear effect |
+| GSM8K | S_ro vs S_ur | LA | 700 | +3.71 | 44 | 18 | 0.0013 | 0.0052 | +3.71, 44 / 18, 0.0013 | helps |
+| GSM8K | T_r1 vs T_ur | LA | 700 | +8.29 | 77 | 19 | 1.86e-09 | 1.68e-08 | +8.29, 77 / 19, 1.86e-09 | helps |
+| GSM8K | M_r1 vs M_ur | LA | 700 | -0.14 | 8 | 9 | 1.0000 | 1.0000 | -0.14, 8 / 9, 1.0000 | no clear effect |
+
+**Family G2** (method: S_tr vs S_ur; 2 tests, Holm):
+
+| Task | Test | Deciding line | n | Δ pp | b | c | Raw p | Holm p | All rows (LA): Δ pp, b / c, raw p | Readout wording |
+|---|---|---|---:|---:|---:|---:|---:|---:|---|---|
+| CSQA | S_tr vs S_ur | LA | 1500 | +1.47 | 154 | 132 | 0.2143 | 0.4285 | +1.47, 154 / 132, 0.2143 | no clear effect |
+| PIQA | S_tr vs S_ur | LA | 750 | +0.80 | 106 | 100 | 0.7277 | 0.7277 | +0.80, 106 / 100, 0.7277 | no clear effect |
+
+| Task | Comparison (descriptive, all rows) | First % | Second % | Δ pp | b / c | Raw p | Line the unparsed / truncation rule picks: n, Δ pp, b / c, raw p |
+|---|---|---:|---:|---:|---:|---:|---|
+| CSQA | S_og vs S_ur | 78.93 | 68.53 | +10.40 | 227 / 71 | 3.53e-20 | all rows |
+| CSQA | T_og vs T_ur | 81.67 | 56.93 | +24.73 | 451 / 80 | 9.27e-64 | LP: 1272, +14.54, 265 / 80, 2.79e-24 |
+| CSQA | M_og vs M_ur | 88.40 | 75.80 | +12.60 | 239 / 50 | 1.02e-30 | all rows |
+| CSQA | S_og vs S_ro | 78.93 | 74.20 | +4.73 | 143 / 72 | 1.47e-06 | all rows |
+| CSQA | T_og vs T_r1 | 81.67 | 74.20 | +7.47 | 186 / 74 | 2.68e-12 | all rows |
+| CSQA | M_og vs M_r1 | 88.40 | 80.33 | +8.07 | 155 / 34 | 1.17e-19 | all rows |
+| CSQA | S_tr vs S_ro | 70.00 | 74.20 | -4.20 | 98 / 161 | 0.0001 | LT: 1308, -1.91, 73 / 98, 0.0661 |
+| CSQA | S_tr vs T_r1 | 70.00 | 74.20 | -4.20 | 122 / 185 | 0.0004 | LT: 1343, -1.64, 108 / 130, 0.1733 |
+| PIQA | S_og vs S_ur | 78.40 | 71.60 | +6.80 | 128 / 77 | 0.0005 | all rows |
+| PIQA | T_og vs T_ur | 88.13 | 78.93 | +9.20 | 113 / 44 | 3.49e-08 | all rows |
+| PIQA | M_og vs M_ur | 95.73 | 92.40 | +3.33 | 41 / 16 | 0.0013 | all rows |
+| PIQA | S_og vs S_ro | 78.40 | 77.33 | +1.07 | 84 / 76 | 0.5801 | all rows |
+| PIQA | T_og vs T_r1 | 88.13 | 86.80 | +1.33 | 45 / 35 | 0.3143 | all rows |
+| PIQA | M_og vs M_r1 | 95.73 | 93.07 | +2.67 | 34 / 14 | 0.0055 | all rows |
+| PIQA | S_tr vs S_ro | 72.40 | 77.33 | -4.93 | 76 / 113 | 0.0087 | all rows |
+| PIQA | S_tr vs T_r1 | 72.40 | 86.80 | -14.40 | 45 / 153 | 5.78e-15 | all rows |
+| GSM8K | S_og vs S_ur | 93.29 | 87.43 | +5.86 | 49 / 8 | 2.72e-08 | all rows |
+| GSM8K | T_og vs T_ur | 97.86 | 86.14 | +11.71 | 87 / 5 | 2.10e-20 | all rows |
+| GSM8K | M_og vs M_ur | 97.57 | 94.57 | +3.00 | 23 / 2 | 1.94e-05 | all rows |
+| GSM8K | S_og vs S_ro | 93.29 | 91.14 | +2.14 | 29 / 14 | 0.0315 | all rows |
+| GSM8K | T_og vs T_r1 | 97.86 | 94.43 | +3.43 | 28 / 4 | 1.93e-05 | all rows |
+| GSM8K | M_og vs M_r1 | 97.57 | 94.43 | +3.14 | 25 / 3 | 2.74e-05 | all rows |
+
+Stated plainly:
+
+- **(a)** G1, the reading effect, in the wording the readout gives (first arm = with the R1 translation, second arm = the Urdu item):
+  - CSQA, Qwen3-14B (S_ro vs S_ur): 68.53 → 74.20 on all rows (+5.67 pp, b 172 / c 87, raw p 1.40e-07); Holm p 1.06e-06: the English translation: **helps**.
+  - CSQA, Llama-3.1-70B (T_r1 vs T_ur): 56.93 → 74.20 on all rows (+17.27 pp, b 365 / c 106, raw p 2.40e-34); deciding line LP, n 1271: +7.24 pp, b 197 / c 105, raw p 1.32e-07; Holm p 1.06e-06: the English translation: **helps**.
+  - CSQA, qwen3.8-max (M_r1 vs M_ur): 75.80 → 80.33 on all rows (+4.53 pp, b 137 / c 69, raw p 2.49e-06); Holm p 1.46e-05: the English translation: **helps**.
+  - PIQA, Qwen3-14B (S_ro vs S_ur): 71.60 → 77.33 on all rows (+5.73 pp, b 114 / c 71, raw p 0.0019); Holm p 0.0058: the English translation: **helps**.
+  - PIQA, Llama-3.1-70B (T_r1 vs T_ur): 78.93 → 86.80 on all rows (+7.87 pp, b 107 / c 48, raw p 2.44e-06); Holm p 1.46e-05: the English translation: **helps**.
+  - PIQA, qwen3.8-max (M_r1 vs M_ur): 92.40 → 93.07 on all rows (+0.67 pp, b 31 / c 26, raw p 0.5966); Holm p 1.0000: the English translation: **no clear effect**.
+  - GSM8K, Qwen3-14B (S_ro vs S_ur): 87.43 → 91.14 on all rows (+3.71 pp, b 44 / c 18, raw p 0.0013); Holm p 0.0052: the English translation: **helps**.
+  - GSM8K, Llama-3.1-70B (T_r1 vs T_ur): 86.14 → 94.43 on all rows (+8.29 pp, b 77 / c 19, raw p 1.86e-09); Holm p 1.68e-08: the English translation: **helps**.
+  - GSM8K, qwen3.8-max (M_r1 vs M_ur): 94.57 → 94.43 on all rows (-0.14 pp, b 8 / c 9, raw p 1.0000); Holm p 1.0000: the English translation: **no clear effect**.
+- **(b)** G2, the method (S_tr = the student with teacher facts, S_ur = the student on the Urdu item alone), in the wording the readout gives:
+  - CSQA, Qwen3-14B (S_tr vs S_ur): 68.53 → 70.00 on all rows (+1.47 pp, b 154 / c 132, raw p 0.2143); Holm p 0.4285: the teacher facts: **no clear effect**.
+  - PIQA, Qwen3-14B (S_tr vs S_ur): 71.60 → 72.40 on all rows (+0.80 pp, b 106 / c 100, raw p 0.7277); Holm p 0.7277: the teacher facts: **no clear effect**.
+  - Truncation in the two arms of each G2 test:
+    - CSQA: S_tr reached the token limit on 154 rows (10.27%) and S_ur on 83 (5.53%). The two rates do not differ by more than 5.0 pp, so the deciding line stays all rows. On the rows truncated in neither arm (LT, n 1282): 73.40 → 76.76 (+3.35 pp, b 115 / c 72, raw p 0.0020); this line is printed beside the deciding line and carries no wording.
+    - PIQA: S_tr reached the token limit on 12 rows (1.60%) and S_ur on 1 (0.13%). The two rates do not differ by more than 5.0 pp, so the deciding line stays all rows. On the rows truncated in neither arm (LT, n 738): 71.68 → 72.63 (+0.95 pp, b 104 / c 97, raw p 0.6722); this line is printed beside the deciding line and carries no wording.
+- **(c)** Teacher facts against the simpler arms (descriptive, all rows):
+  - CSQA, S_tr against S_ro (the same student with the R1 translation and no facts): 70.00 vs 74.20 (-4.20 pp, b 98 / c 161, raw p 0.0001); on the line the unparsed / truncation rule picks (LT, n 1308): 76.83 vs 78.75 (-1.91 pp, b 73 / c 98, raw p 0.0661).
+  - CSQA, S_tr against T_r1 (the 70B teacher answering alone from the R1 translation): 70.00 vs 74.20 (-4.20 pp, b 122 / c 185, raw p 0.0004); on the line the unparsed / truncation rule picks (LT, n 1343): 75.80 vs 77.44 (-1.64 pp, b 108 / c 130, raw p 0.1733).
+  - PIQA, S_tr against S_ro (the same student with the R1 translation and no facts): 72.40 vs 77.33 (-4.93 pp, b 76 / c 113, raw p 0.0087).
+  - PIQA, S_tr against T_r1 (the 70B teacher answering alone from the R1 translation): 72.40 vs 86.80 (-14.40 pp, b 45 / c 153, raw p 5.78e-15).
+- **(d)** The original English item against the R1 translation (descriptive, all rows; a reading_failed row is wrong in the R1 arm):
+  - CSQA, Qwen3-14B: original English item 78.93, R1 translation 74.20 (+4.73 pp, b 143 / c 72, raw p 1.47e-06).
+  - CSQA, Llama-3.1-70B: original English item 81.67, R1 translation 74.20 (+7.47 pp, b 186 / c 74, raw p 2.68e-12).
+  - CSQA, qwen3.8-max: original English item 88.40, R1 translation 80.33 (+8.07 pp, b 155 / c 34, raw p 1.17e-19).
+  - PIQA, Qwen3-14B: original English item 78.40, R1 translation 77.33 (+1.07 pp, b 84 / c 76, raw p 0.5801).
+  - PIQA, Llama-3.1-70B: original English item 88.13, R1 translation 86.80 (+1.33 pp, b 45 / c 35, raw p 0.3143).
+  - PIQA, qwen3.8-max: original English item 95.73, R1 translation 93.07 (+2.67 pp, b 34 / c 14, raw p 0.0055).
+  - GSM8K, Qwen3-14B: original English item 93.29, R1 translation 91.14 (+2.14 pp, b 29 / c 14, raw p 0.0315).
+  - GSM8K, Llama-3.1-70B: original English item 97.86, R1 translation 94.43 (+3.43 pp, b 28 / c 4, raw p 1.93e-05).
+  - GSM8K, qwen3.8-max: original English item 97.57, R1 translation 94.43 (+3.14 pp, b 25 / c 3, raw p 2.74e-05).
+- **(e)** Predictions (freeze F7, read on all rows) hit: 18 of 20.
+  - S_ro - S_ur in [0, +8], CSQA: observed +5.67 — hit
+  - S_ro - S_ur in [-2, +8], PIQA: observed +5.73 — hit
+  - S_ro - S_ur in [-2, +4], GSM8K: observed +3.71 — hit
+  - T_r1 - T_ur in [0, +10], CSQA: observed +17.27 — miss
+  - T_r1 - T_ur in [0, +10], PIQA: observed +7.87 — hit
+  - T_r1 - T_ur in [0, +10], GSM8K: observed +8.29 — hit
+  - M_r1 - M_ur in [0, +10], CSQA: observed +4.53 — hit
+  - M_r1 - M_ur in [0, +10], PIQA: observed +0.67 — hit
+  - M_r1 - M_ur in [0, +10], GSM8K: observed -0.14 — miss
+  - S_tr - S_ur in [-3, +6], CSQA: observed +1.47 — hit
+  - S_tr - S_ur in [-3, +6], PIQA: observed +0.80 — hit
+  - S_og is at least S_ro minus 2, CSQA: observed +4.73 — hit
+  - S_og is at least S_ro minus 2, PIQA: observed +1.07 — hit
+  - S_og is at least S_ro minus 2, GSM8K: observed +2.14 — hit
+  - T_og is at least T_r1 minus 2, CSQA: observed +7.47 — hit
+  - T_og is at least T_r1 minus 2, PIQA: observed +1.33 — hit
+  - T_og is at least T_r1 minus 2, GSM8K: observed +3.43 — hit
+  - M_og is at least M_r1 minus 2, CSQA: observed +8.07 — hit
+  - M_og is at least M_r1 minus 2, PIQA: observed +2.67 — hit
+  - M_og is at least M_r1 minus 2, GSM8K: observed +3.14 — hit
+- **(f)** S_ur against the sealed fair baseline on the shared rows (same prompt and sampling, other batches; reported only):
+  - CSQA, 300 shared rows: sealed fair baseline 63.33 (190), S_ur 64.67 (194); both right 174, fair only 16, S_ur only 20, both wrong 90; same prediction on 246 rows.
+  - PIQA, 150 shared rows: sealed fair baseline 72.00 (108), S_ur 70.67 (106); both right 93, fair only 15, S_ur only 13, both wrong 29; same prediction on 122 rows.
+  - GSM8K, 700 shared rows: sealed fair baseline 88.71 (621), S_ur 87.43 (612); both right 602, fair only 19, S_ur only 10, both wrong 69; same prediction on 647 rows.
+- **(g)** Readings and facts. Rows whose translation failed (reading_failed; not generated in S_ro, S_tr, T_r1, M_r1 and counted as wrong there): CSQA 1 of 1500 rows; PIQA 0 of 750 rows; GSM8K 0 of 700 rows.
+  - CSQA teacher facts: 1498 of 1500 replies parsed; 8834 facts kept; 5 lines removed by the D10 verdict filter and 34 by the D14 option filter (in 32 rows); rows without facts: 2 (their S_tr prompt equals the S_ur prompt).
+  - PIQA teacher facts: 749 of 750 replies parsed; 4470 facts kept; 0 lines removed by the D10 verdict filter and 17 by the D14 option filter (in 13 rows); rows without facts: 1 (their S_tr prompt equals the S_ur prompt).
+  - Gold: taken from the Urdu source row with the fair script's rule. Positions where the English source row gives another gold: CSQA 0; PIQA 5; GSM8K 0.
+- **(h)** Events. The teacher engine did not start with the frozen max_num_seqs 16 until max_num_batched_tokens was set to the D10 engine's own value
+  (`docs/EFBPT_D14_AMENDMENT_1.md`); no prompt, model or decoding changed. API ledger at the time of the readout (TEST-5 and retries included): 11860 calls of at most 13000; 3639718 tokens of at most 7000000 (prompt 1972524, completion 1667194); stopped: no.
+- What this record does not say: it gives no claim beyond the readout wording above. The G1 and G2 wording is per test; no test is pooled across tasks.
