@@ -5250,6 +5250,7 @@ Sources: `docs/handoff/D11_FULL_READOUT.md` (every number, unless another file i
 `docs/D11_GO_EVAL458.md`. RO ablation: the sealed file `outputs/efbpt/d11/ablate_ro/dev200/d11_ablate_ro_summary.json`
 (job 115548, MD5 `54d22ca19f094811bbaf919431c8d91c`); no readout file exists for it. Contract:
 `docs/EFBPT_D11_RTG_FREEZE.md` with Amendments 1 to 3.
+Added 2026-11-15: a committed readout of the RO ablation now exists, `docs/handoff/D11_RO_ABLATION_READOUT.md`; it is the source to cite for the DEV200 RO numbers.
 
 **Method:** Urdu question → reader → English question → teacher (Llama-3.1-70B-AWQ, D11-O v1 prompt) writes short
 English facts → student (Qwen3-14B, nf4, batch size 1) answers in Urdu with the facts in the facts block. Readers:
@@ -5363,3 +5364,113 @@ job per arm at batch size 1: A_r2_eval 115529, TR 115575, TR_wrong_eval 115576, 
   evidence-id needles with fewer than 3 letters was amended, and the DEV200 regression was re-run (5/5 identical).
 - Not yet measured on eval458: the large models answering alone, traditional RAG, the translation-only
   ablation, and other students.
+
+## EFBPT D13: BASELINES AND TRANSFER ON eval458 (recorded 2026-11-15)
+
+Sources: `docs/handoff/D13_READOUT.md` (every number, unless another file is named), the freeze
+`docs/EFBPT_D13_BASELINES_TRANSFER_FREEZE.md`, `docs/EFBPT_D13_AMENDMENT_1.md`, `docs/EFBPT_D13_AMENDMENT_2.md`,
+`docs/EFBPT_D13_AMENDMENT_3.md`, and `docs/EFBPT_D13_RUN_NOTE.md` (interruptions). DEV200 RO: `docs/handoff/D11_RO_ABLATION_READOUT.md`.
+
+**Purpose (freeze):** baselines and a transfer test after the D11 held-out test. D13 selects nothing and tunes nothing. The D11
+verdict `CONFIRMED` stays as it is whatever D13 shows. No arm is run again after it is scored.
+
+**Setup:** eval458 decides (n = 458); DEV200 is descriptive. 19 sealed arm files. No job computed accuracy. The readout script was
+committed and pushed before it read any D13 arm and was run once, both scoring stages together. E0 = the frozen extractor; E3 = the
+validated scorer; for T_tr_R1 and T_tr_L1 the label is E0fa (freeze §7.1), which gives the same label as E0 on every row of both arms.
+Lines: L1 = label, all rows; L2 = E3, all rows; L3 = rows parsed in both arms; L6 = rows truncated in neither arm; L7 = both. A test is
+read on L1 unless the unparsed rates (then L3), the truncated rates (then L6) or both (then L7) of its two arms differ by more than
+5.0 pp (Amendment 2). b = the first-named arm right and the second wrong; p = exact two-sided McNemar.
+
+| Arm | What it is | E0 acc % (correct) | E3 acc % (correct) | Unparsed, E0 (%) | Truncated (%) |
+|---|---|---:|---:|---:|---:|
+| A_r2_eval | Qwen3-14B student alone (sealed D11 arm) | 54.80 (251) | 55.46 (254) | 15 (3.28) | 26 (5.68) |
+| TR | RTG: reader R1, 70B teacher facts, Qwen3-14B student (sealed D11 arm) | 68.78 (315) | 74.24 (340) | 6 (1.31) | 20 (4.37) |
+| TR_L1_eval | RTG with the local reader R3 (sealed D11 arm) | 64.63 (296) | 70.96 (325) | 7 (1.53) | 19 (4.15) |
+| T_direct_F_eval | Llama-3.1-70B alone, Urdu question | 63.32 (290) | 63.10 (289) | 9 (1.97) | 5 (1.09) |
+| T_tr_R1 | Llama-3.1-70B alone, the R1 English reading as input | 75.11 (344) | 75.11 (344) | 18 (3.93) | 7 (1.53) |
+| T_tr_L1 | Llama-3.1-70B alone, its own English reading (R3) as input | 70.96 (325) | 70.96 (325) | 25 (5.46) | 6 (1.31) |
+| API_direct_ur_eval | qwen3.8-max alone, Urdu question | 67.47 (309) | 67.47 (309) | 1 (0.22) | 0 (0.00) |
+| API_tr_R1 | qwen3.8-max alone, the R1 English reading (its own) as input | 80.13 (367) | 80.13 (367) | 2 (0.44) | 0 (0.00) |
+| RAG_ur | student + retrieved Wikipedia chunks, query = the Urdu question | 53.93 (247) | 51.97 (238) | 21 (4.59) | 50 (10.92) |
+| RAG_en | student + retrieved Wikipedia chunks, query = the R1 reading | 53.93 (247) | 54.37 (249) | 23 (5.02) | 61 (13.32) |
+| RO_eval | student + the R1 reading as one line, no facts | 64.63 (296) | 67.90 (311) | 6 (1.31) | 21 (4.59) |
+| Llama8B_A | Llama-3.1-8B-Instruct alone | 30.79 (141) | 24.02 (110) | 188 (41.05) | 70 (15.28) |
+| Llama8B_TR | Llama-3.1-8B-Instruct with the TR facts | 49.34 (226) | 42.79 (196) | 118 (25.76) | 24 (5.24) |
+| Gemma9B_A | Gemma-2-9B-it alone | 47.60 (218) | 45.41 (208) | 81 (17.69) | 7 (1.53) |
+| Gemma9B_TR | Gemma-2-9B-it with the TR facts | 51.97 (238) | 50.66 (232) | 108 (23.58) | 0 (0.00) |
+| Qwen8B_A | Qwen3-8B alone | 52.62 (241) | 51.53 (236) | 40 (8.73) | 79 (17.25) |
+| Qwen8B_TR | Qwen3-8B with the TR facts | 64.63 (296) | 64.85 (297) | 20 (4.37) | 29 (6.33) |
+
+**Family F1** (TR vs the large model alone and vs traditional RAG; Holm over the deciding lines):
+
+| Test | Deciding line | n | Δ pp | b | c | Raw p | Holm p | L1: Δ pp, b / c, raw p | Readout wording |
+|---|---|---:|---:|---:|---:|---:|---:|---|---|
+| TR vs T_direct_F_eval | L1 | 458 | +5.46 | 120 | 95 | 0.1015 | 0.3044 | +5.46, 120 / 95, 0.1015 | not distinguishable |
+| TR vs T_tr_R1 | L1 | 458 | -6.33 | 55 | 84 | 0.01724 | 0.06895 | -6.33, 55 / 84, 0.01724 | not distinguishable |
+| TR vs T_tr_L1 | L1 | 458 | -2.18 | 70 | 80 | 0.4625 | 0.9251 | -2.18, 70 / 80, 0.4625 | not distinguishable |
+| TR vs API_direct_ur_eval | L1 | 458 | +1.31 | 59 | 53 | 0.6368 | 0.9251 | +1.31, 59 / 53, 0.6368 | not distinguishable |
+| TR vs API_tr_R1 | L1 | 458 | -11.35 | 31 | 83 | 1.18e-06 | 7.082e-06 | -11.35, 31 / 83, 1.18e-06 | API_tr_R1 beats TR |
+| TR vs RAG_ur | L6 | 391 | +16.11 | 101 | 38 | 8.818e-08 | 6.172e-07 | +14.85, 118 / 50, 1.612e-07 | TR beats RAG_ur |
+| TR vs RAG_en | L6 | 383 | +12.79 | 85 | 36 | 9.815e-06 | 4.907e-05 | +14.85, 107 / 39, 1.631e-08 | TR beats RAG_en |
+
+**Family F2** (transfer; S_TR vs S_A):
+
+| Test | Deciding line | n | Δ pp | b | c | Raw p | Holm p | L1: Δ pp, b / c, raw p | Readout wording |
+|---|---|---:|---:|---:|---:|---:|---:|---|---|
+| Llama8B_TR vs Llama8B_A | L7 | 174 | +12.64 | 37 | 15 | 0.003185 | 0.005757 | +18.56, 136 / 51, 4.067e-10 | Llama8B_TR beats Llama8B_A |
+| Gemma9B_TR vs Gemma9B_A | L3 | 291 | +10.31 | 63 | 33 | 0.002879 | 0.005757 | +4.37, 100 / 80, 0.1565 | Gemma9B_TR beats Gemma9B_A |
+| Qwen8B_TR vs Qwen8B_A | L6 | 359 | +11.70 | 90 | 48 | 0.0004406 | 0.001322 | +12.01, 121 / 66, 7.027e-05 | Qwen8B_TR beats Qwen8B_A |
+
+| Comparison (descriptive) | L1: Δ pp | b / c | p | L2 (E3): Δ pp | b / c | p |
+|---|---:|---:|---:|---:|---:|---:|
+| TR_L1_eval vs T_direct_F_eval | +1.31 | 109 / 103 | 0.7314 | +7.86 | 105 / 69 | 0.007788 |
+| TR_L1_eval vs T_tr_L1 | -6.33 | 54 / 83 | 0.01643 | +0.00 | 59 / 59 | 1 |
+| TR vs RO_eval | +4.15 | 75 / 56 | 0.1155 | +6.33 | 77 / 48 | 0.01196 |
+| RO_eval vs A_r2_eval | +9.83 | 106 / 61 | 0.0006187 | +12.45 | 105 / 48 | 4.697e-06 |
+| RAG_ur vs A_r2_eval | -0.87 | 79 / 83 | 0.8138 | -3.49 | 62 / 78 | 0.2047 |
+| RAG_en vs A_r2_eval | -0.87 | 86 / 90 | 0.8212 | -1.09 | 73 / 78 | 0.7449 |
+
+Stated plainly:
+
+- **(a)** F1 (TR against 7 baselines, Holm at 0.05), in the wording the readout gives: **API_tr_R1 beats TR** (80.13 vs 68.78; Δ -11.35 pp, b 31 / c 83, raw p 1.18e-06, Holm p 7.082e-06). **TR beats RAG_ur** (deciding line L6, n 391: Δ +16.11 pp, b 101 / c 38, Holm p 6.172e-07) and **TR beats RAG_en** (deciding line L6, n 383: Δ +12.79 pp, b 85 / c 36, Holm p 4.907e-05). TR is **not distinguishable** from T_direct_F_eval (Δ +5.46 pp, raw p 0.1015, Holm p 0.3044), T_tr_R1 (Δ -6.33 pp, raw p 0.01724, Holm p 0.06895), T_tr_L1 (Δ -2.18 pp, raw p 0.4625, Holm p 0.9251) and API_direct_ur_eval (Δ +1.31 pp, raw p 0.6368, Holm p 0.9251).
+- **(b)** T_tr_R1 (the 70B teacher answering from the R1 reading, no student) is 6.33 pp above TR on L1 (b 55 / c 84) with raw p 0.01724 and Holm p 0.06895, so the frozen wording is "not distinguishable". On L2 (E3) the two are 75.11 (T_tr_R1) and 74.24 (TR).
+- **(c)** F2 (S_TR against S_A for three other students, Holm at 0.05): transfer **holds** by the frozen rule (3 of 3 students with Δ > 0 and Holm p < 0.05). Gemma-2-9B-it: +4.37 pp, p 0.1565 on L1, and +10.31 pp, p 0.002879 (Holm p 0.005757) on its deciding line L3 (rows parsed in both arms, n 291); L3 decides because the unparsed rates of its two arms differ by 5.90 pp. Llama-3.1-8B-Instruct (deciding line L7, n 174: +12.64 pp, Holm p 0.005757; L1 +18.56 pp, p 4.067e-10) and Qwen3-8B (deciding line L6, n 359: +11.70 pp, Holm p 0.001322; L1 +12.01 pp, p 7.027e-05) are positive with p < 0.05 on every line L1-L7.
+- **(d)** Translation only: RO_eval (the student with the English reading as one line and no facts) is +9.83 pp over A_r2_eval (64.63 vs 54.80, b 106 / c 61, p 0.0006187). TR vs RO_eval is +4.15 pp (b 75 / c 56, p 0.1155) on L1. On DEV200 the same arm RO was -2.5 pp against A_r2 (p 0.6147; `docs/handoff/D11_RO_ABLATION_READOUT.md`). So how much of the gain of TR comes from the facts and how much from the translation is not settled.
+- **(e)** Reading effect inside every model (L1 accuracy, Urdu question → English reading as input): qwen3.8-max API_direct_ur_eval 67.47 → API_tr_R1 80.13; Llama-3.1-70B T_direct_F_eval 63.32 → T_tr_R1 75.11 and T_tr_L1 70.96; Qwen3-14B A_r2_eval 54.80 → RO_eval 64.63. The readout holds a paired test for the last pair only (RO_eval vs A_r2_eval, above).
+- **(f)** Traditional RAG is level with A_r2_eval: RAG_ur 53.93 and RAG_en 53.93 against 54.80 (L1: -0.87 pp, p 0.8138; and -0.87 pp, p 0.8212). Retrieval title share (gold evidence titles found among the retrieved chunks):
+
+| Set | Arm | Query | Found / all gold titles | Found / gold titles present in the corpus | Rows with at least one found / rows |
+|---|---|---|---:|---:|---:|
+| eval458 | RAG_ur | the Urdu question | 46 / 1393 (3.30 %) | 46 / 995 (4.62 %) | 41 / 458 (8.95 %) |
+| eval458 | RAG_en | the R1 reading | 207 / 1393 (14.86 %) | 207 / 995 (20.80 %) | 188 / 458 (41.05 %) |
+| DEV200 | RAG_ur | the Urdu question | 24 / 636 (3.77 %) | 24 / 439 (5.47 %) | 23 / 200 (11.50 %) |
+| DEV200 | RAG_en | the R1 reading | 79 / 636 (12.42 %) | 79 / 439 (18.00 %) | 73 / 200 (36.50 %) |
+
+- **(g)** Predictions (freeze §5, read on L1 of eval458): 8 hit, 3 miss.
+  - T_direct_F_eval accuracy in [48, 60]: observed 63.32 — miss
+  - API_direct_ur_eval accuracy in [62, 72]: observed 67.47 — hit
+  - T_tr_R1 accuracy in [60, 76]: observed 75.11 — hit
+  - T_tr_L1 within 4 pp of T_tr_R1: observed T_tr_L1 − T_tr_R1 = -4.15 — miss
+  - RAG_ur − A_r2_eval in [-6, +4]: observed -0.87 — hit
+  - RAG_en − A_r2_eval in [-6, +4]: observed -0.87 — hit
+  - RO_eval − A_r2_eval in [-3, +5]: observed +9.83 — miss
+  - Llama8B_TR − Llama8B_A > 0: observed +18.56 — hit
+  - Gemma9B_TR − Gemma9B_A > 0: observed +4.37 — hit
+  - Qwen8B_TR − Qwen8B_A > 0: observed +12.01 — hit
+  - expected reading: TR and API_direct_ur_eval not distinguishable: observed not distinguishable — hit
+- **(h)** The three small students often give no parsable answer or run to the token limit:
+
+| Arm | E0 acc % (correct) | Unparsed, E0 (%) | Unparsed, E3 (%) | Truncated (%) |
+|---|---:|---:|---:|---:|
+| Llama8B_A | 30.79 (141) | 188 (41.05) | 263 (57.42) | 70 (15.28) |
+| Llama8B_TR | 49.34 (226) | 118 (25.76) | 154 (33.62) | 24 (5.24) |
+| Gemma9B_A | 47.60 (218) | 81 (17.69) | 95 (20.74) | 7 (1.53) |
+| Gemma9B_TR | 51.97 (238) | 108 (23.58) | 125 (27.29) | 0 (0.00) |
+| Qwen8B_A | 52.62 (241) | 40 (8.73) | 43 (9.39) | 79 (17.25) |
+| Qwen8B_TR | 64.63 (296) | 20 (4.37) | 23 (5.02) | 29 (6.33) |
+
+- API_tr_R1 on eval458 holds 456 answered rows and 2 rows that the provider's input inspection refused (HTTP 400, Amendment 3); the refused rows are counted as wrong. On the 456 answered rows TR vs API_tr_R1 is 68.64 vs 80.48, Δ -11.84 pp, b 29 / c 83, raw p 3.291e-07.
+- Events (`docs/EFBPT_D13_RUN_NOTE.md`): API_direct_ur_eval was interrupted twice and resumed from its finished rows; retrieval job
+  116804 failed before writing output (no git on the node) and was resubmitted as job 117476. No arm was scored before the readout.
+- What this record does not say: it gives no claim beyond the readout wording above. TR is beaten by one baseline, beats two, and is
+  not distinguishable from four.

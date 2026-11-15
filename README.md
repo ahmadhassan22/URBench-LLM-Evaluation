@@ -462,6 +462,8 @@ On eval458 (n = 458, run once): **68.78% vs 54.80%, +13.97 pp, b 117 / c 53, exa
 **18. The gain comes from what the facts say.**
 With the facts of another question in the same layout, eval458 accuracy is 52.62%: 16.16 pp below the method (p = 8.747e-10) and not different from no facts (−2.18 pp, p = 0.5225). On DEV200, adding only the English translation of the question, without facts, does not help (−2.5 pp, p = 0.6147).
 
+> **Update (2026-11-15).** On eval458 the translation-only arm does help: RO_eval is +9.83 pp over A_r2_eval (p = 0.0006187), and TR vs RO_eval is +4.15 pp (p = 0.1155). The DEV200 number above is from `docs/handoff/D11_RO_ABLATION_READOUT.md`. See finding 26.
+
 **19. The pipeline also works with a local reader.**
 With Llama-3.1-70B as the reader (no API), eval458 accuracy is 64.63% vs 54.80%: +9.83 pp, b 107 / c 62, p = 0.0006677.
 
@@ -475,13 +477,32 @@ The frozen extractor takes the last ہاں/نہیں mention. In a labelled audit
 At batch size 8 a re-run of the no-facts arm agreed with the earlier run on only 155/200 predictions. At batch size 1 the 200 generations are byte-identical across two jobs on two nodes. Every paired test since D10 runs the student at batch size 1.
 
 **23. Open limitation: a strong API model answering alone matches the pipeline on DEV200.**
-qwen3.8-max asked the Urdu question directly scores 69.00% on DEV200, against 68.50% for Read-then-Ground with the 14B student (b 26 / c 27, p = 1). The local 70B teacher answering alone scores 55.50%. These baselines, traditional RAG, and other students have not yet been measured on eval458.
+qwen3.8-max asked the Urdu question directly scores 69.00% on DEV200, against 68.50% for Read-then-Ground with the 14B student (b 26 / c 27, p = 1). The local 70B teacher answering alone scores 55.50%.
+
+> **Update (2026-11-15).** These baselines were measured on eval458 in D13: findings 24–28.
+
+**24. Given the English reading, the API model alone beats the pipeline; the other large-model baselines are not distinguishable from it.**
+On eval458, in the wording fixed before the run: qwen3.8-max answering from the English reading scores 80.13% against 68.78% for Read-then-Ground (-11.35 pp, b 31 / c 83, Holm p = 7.082e-06): API_tr_R1 beats TR. The 70B teacher answering from the same reading is 6.33 pp above TR (raw p = 0.01724, Holm p = 0.06895): not distinguishable; under the validated scorer the two are 75.11 and 74.24. TR is also not distinguishable from the 70B teacher on the Urdu question (Δ +5.46 pp, Holm p = 0.3044), from the 70B teacher on its own reading (Δ -2.18 pp, Holm p = 0.9251) and from the API model on the Urdu question (Δ +1.31 pp, Holm p = 0.9251).
+
+**25. The English reading raises every model that was run with and without it.**
+L1 accuracy on eval458, Urdu question → English reading as input: qwen3.8-max 67.47 → 80.13; Llama-3.1-70B 63.32 → 75.11 (R1 reading) and 70.96 (its own reading); Qwen3-14B 54.80 → 64.63 (the reading added as one line).
+
+**26. Translation alone helps on eval458, so the share of the facts in the gain is not settled.**
+Translation only: RO_eval (the student with the English reading as one line and no facts) is +9.83 pp over A_r2_eval (64.63 vs 54.80, b 106 / c 61, p 0.0006187). TR vs RO_eval is +4.15 pp (b 75 / c 56, p 0.1155) on L1. On DEV200 the same arm RO was -2.5 pp against A_r2 (p 0.6147; `docs/handoff/D11_RO_ABLATION_READOUT.md`). So how much of the gain of TR comes from the facts and how much from the translation is not settled.
+
+**27. Traditional RAG is level with the student alone.**
+RAG_ur 53.93% and RAG_en 53.93% against 54.80% for the student alone. TR beats RAG_ur (Δ +16.11 pp on its deciding line, Holm p = 6.172e-07) and TR beats RAG_en (Δ +12.79 pp, Holm p = 4.907e-05). The retriever finds 46 / 1393 (3.30 %) of the gold evidence titles with the Urdu question as query and 207 / 1393 (14.86 %) with the English reading.
+
+**28. The facts transfer to three other students by the frozen rule; the small students are noisy.**
+Transfer holds (3 of 3). Llama-3.1-8B-Instruct and Qwen3-8B are positive with p < 0.05 on every line. Gemma-2-9B-it is +4.37 pp (p = 0.1565) on all rows and +10.31 pp (p = 0.002879) on the rows parsed in both arms, which is its deciding line. Unparsed answers under the frozen scorer: Llama-3.1-8B-Instruct 41.05% alone and 25.76% with facts; Gemma-2-9B-it 17.69% and 23.58%; Qwen3-8B 8.73% and 4.37%.
 
 ---
 
-## Current State (2026-11-12)
+## Current State (2026-11-15)
 
 **Confirmed.** Read-then-Ground (RTG) passed its pre-registered held-out test on eval458: +13.97 pp over the no-facts student (p = 1.021e-06), with a wrong-facts control and a local-reader variant. See *Method: Read-then-Ground*.
+
+**Measured after the held-out test (D13, 2026-11-15).** Baselines and transfer on eval458, wording fixed before the run: API_tr_R1 beats TR (80.13% vs 68.78%); TR beats RAG_ur and RAG_en; TR is not distinguishable from T_direct_F_eval, T_tr_R1, T_tr_L1 and API_direct_ur_eval; transfer to three other students holds (3 of 3). See *Baselines and Transfer on eval458 (D13)*.
 
 **Closed.** Each route below was tested against a gate declared in advance and is kept in this document as a result:
 
@@ -497,7 +518,9 @@ qwen3.8-max asked the Urdu question directly scores 69.00% on DEV200, against 68
 | Teacher facts from the Urdu question (D10, D10 v2) | +5.0 pp and +4.5 pp, not significant; closed | *Diagnostics after D6* |
 
 **Open.**
-- Baselines on eval458: the large models answering alone, traditional RAG, the translation-only ablation, and transfer to other student models. Not yet run.
+- How much of the RTG gain comes from the facts is not settled: on eval458 the translation-only arm is +9.83 pp over the student alone (p = 0.0006187) and TR is +4.15 pp over it (p = 0.1155), while on DEV200 the translation-only arm was -2.5 pp.
+- With the English reading as input, the API model alone is above RTG (80.13% vs 68.78%), and the 70B teacher alone is 6.33 pp above it on L1 (Holm p = 0.06895, not distinguishable).
+- The three small students have high unparsed rates (up to 41.05%); an analysis of their unparsed and truncated rows is not yet written.
 - The scorer audit has one primary adjudicator and a small agree-stratum (20 rows per arm); both scorers are reported for every comparison.
 
 ---
@@ -642,13 +665,132 @@ TR_L1 replaces the API reader with Llama-3.1-70B, so the whole pipeline runs on 
 
 ### Limits
 
-- **Baselines on eval458 are not yet measured.** On DEV200 the API model answering alone (69.00%) is level with RTG (68.50%). The large models alone, traditional RAG, and other students still have to be tested on eval458.
+- **On eval458 one baseline beats RTG and four are not distinguishable from it** (D13). qwen3.8-max answering from the English reading scores 80.13% against 68.78% (Holm p = 7.082e-06). The 70B teacher answering from the same reading is 6.33 pp above RTG on L1 (raw p = 0.01724, Holm p = 0.06895); under E3 the two are 75.11 and 74.24. RTG beats only the two traditional RAG arms.
+- **The share of the facts in the gain is not settled.** On eval458 the translation-only arm RO_eval is +9.83 pp over the student alone (p = 0.0006187) and TR is +4.15 pp over RO_eval (p = 0.1155, L1). On DEV200 RO was -2.5 pp.
+- **Transfer rests on subsets of rows.** The three small students leave 4.37% to 41.05% of rows unparsed under E0, so their tests are read on L7, L3 and L6. Gemma-2-9B-it is +4.37 pp (p = 0.1565) on all rows.
+- **D13 predictions:** 8 hit, 3 miss. The misses: T_direct_F_eval at 63.32 (predicted in [48, 60]); T_tr_L1 − T_tr_R1 at -4.15 pp (predicted within 4 pp); RO_eval − A_r2_eval at +9.83 pp (predicted in [-3, +5]).
+- **Two eval458 rows of API_tr_R1 were refused by the provider** and are counted as wrong (Amendment 3).
 - **RTG stays below the oracle arms on DEV200:** −5.5 pp against the oracle reading (p = 0.08014) and −7.5 pp against gold facts (p = 0.04438).
 - **Reading errors pass through.** On DEV200, TR is +16.1 pp over A_r2 on the 124 rows whose reading recovers every gold proper noun and −6.5 pp on the 31 rows where it does not.
 - **Under the frozen scorer the gain is on gold-no rows** (Key Finding 20).
 - **The pre-registered predictions were imprecise:** on eval458 the gain was predicted at +5 to +10 pp and came out at +13.97 pp; the no-facts arm was predicted at 55 to 63 and came out at 54.80.
 
-Sources: `docs/handoff/D11_FULL_READOUT.md`, `docs/handoff/D11_EVAL458_READOUT_LINES.md`, `docs/handoff/D11_DEV200_READOUT_LINES.md`, `docs/handoff/D10_FULL_READOUT.md` (T_direct_F), the sealed `outputs/efbpt/d11/ablate_ro/dev200/d11_ablate_ro_summary.json` (RO); records in `experiments.md`.
+Sources: `docs/handoff/D11_FULL_READOUT.md`, `docs/handoff/D11_EVAL458_READOUT_LINES.md`, `docs/handoff/D11_DEV200_READOUT_LINES.md`, `docs/handoff/D10_FULL_READOUT.md` (T_direct_F), `docs/handoff/D11_RO_ABLATION_READOUT.md` (RO), `docs/handoff/D13_READOUT.md` (D13 limits); records in `experiments.md`.
+
+---
+
+## Baselines and Transfer on eval458 (D13)
+
+After the held-out test, the baselines that were still missing were run on eval458 under a new freeze (`docs/EFBPT_D13_BASELINES_TRANSFER_FREEZE.md`, Amendments 1 to 3): the large models answering alone, traditional RAG, a translation-only ablation, and the same facts given to three other students. D13 selects nothing and tunes nothing, and it does not change the D11 verdict. The readout script was committed and pushed before it read any D13 arm and was run once. eval458 decides (n = 458); DEV200 numbers are descriptive.
+
+### Systems on eval458
+
+E0 is the frozen extractor (the label of every test); E3 is the validated scorer. Unparsed counts as wrong. Truncated = the row reached the token limit.
+
+| Arm | What it is | E0 acc % (correct) | E3 acc % (correct) | Unparsed, E0 (%) | Truncated (%) |
+|---|---|---:|---:|---:|---:|
+| A_r2_eval | Qwen3-14B student alone (sealed D11 arm) | 54.80 (251) | 55.46 (254) | 15 (3.28) | 26 (5.68) |
+| TR | RTG: reader R1, 70B teacher facts, Qwen3-14B student (sealed D11 arm) | 68.78 (315) | 74.24 (340) | 6 (1.31) | 20 (4.37) |
+| TR_L1_eval | RTG with the local reader R3 (sealed D11 arm) | 64.63 (296) | 70.96 (325) | 7 (1.53) | 19 (4.15) |
+| T_direct_F_eval | Llama-3.1-70B alone, Urdu question | 63.32 (290) | 63.10 (289) | 9 (1.97) | 5 (1.09) |
+| T_tr_R1 | Llama-3.1-70B alone, the R1 English reading as input | 75.11 (344) | 75.11 (344) | 18 (3.93) | 7 (1.53) |
+| T_tr_L1 | Llama-3.1-70B alone, its own English reading (R3) as input | 70.96 (325) | 70.96 (325) | 25 (5.46) | 6 (1.31) |
+| API_direct_ur_eval | qwen3.8-max alone, Urdu question | 67.47 (309) | 67.47 (309) | 1 (0.22) | 0 (0.00) |
+| API_tr_R1 | qwen3.8-max alone, the R1 English reading (its own) as input | 80.13 (367) | 80.13 (367) | 2 (0.44) | 0 (0.00) |
+| RAG_ur | student + retrieved Wikipedia chunks, query = the Urdu question | 53.93 (247) | 51.97 (238) | 21 (4.59) | 50 (10.92) |
+| RAG_en | student + retrieved Wikipedia chunks, query = the R1 reading | 53.93 (247) | 54.37 (249) | 23 (5.02) | 61 (13.32) |
+| RO_eval | student + the R1 reading as one line, no facts | 64.63 (296) | 67.90 (311) | 6 (1.31) | 21 (4.59) |
+| Llama8B_A | Llama-3.1-8B-Instruct alone | 30.79 (141) | 24.02 (110) | 188 (41.05) | 70 (15.28) |
+| Llama8B_TR | Llama-3.1-8B-Instruct with the TR facts | 49.34 (226) | 42.79 (196) | 118 (25.76) | 24 (5.24) |
+| Gemma9B_A | Gemma-2-9B-it alone | 47.60 (218) | 45.41 (208) | 81 (17.69) | 7 (1.53) |
+| Gemma9B_TR | Gemma-2-9B-it with the TR facts | 51.97 (238) | 50.66 (232) | 108 (23.58) | 0 (0.00) |
+| Qwen8B_A | Qwen3-8B alone | 52.62 (241) | 51.53 (236) | 40 (8.73) | 79 (17.25) |
+| Qwen8B_TR | Qwen3-8B with the TR facts | 64.63 (296) | 64.85 (297) | 20 (4.37) | 29 (6.33) |
+
+### Family F1: RTG against the large model alone and against traditional RAG
+
+Seven tests, Holm at 0.05. A test is read on L1 (E0, all rows) unless the unparsed or the truncated rates of its two arms differ by more than 5.0 pp; then it is read on the rows parsed in both arms (L3), on the rows truncated in neither arm (L6), or on both (L7). The wording is fixed by the freeze: "TR beats X" or "X beats TR" only with Holm p < 0.05; everything else is "not distinguishable".
+
+| Test | Deciding line | n | Δ pp | b | c | Raw p | Holm p | L1: Δ pp, b / c, raw p | Readout wording |
+|---|---|---:|---:|---:|---:|---:|---:|---|---|
+| TR vs T_direct_F_eval | L1 | 458 | +5.46 | 120 | 95 | 0.1015 | 0.3044 | +5.46, 120 / 95, 0.1015 | not distinguishable |
+| TR vs T_tr_R1 | L1 | 458 | -6.33 | 55 | 84 | 0.01724 | 0.06895 | -6.33, 55 / 84, 0.01724 | not distinguishable |
+| TR vs T_tr_L1 | L1 | 458 | -2.18 | 70 | 80 | 0.4625 | 0.9251 | -2.18, 70 / 80, 0.4625 | not distinguishable |
+| TR vs API_direct_ur_eval | L1 | 458 | +1.31 | 59 | 53 | 0.6368 | 0.9251 | +1.31, 59 / 53, 0.6368 | not distinguishable |
+| TR vs API_tr_R1 | L1 | 458 | -11.35 | 31 | 83 | 1.18e-06 | 7.082e-06 | -11.35, 31 / 83, 1.18e-06 | API_tr_R1 beats TR |
+| TR vs RAG_ur | L6 | 391 | +16.11 | 101 | 38 | 8.818e-08 | 6.172e-07 | +14.85, 118 / 50, 1.612e-07 | TR beats RAG_ur |
+| TR vs RAG_en | L6 | 383 | +12.79 | 85 | 36 | 9.815e-06 | 4.907e-05 | +14.85, 107 / 39, 1.631e-08 | TR beats RAG_en |
+
+- F1 (TR against 7 baselines, Holm at 0.05), in the wording the readout gives: **API_tr_R1 beats TR** (80.13 vs 68.78; Δ -11.35 pp, b 31 / c 83, raw p 1.18e-06, Holm p 7.082e-06). **TR beats RAG_ur** (deciding line L6, n 391: Δ +16.11 pp, b 101 / c 38, Holm p 6.172e-07) and **TR beats RAG_en** (deciding line L6, n 383: Δ +12.79 pp, b 85 / c 36, Holm p 4.907e-05). TR is **not distinguishable** from T_direct_F_eval (Δ +5.46 pp, raw p 0.1015, Holm p 0.3044), T_tr_R1 (Δ -6.33 pp, raw p 0.01724, Holm p 0.06895), T_tr_L1 (Δ -2.18 pp, raw p 0.4625, Holm p 0.9251) and API_direct_ur_eval (Δ +1.31 pp, raw p 0.6368, Holm p 0.9251).
+- T_tr_R1 (the 70B teacher answering from the R1 reading, no student) is 6.33 pp above TR on L1 (b 55 / c 84) with raw p 0.01724 and Holm p 0.06895, so the frozen wording is "not distinguishable". On L2 (E3) the two are 75.11 (T_tr_R1) and 74.24 (TR).
+- API_tr_R1 on eval458 holds 456 answered rows and 2 rows that the provider's input inspection refused (HTTP 400, Amendment 3); the refused rows are counted as wrong. On the 456 answered rows TR vs API_tr_R1 is 68.64 vs 80.48, Δ -11.84 pp, b 29 / c 83, raw p 3.291e-07.
+
+### The reading effect and the translation-only ablation
+
+- Reading effect inside every model (L1 accuracy, Urdu question → English reading as input): qwen3.8-max API_direct_ur_eval 67.47 → API_tr_R1 80.13; Llama-3.1-70B T_direct_F_eval 63.32 → T_tr_R1 75.11 and T_tr_L1 70.96; Qwen3-14B A_r2_eval 54.80 → RO_eval 64.63.
+- Translation only: RO_eval (the student with the English reading as one line and no facts) is +9.83 pp over A_r2_eval (64.63 vs 54.80, b 106 / c 61, p 0.0006187). TR vs RO_eval is +4.15 pp (b 75 / c 56, p 0.1155) on L1. On DEV200 the same arm RO was -2.5 pp against A_r2 (p 0.6147; `docs/handoff/D11_RO_ABLATION_READOUT.md`). So how much of the gain of TR comes from the facts and how much from the translation is not settled.
+
+| Comparison (descriptive) | L1 (E0): Δ pp | b / c | p |
+|---|---:|---:|---:|
+| RO_eval vs A_r2_eval | +9.83 | 106 / 61 | 0.0006187 |
+| TR vs RO_eval | +4.15 | 75 / 56 | 0.1155 |
+| TR_L1_eval vs T_direct_F_eval | +1.31 | 109 / 103 | 0.7314 |
+| TR_L1_eval vs T_tr_L1 | -6.33 | 54 / 83 | 0.01643 |
+
+### Traditional RAG
+
+Traditional RAG is level with A_r2_eval: RAG_ur 53.93 and RAG_en 53.93 against 54.80 (L1: -0.87 pp, p 0.8138; and -0.87 pp, p 0.8212).
+
+| Set | Arm | Query | Found / all gold titles | Found / gold titles present in the corpus | Rows with at least one found / rows |
+|---|---|---|---:|---:|---:|
+| eval458 | RAG_ur | the Urdu question | 46 / 1393 (3.30 %) | 46 / 995 (4.62 %) | 41 / 458 (8.95 %) |
+| eval458 | RAG_en | the R1 reading | 207 / 1393 (14.86 %) | 207 / 995 (20.80 %) | 188 / 458 (41.05 %) |
+| DEV200 | RAG_ur | the Urdu question | 24 / 636 (3.77 %) | 24 / 439 (5.47 %) | 23 / 200 (11.50 %) |
+| DEV200 | RAG_en | the R1 reading | 79 / 636 (12.42 %) | 79 / 439 (18.00 %) | 73 / 200 (36.50 %) |
+
+Gold evidence titles are counted once per row; a title is found if its corpus title is the title of one of the retrieved chunks.
+
+### Family F2: the same facts with three other students
+
+Three tests, Holm at 0.05. Transfer "holds" if at least two of the three students have Δ > 0 with Holm p < 0.05.
+
+| Test | Deciding line | n | Δ pp | b | c | Raw p | Holm p | L1: Δ pp, b / c, raw p | Readout wording |
+|---|---|---:|---:|---:|---:|---:|---:|---|---|
+| Llama8B_TR vs Llama8B_A | L7 | 174 | +12.64 | 37 | 15 | 0.003185 | 0.005757 | +18.56, 136 / 51, 4.067e-10 | Llama8B_TR beats Llama8B_A |
+| Gemma9B_TR vs Gemma9B_A | L3 | 291 | +10.31 | 63 | 33 | 0.002879 | 0.005757 | +4.37, 100 / 80, 0.1565 | Gemma9B_TR beats Gemma9B_A |
+| Qwen8B_TR vs Qwen8B_A | L6 | 359 | +11.70 | 90 | 48 | 0.0004406 | 0.001322 | +12.01, 121 / 66, 7.027e-05 | Qwen8B_TR beats Qwen8B_A |
+
+- F2 (S_TR against S_A for three other students, Holm at 0.05): transfer **holds** by the frozen rule (3 of 3 students with Δ > 0 and Holm p < 0.05). Gemma-2-9B-it: +4.37 pp, p 0.1565 on L1, and +10.31 pp, p 0.002879 (Holm p 0.005757) on its deciding line L3 (rows parsed in both arms, n 291); L3 decides because the unparsed rates of its two arms differ by 5.90 pp. Llama-3.1-8B-Instruct (deciding line L7, n 174: +12.64 pp, Holm p 0.005757; L1 +18.56 pp, p 4.067e-10) and Qwen3-8B (deciding line L6, n 359: +11.70 pp, Holm p 0.001322; L1 +12.01 pp, p 7.027e-05) are positive with p < 0.05 on every line L1-L7.
+- The small students often give no parsable answer or run to the token limit, which is why none of the three tests is read on L1:
+
+| Arm | E0 acc % (correct) | Unparsed, E0 (%) | Unparsed, E3 (%) | Truncated (%) |
+|---|---:|---:|---:|---:|
+| Llama8B_A | 30.79 (141) | 188 (41.05) | 263 (57.42) | 70 (15.28) |
+| Llama8B_TR | 49.34 (226) | 118 (25.76) | 154 (33.62) | 24 (5.24) |
+| Gemma9B_A | 47.60 (218) | 81 (17.69) | 95 (20.74) | 7 (1.53) |
+| Gemma9B_TR | 51.97 (238) | 108 (23.58) | 125 (27.29) | 0 (0.00) |
+| Qwen8B_A | 52.62 (241) | 40 (8.73) | 43 (9.39) | 79 (17.25) |
+| Qwen8B_TR | 64.63 (296) | 20 (4.37) | 23 (5.02) | 29 (6.33) |
+
+### Predictions
+
+Predictions (freeze §5, read on L1 of eval458): 8 hit, 3 miss.
+
+| Prediction (freeze §5) | Observed | |
+|---|---:|---|
+| T_direct_F_eval accuracy in [48, 60] | 63.32 | miss |
+| API_direct_ur_eval accuracy in [62, 72] | 67.47 | hit |
+| T_tr_R1 accuracy in [60, 76] | 75.11 | hit |
+| T_tr_L1 within 4 pp of T_tr_R1 | T_tr_L1 − T_tr_R1 = -4.15 | miss |
+| RAG_ur − A_r2_eval in [-6, +4] | -0.87 | hit |
+| RAG_en − A_r2_eval in [-6, +4] | -0.87 | hit |
+| RO_eval − A_r2_eval in [-3, +5] | +9.83 | miss |
+| Llama8B_TR − Llama8B_A > 0 | +18.56 | hit |
+| Gemma9B_TR − Gemma9B_A > 0 | +4.37 | hit |
+| Qwen8B_TR − Qwen8B_A > 0 | +12.01 | hit |
+| expected reading: TR and API_direct_ur_eval not distinguishable | not distinguishable | hit |
+
+Sources: `docs/handoff/D13_READOUT.md` (every number in this section), `docs/EFBPT_D13_RUN_NOTE.md`; DEV200 RO from `docs/handoff/D11_RO_ABLATION_READOUT.md`; record in `experiments.md`.
 
 ---
 
