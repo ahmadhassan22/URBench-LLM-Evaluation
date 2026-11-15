@@ -31,6 +31,9 @@ import d14_common as C  # noqa: E402
 from d14_common import die  # noqa: E402
 
 
+PROBE_SEQS = (12, 8, 6, 5, 4, 3, 2, 1)
+
+
 def build_facts_unit(task, mode, tok, T):
     rows = C.load_rows(task, mode)
     r1, info = C.load_r1(task, mode, rows)
@@ -112,11 +115,15 @@ def main():
     ap.add_argument("--tasks", default="csqa,piqa,gsm8k")
     ap.add_argument("--mode", required=True, choices=C.MODES)
     ap.add_argument("--preflight-only", action="store_true")
+    ap.add_argument("--probe-seqs", action="store_true",
+                    help="TEST only: if the engine does not start with the frozen max_num_seqs, try smaller values and use the largest that starts")
     args = ap.parse_args()
     mode, tasks = args.mode, args.tasks.split(",")
     for t in tasks:
         if t not in C.TASKS:
             die("unknown task %r" % t)
+    if args.probe_seqs and mode != "TEST":
+        die("--probe-seqs is for TEST only; a FULL run uses the frozen engine arguments")
     print("=" * 78)
     print("D14 teacher job   what %s   tasks %s   %s" % (args.what, tasks, "TEST-5 — NOT A RESULT" if mode == "TEST" else "FULL"))
     print("=" * 78, flush=True)
@@ -145,6 +152,43 @@ def main():
         print("[preflight-only] done. No model loaded, nothing written.")
         return
 
+    pending = [u for u in units if not C.is_sealed(u["pth"])]
+    if not pending:
+        print("[done] every requested unit is already sealed; no model loaded")
+        return
+
+    import vllm
+    from vllm import LLM, SamplingParams
+    if vllm.__version__ != T["vllm_version"]:
+        die("vLLM %s found, the D10 freeze requires %s" % (vllm.__version__, T["vllm_version"]))
+    cands = [T["vllm_args"]["max_num_seqs"]]
+    if args.probe_seqs:
+        cands += [n for n in PROBE_SEQS if n < cands[0]]
+    llm, tried = None, []
+    for n in cands:
+        vargs = OrderedDict(T["vllm_args"])
+        vargs["max_num_seqs"] = n
+        print("\n[load] %s  args %s ..." % (T["path"], dict(vargs)), flush=True)
+        t0 = time.time()
+        try:
+            llm = LLM(model=T["path"], **vargs)
+        except Exception as e:
+            tried.append(OrderedDict([("max_num_seqs", n), ("started", False), ("error", "%s: %s" % (type(e).__name__, str(e)[:200]))]))
+            print("[load] the engine did not start with max_num_seqs %d (%s)" % (n, type(e).__name__), flush=True)
+            if not args.probe_seqs:
+                raise
+            continue
+        tried.append(OrderedDict([("max_num_seqs", n), ("started", True)]))
+        T["vllm_args"] = vargs
+        print("[load] %.0fs  (max_num_seqs %d)" % (time.time() - t0, n), flush=True)
+        break
+    if llm is None:
+        die("the engine did not start with any of max_num_seqs %s" % cands)
+    if args.probe_seqs:
+        C.write_json(os.path.join(C.base_dir(mode), "teacher", "PROBE_max_num_seqs_%s.json" % (os.environ.get("SLURM_JOB_ID") or "nojob")),
+                     OrderedDict([("what", "TEST-5: which max_num_seqs the D10 engine starts with on this node"), ("hostname", os.uname().nodename),
+                                  ("slurm_job_id", os.environ.get("SLURM_JOB_ID")), ("tried", tried), ("used", T["vllm_args"]["max_num_seqs"])]))
+
     todo = []
     for u in units:
         start = OrderedDict([
@@ -159,18 +203,6 @@ def main():
         k = C.open_rows(u["pth"], u["expected"], start)
         if k is not None:
             todo.append((u, k))
-    if not todo:
-        print("[done] every requested unit is already sealed; no model loaded")
-        return
-
-    import vllm
-    from vllm import LLM, SamplingParams
-    if vllm.__version__ != T["vllm_version"]:
-        die("vLLM %s found, the D10 freeze requires %s" % (vllm.__version__, T["vllm_version"]))
-    print("\n[load] %s  args %s ..." % (T["path"], dict(T["vllm_args"])), flush=True)
-    t0 = time.time()
-    llm = LLM(model=T["path"], **T["vllm_args"])
-    print("[load] %.0fs" % (time.time() - t0), flush=True)
 
     for u, k in todo:
         params = SamplingParams(temperature=T["sampling"]["temperature"], top_p=T["sampling"]["top_p"], seed=T["sampling"]["seed"], max_tokens=u["max_tokens"])
@@ -189,10 +221,10 @@ def main():
                 ("parse_ok", sum(1 for r in recs if r["parse_ok"])), ("rows_without_facts", sum(1 for r in recs if not r["facts"])),
                 ("facts_total", sum(len(r["facts"]) for r in recs)),
                 ("removed_verdict_lines", sum(len(r["removed_verdict"]) for r in recs)), ("removed_d14_lines", sum(len(r["removed_d14"]) for r in recs)),
-                ("rows_with_a_d14_removed_line", sum(1 for r in recs if r["removed_d14"])), ("vllm", vllm.__version__)])
+                ("rows_with_a_d14_removed_line", sum(1 for r in recs if r["removed_d14"])), ("vllm", vllm.__version__), ("vllm_args", T["vllm_args"])])
         else:
             C.generate_rows(u["pth"], u["expected"], k, gen, lambda e, o, u=u: arm_record(e, o, u["arm"], u["task"]), u["label"])
-            extra = OrderedDict([("vllm", vllm.__version__)])
+            extra = OrderedDict([("vllm", vllm.__version__), ("vllm_args", T["vllm_args"])])
         head = OrderedDict([("experiment", "D14"), ("what", u["kind"]), ("task", u["task"]), ("arm", u.get("arm")), ("mode", mode)])
         C.seal_rows(u["pth"], [e["rid"] for e in u["expected"]], head, extra)
     print("\n[done] %s: %d units sealed, not scored" % (mode, len(todo)), flush=True)

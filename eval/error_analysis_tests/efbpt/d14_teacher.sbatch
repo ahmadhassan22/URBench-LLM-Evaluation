@@ -14,6 +14,7 @@
 #
 # Usage (from ~/URBench):
 #   sbatch eval/error_analysis_tests/efbpt/d14_teacher.sbatch TEST all csqa,piqa,gsm8k
+#   (TEST only: a 4th argument 'probe' tries smaller max_num_seqs values if the engine does not start)
 #   sbatch eval/error_analysis_tests/efbpt/d14_teacher.sbatch FULL facts csqa,piqa
 #   sbatch eval/error_analysis_tests/efbpt/d14_teacher.sbatch FULL arms csqa
 # TEST = rows 0-4 under outputs/efbpt/d14/_test/ (never a result).
@@ -33,6 +34,8 @@ echo "=== mode: $MODE   what: $WHAT   tasks: $TASKS   job: ${SLURM_JOB_ID:-none}
 nvidia-smi
 echo "=== start: $(date) ==="
 
-python eval/error_analysis_tests/efbpt/d14_teacher.py --mode "$MODE" --what "$WHAT" --tasks "$TASKS"
+EXTRA=()
+if [ "${4:-}" = "probe" ]; then EXTRA=(--probe-seqs); fi
+python eval/error_analysis_tests/efbpt/d14_teacher.py --mode "$MODE" --what "$WHAT" --tasks "$TASKS" "${EXTRA[@]}"
 
 echo "=== end: $(date) ==="
