@@ -534,15 +534,54 @@ The same model with the original English item and with the R1 translation, all r
 - GSM8K, Llama-3.1-70B: original English item 97.86, R1 translation 94.43 (+3.43 pp, b 28 / c 4, raw p 1.93e-05).
 - GSM8K, qwen3.8-max: original English item 97.57, R1 translation 94.43 (+3.14 pp, b 25 / c 3, raw p 2.74e-05).
 
+**32. The reading effect on native Urdu questions (D15).**
+UrduMMLU, 2600 native Urdu questions (100 per subdomain), set A n = 2600. H1: 2 of 3 tests say "helps". **The reading effect holds on native Urdu text.** (S_ro vs S_ur: helps; T_r1 vs T_ue: helps; M_r1 vs M_ue: hurts)
+
+- Qwen3-14B (S_ro vs S_ur): 72.85 → 77.38 on set A (+4.54 pp, b 256 / c 138, raw p 2.89e-09); Holm p 5.78e-09: the English translation: **helps**.
+- Llama-3.1-70B (T_r1 vs T_ue): 67.46 → 80.69 on set A (+13.23 pp, b 504 / c 160, raw p 2.38e-42); Holm p 7.13e-42: the English translation: **helps**.
+- qwen3.8-max (M_r1 vs M_ue): 89.15 → 87.46 on set A (-1.69 pp, b 83 / c 127, raw p 0.0029); Holm p 0.0029: the English translation: **hurts**.
+
+**33. Self-translation with no outside model (D15).**
+H2: **mixed** (1 of 2 say "helps"). One by one: S_self vs S_ur: no clear effect; T_self vs T_ue: helps.
+
+- Qwen3-14B (S_self vs S_ur): 72.85 → 71.96 on set A (-0.88 pp, b 173 / c 196, raw p 0.2521); Holm p 0.2521: its own English translation: **no clear effect**.
+- Llama-3.1-70B (T_self vs T_ue): 67.46 → 56.46 on set A (-11.00 pp, b 326 / c 612, raw p 6.67e-21); deciding line LP, n 1810: +5.47 pp, b 246 / c 147, raw p 6.74e-07; Holm p 1.35e-06: its own English translation: **helps**.
+- S_self vs S_ur, set A rows with a valid SL translation: line LA, n 2598: 72.83 → 72.02 (-0.81 pp, b 173 / c 194, raw p 0.2965); printed beside the test, no wording.
+- T_self vs T_ue, set A rows with a valid TL translation: line LA, n 1947: 66.87 → 75.40 (+8.53 pp, b 326 / c 160, raw p 4.08e-14); printed beside the test, no wording.
+
+**34. The teacher-facts method on native Urdu questions (D15).**
+
+- Qwen3-14B (S_tr vs S_ur): 72.85 → 75.77 on set A (+2.92 pp, b 273 / c 197, raw p 0.0005); Holm p 0.0005: the teacher facts: **helps**.
+
+**35. D15 against its predictions and by subject group.**
+Predictions (freeze N8, set A) hit: 7 of 9. Missed:
+
+- T_r1 - T_ue in [-2, +8]: observed +13.23 pp.
+- T_self - T_ue in [-3, +6]: observed -11.00 pp.
+
+The H1 pairs inside the subject groups (set A, descriptive, raw p):
+
+- URDU, S_ro vs S_ur: 43.00 → 45.67 (+2.67 pp, b 40 / c 32, raw p 0.4096; line LA, n 300).
+- URDU, T_r1 vs T_ue: 53.00 → 56.33 (+3.33 pp, b 50 / c 40, raw p 0.3428; line LA, n 300).
+- URDU, M_r1 vs M_ue: 76.33 → 67.67 (-8.67 pp, b 12 / c 38, raw p 0.0003; line LA, n 300).
+- REGIONAL, S_ro vs S_ur: 77.00 → 73.50 (-3.50 pp, b 16 / c 23, raw p 0.3368; line LA, n 200).
+- REGIONAL, T_r1 vs T_ue: 77.42 → 81.72 (+4.30 pp, b 20 / c 12, raw p 0.2153; line LP, n 186).
+- REGIONAL, M_r1 vs M_ue: 93.00 → 88.00 (-5.00 pp, b 5 / c 15, raw p 0.0414; line LA, n 200).
+- OTHER, S_ro vs S_ur: 76.71 → 82.29 (+5.57 pp, b 200 / c 83, raw p 2.63e-12; line LA, n 2100).
+- OTHER, T_r1 vs T_ue: 73.66 → 84.79 (+11.13 pp, b 318 / c 100, raw p 1.49e-27; line LP, n 1959).
+- OTHER, M_r1 vs M_ue: 90.62 → 90.24 (-0.38 pp, b 66 / c 74, raw p 0.5543; line LA, n 2100).
+
 ---
 
-## Current State (2026-11-16)
+## Current State (2026-11-22)
 
 **Confirmed.** Read-then-Ground (RTG) passed its pre-registered held-out test on eval458: +13.97 pp over the no-facts student (p = 1.021e-06), with a wrong-facts control and a local-reader variant. See *Method: Read-then-Ground*.
 
 **Measured after the held-out test (D13, 2026-11-15).** Baselines and transfer on eval458, wording fixed before the run: API_tr_R1 beats TR (80.13% vs 68.78%); TR beats RAG_ur and RAG_en; TR is not distinguishable from T_direct_F_eval, T_tr_R1, T_tr_L1 and API_direct_ur_eval; transfer to three other students holds (3 of 3). See *Baselines and Transfer on eval458 (D13)*.
 
 **Measured on three more tasks (D14, 2026-11-16).** Reading effect and teacher facts on CSQA, PIQA and GSM8K, wording fixed before the run. The English translation (G1): CSQA S_ro vs S_ur: helps; CSQA T_r1 vs T_ur: helps; CSQA M_r1 vs M_ur: helps; PIQA S_ro vs S_ur: helps; PIQA T_r1 vs T_ur: helps; PIQA M_r1 vs M_ur: no clear effect; GSM8K S_ro vs S_ur: helps; GSM8K T_r1 vs T_ur: helps; GSM8K M_r1 vs M_ur: no clear effect. The teacher facts (G2): CSQA S_tr vs S_ur: no clear effect; PIQA S_tr vs S_ur: no clear effect. See *Reading Effect and Teacher Facts on Three More Tasks (D14)*.
+
+**Measured on native Urdu questions (D15, 2026-11-22).** Reading effect, self-translation and teacher facts on UrduMMLU (2600 rows, 100 per subdomain; set A n = 2600), wording fixed before the run: S_ro vs S_ur helps; T_r1 vs T_ue helps; M_r1 vs M_ue hurts; S_self vs S_ur no clear effect; T_self vs T_ue helps; S_tr vs S_ur helps. N9 reading: H1: 2 of 3 tests say "helps". **The reading effect holds on native Urdu text.** (S_ro vs S_ur: helps; T_r1 vs T_ue: helps; M_r1 vs M_ue: hurts) H2: **mixed** (1 of 2 say "helps"). One by one: S_self vs S_ur: no clear effect; T_self vs T_ue: helps. See *Reading Effect and Teacher Facts on Native Urdu Questions (D15)*.
 
 **Closed.** Each route below was tested against a gate declared in advance and is kept in this document as a result:
 
@@ -723,7 +762,11 @@ TR_L1 replaces the API reader with Llama-3.1-70B, so the whole pipeline runs on 
 - **D14 predictions:** hit 18 of 20. The misses: T_r1 - T_ur in [0, +10] on CSQA (observed +17.27 pp); M_r1 - M_ur in [0, +10] on GSM8K (observed -0.14 pp).
 - **D14 translations.** The R1 translation is one machine translation by the commercial model; rows without a valid translation: CSQA 1 of 1500 rows; PIQA 0 of 750 rows; GSM8K 0 of 700 rows. The teacher arms and the API arms answer in one pass with max_tokens 1024; the student keeps the thinking mode and token limits of the fair baseline.
 
-Sources: `docs/handoff/D11_FULL_READOUT.md`, `docs/handoff/D11_EVAL458_READOUT_LINES.md`, `docs/handoff/D11_DEV200_READOUT_LINES.md`, `docs/handoff/D10_FULL_READOUT.md` (T_direct_F), `docs/handoff/D11_RO_ABLATION_READOUT.md` (RO), `docs/handoff/D13_READOUT.md` (D13 limits), `docs/handoff/D14_READOUT.md` (D14 limits); records in `experiments.md`.
+- **D15 sample.** 100 rows from each of the 26 UrduMMLU subdomains (2600 rows): the accuracies are means over subjects, not the dataset-weighted accuracy; a subject group of 300 rows can show only differences of about 6 pp (freeze N7). One run of each arm.
+- **D15 set A.** 2600 of 2600 sampled rows are in set A; 0 are dropped (no valid R1 translation, or refused by qwen3.8-max in M_ur, M_ue or M_r1).
+- **D15 translations.** R1 is by qwen3.8-max, the same model as M, so M_r1 is self-translation for M. Rows without a valid translation: R1 0, TL 653, SL 2 of 2600 rows (reading_failed or too_long); such a row counts as wrong in the arm that needs it, and the deciding-line rule can move a test to the rows parsed in both arms.
+
+Sources: `docs/handoff/D11_FULL_READOUT.md`, `docs/handoff/D11_EVAL458_READOUT_LINES.md`, `docs/handoff/D11_DEV200_READOUT_LINES.md`, `docs/handoff/D10_FULL_READOUT.md` (T_direct_F), `docs/handoff/D11_RO_ABLATION_READOUT.md` (RO), `docs/handoff/D13_READOUT.md` (D13 limits), `docs/handoff/D14_READOUT.md` (D14 limits), `docs/handoff/D15_READOUT.md` (D15 limits); records in `experiments.md`.
 
 ---
 
@@ -999,6 +1042,163 @@ Predictions (freeze F7, read on all rows) hit: 18 of 20.
 | M_og is at least M_r1 minus 2 | GSM8K | +3.14 | hit |
 
 Sources: `docs/handoff/D14_READOUT.md` (every number in this section), `docs/EFBPT_D14_MORE_TASKS_FREEZE.md`, `docs/EFBPT_D14_AMENDMENT_1.md`; analysis pack `docs/handoff/D14_ANALYSIS.md`; tables `docs/thesis_tables/d14_*`; record in `experiments.md`.
+
+---
+
+## Reading Effect and Teacher Facts on Native Urdu Questions (D15)
+
+Under a new freeze (`docs/EFBPT_D15_NATIVE_URDU_FREEZE.md`) the D14 questions were asked on **native** Urdu questions: UrduMMLU (MBZUAI/UrduMMLU, CC BY 4.0), questions written in Urdu and never translated from English. The sample is 100 rows from each of the 26 subdomains (2600 rows); set A = the sampled rows with a valid R1 translation and an answer from qwen3.8-max in all three of its arms (2600 rows; 0 dropped). Every test is read on set A. Families: H1 the reading effect (3 tests), H2 self-translation with no outside model (2 tests), H3 the teacher-facts method (1 test), Holm inside each family. The readout script was committed and pushed before it read any arm and was run once; the wording was fixed before the run: "helps" / "hurts" only with Holm p < 0.05, otherwise "no clear effect".
+
+**The sample is equal per subject, so every accuracy below is the mean over the 26 subjects, not the dataset-weighted UrduMMLU accuracy.**
+
+Power, from the freeze (N7): With about 2,600 rows, raw p < 0.05 needs about 1.3 to 2.2 pp and the first Holm step of H1 about 1.5 to 2.6 pp (discordant share 10% to 30%); inside a group of 300 rows about 6 pp.
+
+### Arms
+
+S = Qwen3-14B, T = Llama-3.1-70B-AWQ, M = qwen3.8-max. Unparsed counts as wrong. Truncated = the row reached the token limit. R1 = the English translation by qwen3.8-max; SL / TL = the model's own translation. A row without a valid translation counts as wrong in the arm that needs it.
+
+| Arm | What it is | Acc % set A (correct) | Unparsed (%) | Truncated (%) | Acc % all sampled rows (correct) |
+|---|---|---:|---:|---:|---:|
+| S_ur | Qwen3-14B, Urdu prompt (the CSQA fair prompt for four options) | 72.85 (1894) | 5 (0.19) | 101 (3.88) | 72.85 (1894) |
+| S_ro | Qwen3-14B, Urdu prompt + the R1 English translation | 77.38 (2012) | 2 (0.08) | 82 (3.15) | 77.38 (2012) |
+| S_self | Qwen3-14B, Urdu prompt + its own English translation (SL) | 71.96 (1871) | 2 (0.08) | 111 (4.27) | 71.96 (1871) |
+| S_tr | Qwen3-14B, Urdu prompt + teacher facts made from the R1 translation | 75.77 (1970) | 0 (0.00) | 158 (6.08) | 75.77 (1970) |
+| T_ur | Llama-3.1-70B, Urdu prompt | 65.15 (1694) | 377 (14.50) | 34 (1.31) | 65.15 (1694) |
+| T_ue | Llama-3.1-70B, English instruction + the Urdu item | 67.46 (1754) | 153 (5.88) | 15 (0.58) | 67.46 (1754) |
+| T_r1 | Llama-3.1-70B, English prompt with the R1 translation | 80.69 (2098) | 23 (0.88) | 19 (0.73) | 80.69 (2098) |
+| T_self | Llama-3.1-70B, English prompt with its own translation (TL) | 56.46 (1468) | 682 (26.23) | 12 (0.46) | 56.46 (1468) |
+| M_ur | qwen3.8-max, Urdu prompt | 88.77 (2308) | 0 (0.00) | 0 (0.00) | 88.77 (2308) |
+| M_ue | qwen3.8-max, English instruction + the Urdu item | 89.15 (2318) | 0 (0.00) | 1 (0.04) | 89.15 (2318) |
+| M_r1 | qwen3.8-max, English prompt with the R1 translation (its own translation) | 87.46 (2274) | 0 (0.00) | 0 (0.00) | 87.46 (2274) |
+
+### Family H1: the reading effect on native Urdu
+
+First arm = the model with the R1 English translation; second arm = the same model on the Urdu item (S: Urdu prompt; T and M: English instruction with the Urdu item). 3 tests, Holm at 0.05.
+
+| Test | Deciding line (set A) | n | First % | Second % | Δ pp | b | c | Raw p | Holm p | All sampled rows: line, n, Δ pp, b / c, raw p | Readout wording |
+|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---|---|
+| S_ro vs S_ur | LA | 2600 | 77.38 | 72.85 | +4.54 | 256 | 138 | 2.89e-09 | 5.78e-09 | LA, 2600, +4.54, 256 / 138, 2.89e-09 | helps |
+| T_r1 vs T_ue | LA | 2600 | 80.69 | 67.46 | +13.23 | 504 | 160 | 2.38e-42 | 7.13e-42 | LA, 2600, +13.23, 504 / 160, 2.38e-42 | helps |
+| M_r1 vs M_ue | LA | 2600 | 87.46 | 89.15 | -1.69 | 83 | 127 | 0.0029 | 0.0029 | LA, 2600, -1.69, 83 / 127, 0.0029 | hurts |
+
+In the readout wording:
+
+- Qwen3-14B (S_ro vs S_ur): 72.85 → 77.38 on set A (+4.54 pp, b 256 / c 138, raw p 2.89e-09); Holm p 5.78e-09: the English translation: **helps**.
+- Llama-3.1-70B (T_r1 vs T_ue): 67.46 → 80.69 on set A (+13.23 pp, b 504 / c 160, raw p 2.38e-42); Holm p 7.13e-42: the English translation: **helps**.
+- qwen3.8-max (M_r1 vs M_ue): 89.15 → 87.46 on set A (-1.69 pp, b 83 / c 127, raw p 0.0029); Holm p 0.0029: the English translation: **hurts**.
+
+### Family H2: self-translation, no outside model
+
+First arm = the model with its own English translation; second arm = the same model on the Urdu item. 2 tests, Holm at 0.05.
+
+| Test | Deciding line (set A) | n | First % | Second % | Δ pp | b | c | Raw p | Holm p | All sampled rows: line, n, Δ pp, b / c, raw p | Readout wording |
+|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---|---|
+| S_self vs S_ur | LA | 2600 | 71.96 | 72.85 | -0.88 | 173 | 196 | 0.2521 | 0.2521 | LA, 2600, -0.88, 173 / 196, 0.2521 | no clear effect |
+| T_self vs T_ue | LP | 1810 | 76.69 | 71.22 | +5.47 | 246 | 147 | 6.74e-07 | 1.35e-06 | LP, 1810, +5.47, 246 / 147, 6.74e-07 | helps |
+
+In the readout wording:
+
+- Qwen3-14B (S_self vs S_ur): 72.85 → 71.96 on set A (-0.88 pp, b 173 / c 196, raw p 0.2521); Holm p 0.2521: its own English translation: **no clear effect**.
+- Llama-3.1-70B (T_self vs T_ue): 67.46 → 56.46 on set A (-11.00 pp, b 326 / c 612, raw p 6.67e-21); deciding line LP, n 1810: +5.47 pp, b 246 / c 147, raw p 6.74e-07; Holm p 1.35e-06: its own English translation: **helps**.
+- S_self vs S_ur, set A rows with a valid SL translation: line LA, n 2598: 72.83 → 72.02 (-0.81 pp, b 173 / c 194, raw p 0.2965); printed beside the test, no wording.
+- T_self vs T_ue, set A rows with a valid TL translation: line LA, n 1947: 66.87 → 75.40 (+8.53 pp, b 326 / c 160, raw p 4.08e-14); printed beside the test, no wording.
+
+### Family H3: the teacher-facts method
+
+First arm = S_tr (the student with teacher facts made from the R1 translation); second arm = S_ur. 1 test.
+
+| Test | Deciding line (set A) | n | First % | Second % | Δ pp | b | c | Raw p | Holm p | All sampled rows: line, n, Δ pp, b / c, raw p | Readout wording |
+|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---|---|
+| S_tr vs S_ur | LA | 2600 | 75.77 | 72.85 | +2.92 | 273 | 197 | 0.0005 | 0.0005 | LA, 2600, +2.92, 273 / 197, 0.0005 | helps |
+
+In the readout wording:
+
+- Qwen3-14B (S_tr vs S_ur): 72.85 → 75.77 on set A (+2.92 pp, b 273 / c 197, raw p 0.0005); Holm p 0.0005: the teacher facts: **helps**.
+
+### Reading of the outcome (freeze N9, fixed before the run)
+
+- H1: 2 of 3 tests say "helps". **The reading effect holds on native Urdu text.** (S_ro vs S_ur: helps; T_r1 vs T_ue: helps; M_r1 vs M_ue: hurts)
+- H2: **mixed** (1 of 2 say "helps"). One by one: S_self vs S_ur: no clear effect; T_self vs T_ue: helps.
+- H3: S_tr vs S_ur: helps.
+- Whatever the outcome, D11, D13 and D14 stand as they are.
+
+### Descriptive comparisons (set A)
+
+Instruction language (`_ue` vs `_ur`), the D14 form (`_r1` vs `_ur`), and the translation sources. The all-rows line (LA) and the line the unparsed / truncation rule picks are shown.
+
+| Comparison (descriptive, set A) | Line | n | First % | Second % | Δ pp | b / c | Raw p |
+|---|---|---:|---:|---:|---:|---:|---:|
+| T_ue vs T_ur | LA | 2600 | 67.46 | 65.15 | +2.31 | 334 / 274 | 0.0167 |
+| T_ue vs T_ur | LP (deciding) | 2134 | 72.12 | 76.29 | -4.17 | 119 / 208 | 9.82e-07 |
+| M_ue vs M_ur | LA (deciding) | 2600 | 89.15 | 88.77 | +0.38 | 73 / 63 | 0.4404 |
+| T_r1 vs T_ur | LA | 2600 | 80.69 | 65.15 | +15.54 | 555 / 151 | 4.19e-55 |
+| T_r1 vs T_ur | LP (deciding) | 2200 | 81.50 | 76.45 | +5.05 | 250 / 139 | 1.97e-08 |
+| M_r1 vs M_ur | LA (deciding) | 2600 | 87.46 | 88.77 | -1.31 | 91 / 125 | 0.0245 |
+| S_tr vs S_ro | LA (deciding) | 2600 | 75.77 | 77.38 | -1.62 | 184 / 226 | 0.0428 |
+| S_self vs S_ro | LA (deciding) | 2600 | 71.96 | 77.38 | -5.42 | 113 / 254 | 1.36e-13 |
+| T_self vs T_r1 | LA | 2600 | 56.46 | 80.69 | -24.23 | 82 / 712 | 3.65e-126 |
+| T_self vs T_r1 | LP (deciding) | 1908 | 76.68 | 80.66 | -3.98 | 77 / 153 | 6.07e-07 |
+
+### Subject groups (set A, descriptive)
+
+Groups from the subdomain names only: URDU = urdu literature, urdu language, urdu grammar; REGIONAL = pakistan studies, islamic studies; OTHER = the other 21 subdomains. Domain splits and a per-subdomain table are in the readout.
+
+| Group | Test | Line | n | First % | Second % | Δ pp | b / c | Raw p |
+|---|---|---|---:|---:|---:|---:|---:|---:|
+| URDU | S_ro vs S_ur | LA | 300 | 45.67 | 43.00 | +2.67 | 40 / 32 | 0.4096 |
+| URDU | T_r1 vs T_ue | LA | 300 | 56.33 | 53.00 | +3.33 | 50 / 40 | 0.3428 |
+| URDU | M_r1 vs M_ue | LA | 300 | 67.67 | 76.33 | -8.67 | 12 / 38 | 0.0003 |
+| URDU | S_self vs S_ur | LA | 300 | 34.67 | 43.00 | -8.33 | 24 / 49 | 0.0046 |
+| URDU | T_self vs T_ue | LP | 233 | 48.93 | 55.36 | -6.44 | 25 / 40 | 0.0817 |
+| REGIONAL | S_ro vs S_ur | LA | 200 | 73.50 | 77.00 | -3.50 | 16 / 23 | 0.3368 |
+| REGIONAL | T_r1 vs T_ue | LP | 186 | 81.72 | 77.42 | +4.30 | 20 / 12 | 0.2153 |
+| REGIONAL | M_r1 vs M_ue | LA | 200 | 88.00 | 93.00 | -5.00 | 5 / 15 | 0.0414 |
+| REGIONAL | S_self vs S_ur | LA | 200 | 72.00 | 77.00 | -5.00 | 15 / 25 | 0.1539 |
+| REGIONAL | T_self vs T_ue | LP | 150 | 78.00 | 76.67 | +1.33 | 14 / 12 | 0.8450 |
+| OTHER | S_ro vs S_ur | LA | 2100 | 82.29 | 76.71 | +5.57 | 200 / 83 | 2.63e-12 |
+| OTHER | T_r1 vs T_ue | LP | 1959 | 84.79 | 73.66 | +11.13 | 318 / 100 | 1.49e-27 |
+| OTHER | M_r1 vs M_ue | LA | 2100 | 90.24 | 90.62 | -0.38 | 66 / 74 | 0.5543 |
+| OTHER | S_self vs S_ur | LA | 2100 | 77.29 | 76.71 | +0.57 | 134 / 122 | 0.4918 |
+| OTHER | T_self vs T_ue | LP | 1427 | 81.08 | 73.23 | +7.85 | 207 / 95 | 1.04e-10 |
+
+### Predictions
+
+Predictions (freeze N8, read on LA of set A) hit: 7 of 9.
+
+| Prediction (freeze N8, set A) | First % | Second % | Observed Δ pp | |
+|---|---:|---:|---:|---|
+| S_ro - S_ur in [-2, +6] | 77.38 | 72.85 | +4.54 | hit |
+| T_r1 - T_ue in [-2, +8] | 80.69 | 67.46 | +13.23 | miss |
+| M_r1 - M_ue in [-4, +3] | 87.46 | 89.15 | -1.69 | hit |
+| S_self - S_ur in [-4, +4] | 71.96 | 72.85 | -0.88 | hit |
+| T_self - T_ue in [-3, +6] | 56.46 | 67.46 | -11.00 | miss |
+| S_tr - S_ur in [-2, +6] | 75.77 | 72.85 | +2.92 | hit |
+| S_ro − S_ur: the delta in URDU is not above the delta in OTHER | URDU +2.67 | OTHER +5.57 | -2.90 | hit |
+| T_r1 − T_ue: the delta in URDU is not above the delta in OTHER | URDU +3.33 | OTHER +15.05 | -11.71 | hit |
+| M_r1 − M_ue: the delta in URDU is not above the delta in OTHER | URDU -8.67 | OTHER -0.38 | -8.29 | hit |
+
+### Translations and dropped rows
+
+| translation | model | rows | valid | reading_failed | too_long | requests | accepted readings that reached max_tokens | contains "correct" | contains "answer is" | mark on one option | any flag |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| R1 | qwen3.8-max (API) | 2600 | 2600 | 0 | 0 | 2600 | 0 | 30 | 0 | 2 | 32 |
+| TL | Llama-3.1-70B-AWQ, D10 engine | 2600 | 1947 | 653 | 0 | 2600 | 0 | 29 | 0 | 3 | 32 |
+| SL | Qwen3-14B, thinking off | 2600 | 2598 | 2 | 0 | 2600 | 0 | 35 | 0 | 2 | 37 |
+
+Teacher facts (from the R1 translation): 2600 rows, replies parsed 2593, facts kept 15347, lines removed by the D10 verdict filter 4, by the D14 filter 34; rows without facts 7.
+
+| rows | sampled | set A | dropped | R1 reading_failed | M_ur refused | M_ue refused | M_r1 refused | TL not valid | SL not valid | rows without facts |
+|---|---|---|---|---|---|---|---|---|---|---|
+| all | 2600 | 2600 | 0 | 0 | 0 | 0 | 0 | 653 | 2 | 7 |
+| group URDU | 300 | 300 | 0 | 0 | 0 | 0 | 0 | 44 | 1 | 2 |
+| group REGIONAL | 200 | 200 | 0 | 0 | 0 | 0 | 0 | 37 | 0 | 2 |
+| group OTHER | 2100 | 2100 | 0 | 0 | 0 | 0 | 0 | 572 | 1 | 3 |
+
+API ledger at the time of the readout (TEST-5 and retries included): 10421 calls of at most 11500; 2360888 tokens of at most 5000000 (prompt 1429371, completion 931517); stopped: no.
+
+Amount used by the key (gateway billing query; the key has no limit, so no balance is given): before D15 (no D15 request sent yet): 13.5241; after D15: 21.0341.
+
+Sources: `docs/handoff/D15_READOUT.md` (every number in this section), `docs/EFBPT_D15_NATIVE_URDU_FREEZE.md`; analysis pack `docs/handoff/D15_ANALYSIS.md`; tables `docs/thesis_tables/d15_*`; record in `experiments.md`.
 
 ---
 

@@ -1,0 +1,7 @@
+Family,Test,Line,n,First %,Second %,Delta pp,b,c,Raw p,Holm p,Wording
+H1,S_ro vs S_ur,LA,2600,77.38,72.85,+4.54,256,138,2.89e-09,5.78e-09,helps
+H1,T_r1 vs T_ue,LA,2600,80.69,67.46,+13.23,504,160,2.38e-42,7.13e-42,helps
+H1,M_r1 vs M_ue,LA,2600,87.46,89.15,-1.69,83,127,0.0029,0.0029,hurts
+H2,S_self vs S_ur,LA,2600,71.96,72.85,-0.88,173,196,0.2521,0.2521,no clear effect
+H2,T_self vs T_ue,LP,1810,76.69,71.22,+5.47,246,147,6.74e-07,1.35e-06,helps
+H3,S_tr vs S_ur,LA,2600,75.77,72.85,+2.92,273,197,0.0005,0.0005,helps

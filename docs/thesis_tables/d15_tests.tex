@@ -1,0 +1,19 @@
+% written by eval/error_analysis_tests/efbpt/d15_tables.py from docs/handoff/D15_READOUT.md
+\begin{table}[t]
+\centering
+\small
+\caption{D15 families on set A: H1 reading effect (the R1 English translation against the Urdu item), H2 self-translation, H3 teacher facts. Delta, n and the two percentages are on the deciding line; Holm inside each family.}
+\label{tab:d15-tests}
+\begin{tabular}{lllrrrrrrrrl}
+\toprule
+Family & Test & Line & n & First \% & Second \% & Delta pp & b & c & Raw p & Holm p & Wording \\
+\midrule
+H1 & S\_ro vs S\_ur & LA & 2600 & 77.38 & 72.85 & +4.54 & 256 & 138 & 2.89e-09 & 5.78e-09 & helps \\
+H1 & T\_r1 vs T\_ue & LA & 2600 & 80.69 & 67.46 & +13.23 & 504 & 160 & 2.38e-42 & 7.13e-42 & helps \\
+H1 & M\_r1 vs M\_ue & LA & 2600 & 87.46 & 89.15 & -1.69 & 83 & 127 & 0.0029 & 0.0029 & hurts \\
+H2 & S\_self vs S\_ur & LA & 2600 & 71.96 & 72.85 & -0.88 & 173 & 196 & 0.2521 & 0.2521 & no clear effect \\
+H2 & T\_self vs T\_ue & LP & 1810 & 76.69 & 71.22 & +5.47 & 246 & 147 & 6.74e-07 & 1.35e-06 & helps \\
+H3 & S\_tr vs S\_ur & LA & 2600 & 75.77 & 72.85 & +2.92 & 273 & 197 & 0.0005 & 0.0005 & helps \\
+\bottomrule
+\end{tabular}
+\end{table}

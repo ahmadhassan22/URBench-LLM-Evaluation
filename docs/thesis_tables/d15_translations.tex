@@ -1,0 +1,16 @@
+% written by eval/error_analysis_tests/efbpt/d15_tables.py from docs/handoff/D15_READOUT.md
+\begin{table}[t]
+\centering
+\small
+\caption{D15 translations of the Urdu item: R1 (qwen3.8-max), TL (Llama-3.1-70B-AWQ), SL (Qwen3-14B); flags are reported, not a check.}
+\label{tab:d15-translations}
+\begin{tabular}{llrrrrrrrrrr}
+\toprule
+Translation & Model & Rows & Valid & Failed & Too long & Requests & Hit max tokens & "correct" & "answer is" & Marked option & Any flag \\
+\midrule
+R1 & qwen3.8-max (API) & 2600 & 2600 & 0 & 0 & 2600 & 0 & 30 & 0 & 2 & 32 \\
+TL & Llama-3.1-70B-AWQ, D10 engine & 2600 & 1947 & 653 & 0 & 2600 & 0 & 29 & 0 & 3 & 32 \\
+SL & Qwen3-14B, thinking off & 2600 & 2598 & 2 & 0 & 2600 & 0 & 35 & 0 & 2 & 37 \\
+\bottomrule
+\end{tabular}
+\end{table}
