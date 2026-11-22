@@ -174,6 +174,15 @@ def drop_lines(R):
     return ["| " + " | ".join(head) + " |", "|" + "|".join("---" for _ in head) + "|"] + ["| " + " | ".join(r) + " |" for r in rows if not r[0].startswith("domain ")]
 
 
+def power_sentence():
+    """The power statement of freeze N7, copied from the freeze text (line breaks joined)."""
+    txt = re.sub(r"\s*\n\s*", " ", open(FREEZE, encoding="utf-8").read())
+    m = re.search(r"Power, write it in: (with about 2,600 rows.*?about 6 pp\.)", txt)
+    if not m:
+        die("freeze: the power statement was not found")
+    return m.group(1)[0].upper() + m.group(1)[1:]
+
+
 def readme_section(R):
     D = ["## Reading Effect and Teacher Facts on Native Urdu Questions (D15)", ""]
     D.append("Under a new freeze (`docs/EFBPT_D15_NATIVE_URDU_FREEZE.md`) the D14 questions were asked on **native** Urdu questions: UrduMMLU (MBZUAI/UrduMMLU, CC BY 4.0), "
@@ -184,6 +193,8 @@ def readme_section(R):
              % (R["n"], R["nA"], R["drop"]))
     D.append("")
     D.append("**The sample is equal per subject, so every accuracy below is the mean over the 26 subjects, not the dataset-weighted UrduMMLU accuracy.**")
+    D.append("")
+    D.append("Power, from the freeze (N7): " + power_sentence())
     D.append("")
     D.append("### Arms")
     D.append("")
